@@ -22,7 +22,7 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://propfolio.co"
+    process.env.NEXT_PUBLIC_APP_URL || "https://prop-folio-eosin.vercel.app"
   ),
   title: "PropFolio — AI Real Estate Listing Engine",
   description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",

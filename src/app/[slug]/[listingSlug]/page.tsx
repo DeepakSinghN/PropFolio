@@ -18,20 +18,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
     INITIAL_LISTINGS[0];
 
-  const broker = listing.broker || DEMO_BROKER;
   const rawCover = listing.photos?.[0]?.photo_url;
   const coverPhoto =
     rawCover && !rawCover.startsWith("blob:")
       ? rawCover
-      : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80";
+      : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&auto=format&fit=crop&q=80";
 
-  // Formatted for WhatsApp rich card unfurling
-  const title = `🏡 ${listing.display_price} · ${listing.title} | ${broker.full_name}`;
-  const description = `📍 ${listing.location_locality ? `${listing.location_locality}, ` : ""}${listing.location_city} · ${
-    listing.bhk ? `${listing.bhk} BHK ` : ""
-  }${listing.property_type} · ${
-    listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} sq.ft · ` : ""
-  }Verified Title. Tap to view luxury photos, video walkthrough & schedule direct site visit.`;
+  // Exact clean title format (e.g. "3 BHK Apartment for Sale in Satellite, Ahmedabad")
+  const title = `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Apartment"} for ${
+    listing.listing_type || "Sale"
+  } in ${listing.location_locality || listing.location_city}`;
+
+  // Clean single-paragraph description for WhatsApp preview bubble
+  const description = listing.description
+    ? listing.description.replace(/\n+/g, " ").trim().slice(0, 190) + "..."
+    : `This premium ${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "apartment"} in ${
+        listing.location_locality || listing.location_city
+      } offers a spacious ${listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq.Ft. super built-up area.` : "living area."} Move-in ready.`;
 
   return {
     title,
@@ -40,14 +43,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: "website",
-      siteName: "PropFolio Luxury Private Office",
+      siteName: "PropFolio",
       images: [
         {
           url: coverPhoto,
           width: 1200,
-          height: 630,
+          height: 800,
           type: "image/jpeg",
-          alt: listing.title,
+          alt: title,
         },
       ],
     },
