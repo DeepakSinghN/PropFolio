@@ -96,7 +96,7 @@ export default function DashboardPage() {
               className="flex items-center gap-2 rounded-2xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
             >
               <Sparkles className="h-4 w-4 text-amber-400 dark:text-amber-600" />
-              <span>Nayi Listing Banao (AI)</span>
+              <span>Create Listing (AI)</span>
             </Link>
           </div>
         </div>

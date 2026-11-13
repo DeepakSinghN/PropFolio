@@ -20,6 +20,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid phone number format" }, { status: 400 });
     }
 
+    // Instant bypass for test / demo accounts
+    if (cleanPhone === "919876543210" || cleanPhone === "919999999999") {
+      saveOtp(cleanPhone, "123456");
+      return NextResponse.json({
+        success: true,
+        message: "Test account detected. OTP is 123456",
+        phone: cleanPhone,
+        devOtp: "123456",
+        testAccount: true,
+        waSent: true,
+      });
+    }
+
     // Generate random 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     saveOtp(cleanPhone, code);

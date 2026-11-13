@@ -169,6 +169,17 @@ Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
+## ⚡ Instant Demo / Test Account
+
+For quick manual testing and review without waiting for SMS or WhatsApp API credits:
+
+- **Login URL:** [http://localhost:3000/login](http://localhost:3000/login)
+- **Mobile Number:** `9876543210` (or `+91 98765 43210`)
+- **Verification OTP:** `123456`
+- **One-Click Login:** Click the **"⚡ 1-Click Login"** button on the `/login` page to immediately access the broker dashboard with preloaded luxury listings.
+
+---
+
 ## 🤖 WhatsApp Cloud API Webhook Setup
 
 1. In the **Meta for Developers Console**, go to **WhatsApp → Configuration**.

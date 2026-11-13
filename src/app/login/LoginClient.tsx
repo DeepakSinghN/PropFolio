@@ -96,6 +96,31 @@ export default function LoginClient() {
     }
   };
 
+  // 3. Quick One-Click Demo / Test Account Login
+  const handleQuickTestLogin = async () => {
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      setPhoneNumber("9876543210");
+      setOtpCode("123456");
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: "9876543210", code: "123456" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Demo login failed");
+
+      router.push(redirectPath);
+      router.refresh();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to log in with demo account");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col justify-center bg-[#f8f9fa] py-12 sm:px-6 lg:px-8 transition-colors dark:bg-[#070b14]">
       {/* Top Navbar Header */}
@@ -131,6 +156,31 @@ export default function LoginClient() {
 
         {/* Main Card Container */}
         <div className="mt-8 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl transition-all sm:p-8 dark:border-slate-800 dark:bg-[#0c1222]/90">
+          
+          {/* Quick Demo / Test Account Box */}
+          <div className="mb-6 rounded-2xl border border-[#c5a059]/40 bg-[#fbf6ec] p-4 text-xs dark:border-[#c5a059]/30 dark:bg-[#15120a]">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-[#c5a059] shrink-0" />
+                <span className="font-bold text-[#8a6828] dark:text-[#d4af37]">
+                  Instant Test Account
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickTestLogin}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#0a1128] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#16234b] active:scale-95 transition dark:bg-[#c5a059] dark:text-[#0a1128] dark:hover:bg-[#d4af37]"
+              >
+                <span>⚡ 1-Click Login</span>
+              </button>
+            </div>
+            <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+              <span>Mobile: <strong className="font-mono text-[#0a1128] dark:text-white">+91 98765 43210</strong></span>
+              <span>OTP: <strong className="font-mono text-[#0a1128] dark:text-white">123456</strong></span>
+            </div>
+          </div>
+
           {errorMsg && (
             <div className="mb-5 rounded-2xl bg-rose-50 border border-rose-200/80 p-3 text-xs text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300">
               {errorMsg}

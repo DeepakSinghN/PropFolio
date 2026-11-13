@@ -63,11 +63,24 @@ export function saveOtp(phone: string, code: string): void {
 
 export function verifyOtp(phone: string, code: string): boolean {
   const cleanPhone = phone.replace(/\D/g, "");
+  const trimmedCode = code.trim();
+
+  // Test accounts for instant testing / demo
+  const isTestAccount =
+    cleanPhone === "9876543210" ||
+    cleanPhone === "919876543210" ||
+    cleanPhone === "9999999999" ||
+    cleanPhone === "919999999999";
+
+  if (isTestAccount && trimmedCode === "123456") {
+    return true;
+  }
+
   const store = ensureStore<Record<string, OtpEntry>>(otpFile, {});
   const entry = store[cleanPhone];
   if (!entry) return false;
 
-  const isValid = entry.code === code.trim() && Date.now() < entry.expiresAt;
+  const isValid = entry.code === trimmedCode && Date.now() < entry.expiresAt;
   if (isValid) {
     delete store[cleanPhone];
     saveStore(otpFile, store);
@@ -83,17 +96,23 @@ export function createPhoneSession(phone: string, customProfile?: Partial<Profil
   const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
   const sessionId = "sess_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
 
+  const isTestAccount =
+    cleanPhone === "9876543210" ||
+    cleanPhone === "919876543210" ||
+    cleanPhone === "9999999999" ||
+    cleanPhone === "919999999999";
+
   const profile: Profile = {
-    id: "prof_" + cleanPhone,
-    user_id: "usr_" + cleanPhone,
-    full_name: customProfile?.full_name || "Real Estate Broker",
-    slug: customProfile?.slug || "broker-" + cleanPhone.slice(-4),
+    id: isTestAccount ? DEMO_BROKER.id : "prof_" + cleanPhone,
+    user_id: isTestAccount ? DEMO_BROKER.user_id : "usr_" + cleanPhone,
+    full_name: customProfile?.full_name || (isTestAccount ? DEMO_BROKER.full_name : "Real Estate Broker"),
+    slug: customProfile?.slug || (isTestAccount ? DEMO_BROKER.slug : "broker-" + cleanPhone.slice(-4)),
     phone_number: "+" + cleanPhone,
-    company_name: customProfile?.company_name || "Exclusive Advisory",
-    city: customProfile?.city || "India",
-    avatar_url: customProfile?.avatar_url || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
+    company_name: customProfile?.company_name || (isTestAccount ? DEMO_BROKER.company_name : "Exclusive Advisory"),
+    city: customProfile?.city || (isTestAccount ? DEMO_BROKER.city : "India"),
+    avatar_url: customProfile?.avatar_url || DEMO_BROKER.avatar_url,
     plan_tier: "solo_pro",
-    listing_credits: 25,
+    listing_credits: 28,
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
