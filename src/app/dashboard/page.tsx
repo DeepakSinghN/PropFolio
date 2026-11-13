@@ -11,7 +11,9 @@ import {
   TrendingUp,
   MapPin,
   CheckCircle2,
-  Check
+  Check,
+  Layers,
+  Wallet
 } from "lucide-react";
 import { getAllMemoryListings, DEMO_BROKER } from "@/lib/store";
 import { useState, useEffect } from "react";
@@ -59,6 +61,22 @@ export default function DashboardPage() {
     navigator.clipboard.writeText(fullUrl);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
+  }
+
+  // Broker metrics
+  const planLimit = broker.plan_limit || 30;
+  const remainingListings = Math.max(0, planLimit - listings.length);
+  const totalViews = listings.reduce((sum, l) => sum + (l.views_count || 0), 0);
+  const totalPortfolioValue = listings.reduce((sum, l) => sum + (l.price_amount || 0), 0);
+
+  function formatPortfolioValue(amount: number) {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    }
+    if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(2)} Lakh`;
+    }
+    return `₹${amount.toLocaleString("en-IN")}`;
   }
 
   return (
@@ -124,7 +142,7 @@ export default function DashboardPage() {
               <Eye className="h-4 w-4 text-blue-500" />
             </div>
             <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white">
-              {listings.reduce((sum, l) => sum + (l.views_count || 0), 0)}
+              {totalViews}
             </p>
             <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
               <TrendingUp className="h-3 w-3 shrink-0" />
@@ -134,24 +152,26 @@ export default function DashboardPage() {
 
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Credits</span>
-              <Sparkles className="h-4 w-4 text-[#c5a059]" />
+              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Listings Remaining</span>
+              <Layers className="h-4 w-4 text-[#c5a059]" />
             </div>
             <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white">
-              {DEMO_BROKER.listing_credits} / 30
+              {remainingListings} Left
             </p>
-            <p className="mt-1 text-[11px] text-slate-400">Renews next month</p>
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              {listings.length} of {planLimit} plan used
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">AI Engine</span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Portfolio Value</span>
+              <Wallet className="h-4 w-4 text-emerald-500" />
             </div>
-            <p className="mt-2 text-base sm:text-lg font-bold text-[#0a1128] dark:text-white truncate">
-              Groq AI
+            <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white truncate">
+              {formatPortfolioValue(totalPortfolioValue)}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400">Avg 400ms latency</p>
+            <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 truncate">Active inventory value</p>
           </div>
         </div>
 
