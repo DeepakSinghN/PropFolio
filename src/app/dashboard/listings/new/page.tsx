@@ -336,10 +336,19 @@ export default function NewListingPage() {
                   multiple
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     if (e.target.files && e.target.files.length > 0) {
-                      const newUrls = Array.from(e.target.files).map((f) => URL.createObjectURL(f));
-                      setPhotos([...photos, ...newUrls]);
+                      const files = Array.from(e.target.files);
+                      const base64Promises = files.map((file) => {
+                        return new Promise<string>((resolve) => {
+                          const reader = new FileReader();
+                          reader.onload = () => resolve(reader.result as string);
+                          reader.onerror = () => resolve(DEFAULT_PHOTOS[0]);
+                          reader.readAsDataURL(file);
+                        });
+                      });
+                      const results = await Promise.all(base64Promises);
+                      setPhotos((prev) => [...prev, ...results]);
                     }
                   }}
                 />
