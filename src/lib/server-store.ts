@@ -54,6 +54,45 @@ export function getAllListingsFromDisk(): Listing[] {
   return Array.from(map.values());
 }
 
+export function deleteListingFromDisk(slug: string): boolean {
+  const map = ensureFileStore();
+  const deleted = map.delete(slug);
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const all = Array.from(map.values());
+    fs.writeFileSync(dataFilePath, JSON.stringify(all, null, 2), "utf8");
+  } catch (err) {
+    console.error("Server store delete write error:", err);
+  }
+
+  return deleted;
+}
+
+export function updateListingStatusOnDisk(slug: string, status: "active" | "sold" | "draft"): Listing | null {
+  const map = ensureFileStore();
+  const item = map.get(slug);
+  if (!item) return null;
+
+  item.status = status;
+  item.updated_at = new Date().toISOString();
+  map.set(slug, item);
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const all = Array.from(map.values());
+    fs.writeFileSync(dataFilePath, JSON.stringify(all, null, 2), "utf8");
+  } catch (err) {
+    console.error("Server store status write error:", err);
+  }
+
+  return item;
+}
+
 // -------------------------------------------------------------
 // WhatsApp User Multi-Message Session Store ("done" command buffer)
 // -------------------------------------------------------------

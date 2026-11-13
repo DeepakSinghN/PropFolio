@@ -13,7 +13,12 @@ import {
   CheckCircle2,
   Check,
   Layers,
-  Wallet
+  Wallet,
+  MoreVertical,
+  Trash2,
+  Tag,
+  RefreshCw,
+  MessageCircle
 } from "lucide-react";
 import { getAllMemoryListings, DEMO_BROKER } from "@/lib/store";
 import { useState, useEffect } from "react";
@@ -25,6 +30,8 @@ export default function DashboardPage() {
   const [listings, setListings] = useState<Listing[]>(getAllMemoryListings());
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [broker, setBroker] = useState<any>(DEMO_BROKER);
+  const [openMenuSlug, setOpenMenuSlug] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "sold">("all");
 
   useEffect(() => {
     // 1. Fetch current auth user
@@ -53,6 +60,16 @@ export default function DashboardPage() {
         }
       })
       .catch((err) => console.warn("Failed to fetch fresh listings:", err));
+
+    // 3. Close open menu on outside click
+    function handleOutsideClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-listing-actions]")) {
+        setOpenMenuSlug(null);
+      }
+    }
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
   }, []);
 
   function copyLink(slug: string) {
@@ -63,9 +80,50 @@ export default function DashboardPage() {
     setTimeout(() => setCopiedSlug(null), 2000);
   }
 
+  async function handleToggleStatus(slug: string, currentStatus?: string) {
+    const nextStatus = currentStatus === "sold" ? "active" : "sold";
+    setOpenMenuSlug(null);
+
+    // Optimistic UI update
+    setListings((prev) =>
+      prev.map((l) => (l.slug === slug ? { ...l, status: nextStatus as any } : l))
+    );
+
+    try {
+      await fetch("/api/listings/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, action: "status", status: nextStatus }),
+      });
+    } catch (err) {
+      console.warn("Failed to update status:", err);
+    }
+  }
+
+  async function handleDeleteListing(slug: string, title: string) {
+    setOpenMenuSlug(null);
+    const confirmed = window.confirm(`Are you sure you want to permanently delete "${title}"?`);
+    if (!confirmed) return;
+
+    // Optimistic UI update
+    setListings((prev) => prev.filter((l) => l.slug !== slug));
+
+    try {
+      await fetch("/api/listings/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, action: "delete" }),
+      });
+    } catch (err) {
+      console.warn("Failed to delete listing:", err);
+    }
+  }
+
   // Broker metrics
   const planLimit = broker.plan_limit || 30;
-  const remainingListings = Math.max(0, planLimit - listings.length);
+  const activeCount = listings.filter((l) => l.status !== "sold").length;
+  const soldCount = listings.filter((l) => l.status === "sold").length;
+  const remainingListings = Math.max(0, planLimit - activeCount);
   const totalViews = listings.reduce((sum, l) => sum + (l.views_count || 0), 0);
   const totalPortfolioValue = listings.reduce((sum, l) => sum + (l.price_amount || 0), 0);
 
@@ -78,6 +136,13 @@ export default function DashboardPage() {
     }
     return `₹${amount.toLocaleString("en-IN")}`;
   }
+
+  // Filtered listings
+  const filteredListings = listings.filter((item) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "sold") return item.status === "sold";
+    return item.status !== "sold";
+  });
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-24 text-[#0a1128] transition-colors dark:bg-[#070b14] dark:text-slate-100">
@@ -179,42 +244,90 @@ export default function DashboardPage() {
         <div className="mt-8 rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800 gap-3">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-[#0a1128] dark:text-white">
-                Your Active Listings ({listings.length})
-              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#0a1128] dark:text-white">
+                  Your Property Portfolio ({listings.length})
+                </h2>
+              </div>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                Each listing has a direct branded link optimized for instant WhatsApp sharing.
+                Manage active inventory, mark completed deals as Sold, or share direct WhatsApp links.
               </p>
+
+              {/* Status Filter Tabs */}
+              <div className="mt-3 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("all")}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    statusFilter === "all"
+                      ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  All ({listings.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("active")}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    statusFilter === "active"
+                      ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  Active ({activeCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("sold")}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    statusFilter === "sold"
+                      ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  Sold ({soldCount})
+                </button>
+              </div>
             </div>
 
             <Link
               href="/dashboard/listings/new"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-800 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 self-start sm:self-auto"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-800 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 self-start sm:self-auto shrink-0"
             >
               <PlusCircle className="h-3.5 w-3.5 text-[#c5a059]" />
               <span>+ New Listing</span>
             </Link>
           </div>
 
-          {listings.length === 0 ? (
+          {filteredListings.length === 0 ? (
             <div className="py-16 text-center">
               <Building2 className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <h3 className="mt-3 text-base font-bold text-slate-800 dark:text-slate-200">No active listings yet</h3>
-              <p className="mt-1 text-xs text-slate-500">Create your first branded real estate listing in under 30 seconds.</p>
-              <Link
-                href="/dashboard/listings/new"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0a1128] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16234b]"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
-                <span>Create Listing</span>
-              </Link>
+              <h3 className="mt-3 text-base font-bold text-slate-800 dark:text-slate-200">
+                {statusFilter === "sold" ? "No sold properties yet" : "No active listings found"}
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">
+                {statusFilter === "sold"
+                  ? "Mark any closed property deal as 'Sold' to showcase your successful transactions."
+                  : "Create your first branded real estate listing in under 30 seconds."}
+              </p>
+              {statusFilter !== "sold" && (
+                <Link
+                  href="/dashboard/listings/new"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0a1128] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16234b]"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+                  <span>Create Listing</span>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800/80">
-              {listings.map((item) => {
+              {filteredListings.map((item) => {
                 const rawCover = item.photos?.[0]?.photo_url;
                 const coverPhoto = (rawCover && !rawCover.startsWith("blob:")) ? rawCover : FALLBACK_PHOTO;
                 const targetUrl = `/${broker.slug || DEMO_BROKER.slug}/${item.slug}`;
+                const isSold = item.status === "sold";
 
                 return (
                   <div
@@ -230,23 +343,40 @@ export default function DashboardPage() {
                           onError={(e) => {
                             e.currentTarget.src = FALLBACK_PHOTO;
                           }}
-                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                          className={`h-full w-full object-cover transition-transform duration-300 hover:scale-105 ${
+                            isSold ? "grayscale-[40%]" : ""
+                          }`}
                         />
+                        {isSold && (
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                            <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+                              SOLD
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="min-w-0 flex-1 space-y-1">
                         {/* Tags */}
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                            Active
-                          </span>
+                          {isSold ? (
+                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                              SOLD
+                            </span>
+                          ) : (
+                            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                              Active
+                            </span>
+                          )}
                           <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                             {item.bhk ? `${item.bhk} BHK` : ""} {item.property_type}
                           </span>
                         </div>
 
                         {/* Title: Not overly bold, wrap safely */}
-                        <h3 className="text-xs sm:text-sm font-semibold text-[#0a1128] dark:text-white leading-snug line-clamp-2 break-words">
+                        <h3 className={`text-xs sm:text-sm font-semibold leading-snug line-clamp-2 break-words ${
+                          isSold ? "text-slate-500 line-through dark:text-slate-400" : "text-[#0a1128] dark:text-white"
+                        }`}>
                           {item.title}
                         </h3>
 
@@ -271,12 +401,15 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Action buttons (Clean row on mobile and desktop) */}
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 sm:border-0 sm:pt-0 dark:border-slate-800/80 shrink-0">
+                    {/* Action buttons with 3-dot Dropdown */}
+                    <div
+                      className="relative flex items-center justify-end gap-1.5 sm:gap-2 pt-2 border-t border-slate-100 sm:border-0 sm:pt-0 dark:border-slate-800/80 shrink-0"
+                      data-listing-actions
+                    >
                       <button
                         type="button"
                         onClick={() => copyLink(item.slug)}
-                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/50 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/50 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                       >
                         {copiedSlug === item.slug ? (
                           <>
@@ -294,11 +427,87 @@ export default function DashboardPage() {
                       <Link
                         href={targetUrl}
                         target="_blank"
-                        className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128]"
+                        className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128]"
                       >
                         <span>Open Live</span>
                         <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
+
+                      {/* Dropdown Options Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuSlug(openMenuSlug === item.slug ? null : item.slug);
+                        }}
+                        aria-label="Listing options"
+                        title="Options (Mark as Sold, Delete, Share)"
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-[#c5a059] hover:text-[#0a1128] active:scale-90 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 pointer-events-auto"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+
+                      {/* Action Dropdown Menu */}
+                      {openMenuSlug === item.slug && (
+                        <div className="absolute right-0 top-10 z-40 w-52 rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-2xl ring-1 ring-black/5 dark:border-slate-700 dark:bg-[#0c1222] animate-in fade-in zoom-in-95 duration-150">
+                          {/* 1. Mark as Sold / Active */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(item.slug, item.status)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80"
+                          >
+                            {isSold ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 text-emerald-600 shrink-0" />
+                                <div>
+                                  <p className="font-semibold text-emerald-700 dark:text-emerald-400">Reactivate Listing</p>
+                                  <p className="text-[10px] text-slate-400">Set back to active status</p>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <Tag className="h-4 w-4 text-amber-600 shrink-0" />
+                                <div>
+                                  <p className="font-semibold text-slate-800 dark:text-white">Mark as Sold</p>
+                                  <p className="text-[10px] text-slate-400">Show Sold badge on link</p>
+                                </div>
+                              </>
+                            )}
+                          </button>
+
+                          {/* 2. Share to WhatsApp */}
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(
+                              `*${item.title}*\nPrice: ${item.display_price}\nLocation: ${item.location_locality}, ${item.location_city}\n\nView Property Details:\n${typeof window !== "undefined" ? window.location.origin : ""}${targetUrl}`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => setOpenMenuSlug(null)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80"
+                          >
+                            <MessageCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                            <div>
+                              <p className="font-semibold text-slate-800 dark:text-white">Share to WhatsApp</p>
+                              <p className="text-[10px] text-slate-400">Send pre-formatted pitch</p>
+                            </div>
+                          </a>
+
+                          <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                          {/* 3. Delete Listing */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteListing(item.slug, item.title)}
+                            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+                          >
+                            <Trash2 className="h-4 w-4 shrink-0" />
+                            <div>
+                              <p className="font-semibold">Delete Listing</p>
+                              <p className="text-[10px] text-rose-400 dark:text-rose-500">Permanently remove</p>
+                            </div>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
