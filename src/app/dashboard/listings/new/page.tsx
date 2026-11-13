@@ -399,9 +399,9 @@ export default function NewListingPage() {
                   </button>
                 </div>
 
-                {/* TAB 1: LIVE PREVIEW (Exact match to the reference mockup) */}
+                {/* TAB 1: LIVE PREVIEW (Exact match to the reference mockup, mobile-safe) */}
                 {previewTab === "preview" && (
-                  <div className="mx-auto max-w-md rounded-3xl border-2 border-slate-300/80 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-[#090e1c]">
+                  <div className="mx-auto w-full max-w-sm sm:max-w-md rounded-3xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xl dark:border-slate-700 dark:bg-[#090e1c] overflow-hidden">
                     
                     {/* Top Carousel Preview */}
                     <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-slate-200">
@@ -410,102 +410,102 @@ export default function NewListingPage() {
                         alt=""
                         className="h-full w-full object-cover"
                       />
-                      <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      <div className="absolute top-2.5 left-2.5 rounded-full bg-[#0a1128]/80 px-2 py-0.5 text-[9px] font-semibold text-white">
                         FOR {listingData.listing_type.toUpperCase()}
                       </div>
-                      <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-semibold text-white">
+                      <div className="absolute bottom-2.5 right-2.5 rounded-full bg-[#0a1128]/80 px-2 py-0.5 text-[9px] font-medium text-white">
                         1/{photos.length}
                       </div>
                     </div>
 
                     {/* Meta & Title */}
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
-                          <MapPin className="h-3 w-3 text-[#c5a059]" />
-                          <span>{listingData.location_locality}, {listingData.location_city}</span>
+                    <div className="mt-3.5 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37] max-w-full truncate">
+                          <MapPin className="h-3 w-3 text-[#c5a059] shrink-0" />
+                          <span className="truncate">{listingData.location_locality}, {listingData.location_city}</span>
                         </span>
-                        <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full dark:bg-emerald-950/40">
+                        <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full dark:bg-emerald-950/40 dark:text-emerald-300">
                           🏡 For {listingData.listing_type}
                         </span>
                       </div>
 
-                      <h4 className="text-base font-extrabold text-[#0a1128] dark:text-white leading-snug">
+                      <h4 className="text-sm sm:text-base font-semibold text-[#0a1128] dark:text-white leading-snug break-words">
                         {listingData.title}
                       </h4>
 
                       <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+                        <span className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400">
                           {listingData.display_price}
                         </span>
                       </div>
                     </div>
 
                     {/* 2x2 Overview Cards */}
-                    <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <div className="mt-3.5 border-t border-slate-100 pt-3 dark:border-slate-800">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                         PROPERTY OVERVIEW
                       </p>
 
                       <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
-                          <Bed className="h-4 w-4 text-[#c5a059] shrink-0" />
-                          <div>
-                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Configuration</span>
-                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.bhk ? `${listingData.bhk} BHK` : "Spacious"}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2 dark:border-slate-800 dark:bg-[#0c1222] min-w-0 overflow-hidden">
+                          <Bed className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 truncate">Configuration</span>
+                            <span className="font-semibold text-xs text-[#0a1128] dark:text-white truncate block">{listingData.bhk ? `${listingData.bhk} BHK` : "Spacious"}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
-                          <Maximize2 className="h-4 w-4 text-[#c5a059] shrink-0" />
-                          <div>
-                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Super Built-Up</span>
-                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.carpet_area_sqft} Sq. Ft.</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2 dark:border-slate-800 dark:bg-[#0c1222] min-w-0 overflow-hidden">
+                          <Maximize2 className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 truncate">Super Built-Up</span>
+                            <span className="font-semibold text-xs text-[#0a1128] dark:text-white truncate block">{listingData.carpet_area_sqft} Sq. Ft.</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
-                          <Sofa className="h-4 w-4 text-[#c5a059] shrink-0" />
-                          <div>
-                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Furnishing</span>
-                            <span className="font-bold text-[#0a1128] dark:text-white">Fully Furnished</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2 dark:border-slate-800 dark:bg-[#0c1222] min-w-0 overflow-hidden">
+                          <Sofa className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 truncate">Furnishing</span>
+                            <span className="font-semibold text-xs text-[#0a1128] dark:text-white truncate block">Fully Furnished</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
-                          <Building2 className="h-4 w-4 text-[#c5a059] shrink-0" />
-                          <div>
-                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Property Type</span>
-                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.property_type}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2 dark:border-slate-800 dark:bg-[#0c1222] min-w-0 overflow-hidden">
+                          <Building2 className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-[8px] sm:text-[9px] uppercase tracking-wider text-slate-400 truncate">Property Type</span>
+                            <span className="font-semibold text-xs text-[#0a1128] dark:text-white truncate block">{listingData.property_type}</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Highlights */}
-                    <div className="mt-3.5 space-y-1.5 border-t border-slate-100 pt-3 text-[11px] text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                    <div className="mt-3 space-y-1 border-t border-slate-100 pt-2.5 text-[11px] text-slate-600 dark:border-slate-800 dark:text-slate-300">
                       {listingData.ai_highlights.slice(0, 3).map((hl, idx) => (
-                        <p key={idx} className="flex items-center gap-1.5">
+                        <p key={idx} className="flex items-center gap-1.5 truncate">
                           <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
-                          <span>{hl}</span>
+                          <span className="truncate">{hl}</span>
                         </p>
                       ))}
                     </div>
 
                     {/* Action Bar */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                    <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
                       <button
                         type="button"
-                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2 text-xs font-semibold text-white shadow-sm"
                       >
                         <MessageCircle className="h-3.5 w-3.5" />
                         <span>WhatsApp Broker</span>
                       </button>
                       <button
                         type="button"
-                        className="h-9 w-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"
+                        className="h-8 w-8 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"
                       >
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-3.5 w-3.5" />
                       </button>
                     </div>
 
