@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { Listing } from "@/types/database";
+import { Listing, PropertyCollection } from "@/types/database";
 import { INITIAL_LISTINGS } from "./store";
 
 const dataDir = path.join(process.cwd(), ".data");
 const dataFilePath = path.join(dataDir, "listings.json");
+const collectionsFilePath = path.join(dataDir, "collections.json");
 const sessionsFilePath = path.join(dataDir, "sessions.json");
 
 function ensureFileStore(): Map<string, Listing> {
@@ -183,4 +184,90 @@ export function clearUserSession(phone: string) {
   const map = loadSessions();
   map.delete(phone);
   saveSessions(map);
+}
+
+// -------------------------------------------------------------
+// Curated Property Collections Store
+// -------------------------------------------------------------
+
+function ensureCollectionStore(): Map<string, PropertyCollection> {
+  const map = new Map<string, PropertyCollection>();
+
+  // Default sample collection
+  const defaultCollection: PropertyCollection = {
+    id: "col-default-1",
+    broker_id: "demo-broker-1",
+    title: "Ahmedabad Prime Luxury Shortlist",
+    slug: "ahmedabad-prime-luxury",
+    description: "Hand-picked high-end residential apartments in Satellite and Bodakdev. Ready-to-move homes with reserved car parking and premium amenities.",
+    listing_slugs: [
+      "3-bhk-satellite-ahmedabad",
+      "4-bhk-bodakdev-ahmedabad"
+    ],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    views_count: 38
+  };
+  map.set(defaultCollection.slug, defaultCollection);
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    if (fs.existsSync(collectionsFilePath)) {
+      const content = fs.readFileSync(collectionsFilePath, "utf8");
+      const list: PropertyCollection[] = JSON.parse(content);
+      list.forEach((c) => map.set(c.slug, c));
+    } else {
+      fs.writeFileSync(collectionsFilePath, JSON.stringify([defaultCollection], null, 2), "utf8");
+    }
+  } catch (err) {
+    console.error("Collections store read error:", err);
+  }
+
+  return map;
+}
+
+export function getAllCollectionsFromDisk(): PropertyCollection[] {
+  const map = ensureCollectionStore();
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
+export function getCollectionFromDisk(slug: string): PropertyCollection | undefined {
+  const map = ensureCollectionStore();
+  return map.get(slug);
+}
+
+export function saveCollectionToDisk(collection: PropertyCollection) {
+  const map = ensureCollectionStore();
+  map.set(collection.slug, collection);
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const all = Array.from(map.values());
+    fs.writeFileSync(collectionsFilePath, JSON.stringify(all, null, 2), "utf8");
+  } catch (err) {
+    console.error("Collections store write error:", err);
+  }
+}
+
+export function deleteCollectionFromDisk(slug: string): boolean {
+  const map = ensureCollectionStore();
+  const deleted = map.delete(slug);
+
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const all = Array.from(map.values());
+    fs.writeFileSync(collectionsFilePath, JSON.stringify(all, null, 2), "utf8");
+  } catch (err) {
+    console.error("Collections store delete error:", err);
+  }
+
+  return deleted;
 }

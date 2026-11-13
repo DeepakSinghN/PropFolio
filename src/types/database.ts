@@ -85,3 +85,15 @@ export interface ParsedPropertyData {
   ai_neighborhood_highlights: string[];
 }
 
+export interface PropertyCollection {
+  id: string;
+  broker_id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  listing_slugs: string[];
+  created_at: string;
+  updated_at: string;
+  views_count?: number;
+}
+
