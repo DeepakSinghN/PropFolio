@@ -216,50 +216,61 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pb-28 sm:pb-32 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
+    <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
       
       {/* 1. TOP STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f8f9fa]/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#070b14]/90">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-3.5 sm:px-6">
           
           {/* Broker Identity */}
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-2">
+            <div className="relative shrink-0">
               <img
                 src={
                   broker.avatar_url ||
                   "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80"
                 }
                 alt={broker.full_name}
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80";
+                }}
                 className="h-10 w-10 rounded-full border border-[#c5a059]/40 object-cover ring-2 ring-white shadow-sm dark:border-[#c5a059]/30 dark:ring-slate-900"
               />
               <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white ring-2 ring-white dark:ring-slate-900">
                 <Check className="h-2.5 w-2.5 stroke-[3]" />
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold tracking-tight text-[#0a1128] dark:text-white">
+            
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-xs sm:text-sm font-bold tracking-tight text-[#0a1128] dark:text-white truncate">
                   {broker.full_name}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                
+                {/* Desktop Verified Pill */}
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37] shrink-0">
                   <BadgeCheck className="h-3 w-3 text-[#c5a059]" />
                   Verified Broker
                 </span>
+
+                {/* Mobile Verified Checkmark (Takes zero extra row space) */}
+                <BadgeCheck className="h-3.5 w-3.5 sm:hidden text-[#c5a059] shrink-0" />
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                 {broker.company_name || "Exclusive Advisory"} · {broker.city || "Representative"}
               </p>
             </div>
           </div>
 
           {/* Action Tools */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <ThemeToggle />
 
             <Link
               href={`/${broker.slug}/${listing.slug}/brochure`}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#c5a059] dark:hover:bg-[#16234b]"
+              title="Download PDF Brochure"
+              className="flex h-9 w-9 sm:w-auto items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-0 sm:px-3 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#c5a059]"
             >
               <FileText className="h-3.5 w-3.5 text-[#c5a059]" />
               <span className="hidden sm:inline">PDF Brochure</span>
@@ -269,7 +280,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               onClick={handleShare}
               type="button"
               aria-label="Share property"
-              className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-300 dark:hover:border-[#c5a059]"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-300 dark:hover:border-[#c5a059]"
             >
               {copiedShare ? (
                 <Check className="h-4 w-4 text-emerald-600" />
@@ -301,16 +312,19 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <img
                   src={currentPhoto.photo_url}
                   alt={listing.title}
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_GALLERY_PHOTOS[0].photo_url;
+                  }}
                   onClick={() => setIsLightboxOpen(true)}
                   className="h-full w-full cursor-zoom-in object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
                 />
 
                 {/* Top Badges */}
-                <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 pointer-events-none">
-                  <span className="rounded-full bg-[#0a1128]/80 px-3 py-1 text-xs font-bold text-white backdrop-blur-md shadow-sm">
+                <div className="absolute left-3.5 top-3.5 sm:left-4 sm:top-4 z-20 flex flex-wrap items-center gap-1.5 sm:gap-2 pointer-events-none">
+                  <span className="rounded-full bg-[#0a1128]/85 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-white backdrop-blur-md shadow-sm">
                     {listing.listing_type === "Sale" ? "FOR SALE" : "FOR RENT"}
                   </span>
-                  <span className="rounded-full bg-[#0a1128]/85 border border-[#c5a059]/40 px-3 py-1 text-xs font-semibold text-[#d4af37] backdrop-blur-md shadow-sm">
+                  <span className="rounded-full bg-[#0a1128]/90 border border-[#c5a059]/40 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-[#d4af37] backdrop-blur-md shadow-sm">
                     {listing.property_type.toUpperCase()}
                   </span>
                 </div>
@@ -322,7 +336,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     e.stopPropagation();
                     setIsLightboxOpen(true);
                   }}
-                  className="absolute right-4 top-4 z-30 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
+                  className="absolute right-3.5 top-3.5 sm:right-4 sm:top-4 z-30 flex h-9 w-9 sm:h-10 sm:w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
                   title="View Fullscreen"
                   aria-label="View Fullscreen"
                 >
@@ -330,7 +344,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 </button>
 
                 {/* Photo Counter Pill (Matching reference mockup) */}
-                <div className="absolute bottom-4 right-4 z-20 rounded-full bg-[#0a1128]/75 border border-white/10 px-3 py-1 text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none">
+                <div className="absolute bottom-3.5 right-3.5 sm:bottom-4 sm:right-4 z-20 rounded-full bg-[#0a1128]/80 border border-white/10 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none">
                   {activePhotoIdx + 1}/{photos.length}
                 </div>
 
@@ -343,10 +357,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         e.stopPropagation();
                         setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
                       }}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
                       aria-label="Previous photo"
                     >
-                      <ChevronLeft className="h-6 w-6" />
+                      <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                     </button>
                     <button
                       type="button"
@@ -354,30 +368,37 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         e.stopPropagation();
                         setActivePhotoIdx((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
                       }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
                       aria-label="Next photo"
                     >
-                      <ChevronRight className="h-6 w-6" />
+                      <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
                     </button>
                   </>
                 )}
               </div>
 
-              {/* Thumbnails */}
+              {/* Thumbnails without ugly native scrollbars */}
               {photos.length > 1 && (
-                <div className="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {photos.map((p, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setActivePhotoIdx(idx)}
-                      className={`relative aspect-[4/3] w-20 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-2xl border-2 transition-all pointer-events-auto ${
+                      className={`relative aspect-[4/3] w-18 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border-2 transition-all pointer-events-auto ${
                         activePhotoIdx === idx
-                          ? "border-[#c5a059] scale-95 shadow-md shadow-[#c5a059]/25"
+                          ? "border-[#c5a059] scale-[0.98] shadow-md shadow-[#c5a059]/25 ring-2 ring-[#c5a059]/30"
                           : "border-transparent opacity-65 hover:opacity-100"
                       }`}
                     >
-                      <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+                      <img
+                        src={p.photo_url}
+                        alt=""
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_GALLERY_PHOTOS[0].photo_url;
+                        }}
+                        className="h-full w-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -795,28 +816,26 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
         </div>
       </main>
 
-      {/* ========================================================= */}
-      {/* 3. MOBILE FLOATING STICKY ACTION BAR (Screens < 1024px)   */}
-      {/* ========================================================= */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-xl lg:hidden dark:border-slate-800 dark:bg-[#070b14]/95 pointer-events-auto">
+      {/* 3. MOBILE FLOATING STICKY ACTION BAR (Screens < 1024px) */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/90 bg-white/95 px-4 py-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-xl lg:hidden dark:border-slate-800 dark:bg-[#070b14]/95 pointer-events-auto">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
           
           {/* Price Preview */}
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
               For {listing.listing_type || "Sale"}
             </span>
-            <span className="block truncate text-lg font-black text-emerald-700 dark:text-emerald-400">
+            <span className="block truncate text-base font-bold text-emerald-700 dark:text-emerald-400">
               {listing.display_price}
             </span>
           </div>
 
           {/* Quick Buttons: Call + WhatsApp */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <a
               href={`tel:${broker.phone_number}`}
               aria-label="Call Broker"
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition hover:border-[#c5a059] active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
             >
               <Phone className="h-4 w-4" />
             </a>
@@ -825,7 +844,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               href={waLink}
               target="_blank"
               rel="noreferrer"
-              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition hover:bg-emerald-700 active:scale-95"
+              className="flex h-10 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-emerald-600 px-3.5 sm:px-5 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition hover:bg-emerald-700 active:scale-95"
             >
               <MessageCircle className="h-4 w-4 fill-white" />
               <span>WhatsApp</span>
