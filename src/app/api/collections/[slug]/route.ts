@@ -41,3 +41,4 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+

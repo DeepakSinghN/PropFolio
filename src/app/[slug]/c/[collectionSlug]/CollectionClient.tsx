@@ -350,3 +350,4 @@ export default function CollectionClient({ collection, listings, broker }: Props
     </div>
   );
 }
+
