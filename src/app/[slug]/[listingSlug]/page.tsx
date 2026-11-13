@@ -52,13 +52,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
+      url: `${appBaseUrl}/${slug}/${listingSlug}`,
       type: "website",
       siteName: "PropFolio",
       images: [
         {
           url: coverPhoto,
+          secureUrl: coverPhoto,
           width: 1200,
-          height: 800,
+          height: 630,
           type: "image/jpeg",
           alt: title,
         },

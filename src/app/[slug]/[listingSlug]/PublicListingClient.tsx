@@ -293,18 +293,18 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       </header>
 
       {/* 2. MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
-      <main className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 sm:pt-6">
+      <main className="mx-auto max-w-6xl px-0 sm:px-6 pt-0 sm:pt-6">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           
           {/* ========================================================= */}
           {/* LEFT COLUMN: HERO GALLERY & PROPERTY SPECS (8 Cols Desktop) */}
           {/* ========================================================= */}
-          <div className="space-y-6 lg:col-span-8">
+          <div className="space-y-0 sm:space-y-6 lg:col-span-8">
             
-            {/* Gallery Section */}
-            <section className="space-y-3">
+            {/* Gallery Section - Full bleed edge-to-edge on mobile */}
+            <section className="space-y-0 sm:space-y-3">
               <div
-                className="group relative aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] w-full overflow-hidden rounded-3xl bg-slate-200 shadow-xl ring-1 ring-slate-900/5 select-none dark:bg-slate-900 dark:ring-white/10"
+                className="group relative aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] w-full overflow-hidden rounded-none sm:rounded-3xl bg-slate-200 shadow-none sm:shadow-xl ring-0 sm:ring-1 ring-slate-900/5 select-none dark:bg-slate-900 dark:ring-white/10"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -343,8 +343,8 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <Maximize2 className="h-4 w-4" />
                 </button>
 
-                {/* Photo Counter Pill (Matching reference mockup) */}
-                <div className="absolute bottom-3.5 right-3.5 sm:bottom-4 sm:right-4 z-20 rounded-full bg-[#0a1128]/80 border border-white/10 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none">
+                {/* Photo Counter Pill (Matching reference mockup exactly: 1/5) */}
+                <div className="absolute bottom-9 right-4 sm:bottom-4 sm:right-4 z-20 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none shadow-md">
                   {activePhotoIdx + 1}/{photos.length}
                 </div>
 
@@ -379,7 +379,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
               {/* Thumbnails without ugly native scrollbars */}
               {photos.length > 1 && (
-                <div className="flex gap-2 sm:gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="hidden sm:flex gap-2 sm:gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {photos.map((p, idx) => (
                     <button
                       key={idx}
@@ -405,32 +405,34 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               )}
             </section>
 
-            {/* Property Key Details & Pricing */}
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222] overflow-hidden">
-              {/* Location Tag */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-3 py-1 text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37] max-w-full">
-                  <MapPin className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
-                  <span className="truncate">
-                    {listing.location_locality ? `${listing.location_locality}, ` : ""}
-                    {listing.location_city}
-                  </span>
-                </div>
-
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs sm:text-[13px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
-                  <Home className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>For {listing.listing_type || "Sale"}</span>
+            {/* Property Key Details & Pricing - Curved Sheet Overlap Effect on Mobile */}
+            <section className="relative z-10 -mt-6 sm:mt-0 rounded-t-[32px] sm:rounded-3xl border-t sm:border border-slate-200/90 bg-white p-5 sm:p-6 shadow-none dark:border-slate-800 dark:bg-[#0c1222] overflow-hidden">
+              
+              {/* Location Landmark Tag (Matching Red Pin in Reference Mockup) */}
+              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
+                <MapPin className="h-3.5 w-3.5 shrink-0 fill-rose-600 text-white" />
+                <span className="truncate">
+                  {listing.location_locality ? `${listing.location_locality}, ` : ""}
+                  {listing.location_city}
                 </span>
               </div>
 
               {/* Title (Editorial Hierarchy - Clean & Not Overly Bold) */}
-              <h1 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-[#0a1128] dark:text-white leading-snug break-words">
-                {listing.title}
+              <h1 className="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#0a1128] dark:text-white leading-snug break-words">
+                {listing.bhk ? `${listing.bhk} BHK ` : ""}{listing.property_type || "Apartment"} for {listing.listing_type || "Sale"} in {listing.location_locality || listing.location_city}
               </h1>
 
-              {/* Price Row */}
-              <div className="mt-3 flex flex-wrap items-baseline gap-2 sm:gap-3 border-b border-slate-100 pb-5 dark:border-slate-800/80">
-                <span className="text-3xl sm:text-4xl font-bold tracking-tight text-emerald-700 dark:text-emerald-400">
+              {/* For Sale Tag Pill (Soft light green pill matching reference) */}
+              <div className="mt-2.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+                  <span>🏠</span>
+                  <span>For {listing.listing_type || "Sale"}</span>
+                </span>
+              </div>
+
+              {/* Price Row (Dark green prominent display) */}
+              <div className="mt-2.5 flex flex-wrap items-baseline gap-2 sm:gap-3 border-b border-slate-100 pb-5 dark:border-slate-800/80">
+                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1c5436] dark:text-emerald-400">
                   {listing.display_price}
                 </span>
                 {ratePerSqft && (
@@ -447,18 +449,20 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               {/* 2x2 PROPERTY OVERVIEW CARDS (Mobile-Safe, Never Overflow) */}
               {/* ======================================================= */}
               <div className="mt-5">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-                  Property Overview
-                </h3>
+                <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-400">
+                    PROPERTY OVERVIEW
+                  </h3>
+                </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3.5">
+                <div className="mt-3.5 grid grid-cols-2 gap-2.5 sm:gap-3.5">
                   {/* Configuration */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-3 sm:p-3.5 min-w-0 overflow-hidden dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
                       <Bed className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">
+                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
                         Configuration
                       </span>
                       <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
@@ -468,27 +472,27 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   </div>
 
                   {/* Super Built-Up Area */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-3 sm:p-3.5 min-w-0 overflow-hidden dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
                       <Maximize2 className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">
+                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
                         Super Built-Up Area
                       </span>
                       <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
-                        {listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq. Ft.` : "Generous"}
+                        {listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq.Ft.` : "Generous"}
                       </p>
                     </div>
                   </div>
 
                   {/* Furnishing */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-3 sm:p-3.5 min-w-0 overflow-hidden dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
                       <Sofa className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">
+                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
                         Furnishing
                       </span>
                       <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
@@ -498,12 +502,12 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   </div>
 
                   {/* Property Type */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-3 sm:p-3.5 min-w-0 overflow-hidden dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
                       <Building2 className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">
+                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
                         Property Type
                       </span>
                       <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
@@ -517,7 +521,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
             {/* Curated Highlights */}
             {listing.ai_highlights && listing.ai_highlights.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
@@ -545,7 +549,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             )}
 
             {/* About this Property (Description) */}
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                 About this Property
               </h3>
@@ -556,7 +560,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
             {/* Amenities & Infrastructure */}
             {listing.amenities && listing.amenities.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                     Amenities & Facilities
@@ -580,7 +584,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
             {/* Location Advantages */}
             {listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center gap-1.5">
                   <Compass className="h-3.5 w-3.5 text-[#c5a059]" />
                   <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
@@ -603,7 +607,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             )}
 
             {/* Interactive Live EMI Estimator */}
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
