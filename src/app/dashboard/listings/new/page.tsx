@@ -13,13 +13,20 @@ import {
   MessageCircle,
   UploadCloud,
   X,
-  Building,
+  Building2,
   MapPin,
   Tag,
   ArrowRight,
   Loader2,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Bed,
+  Maximize2,
+  Sofa,
+  Eye,
+  Edit3,
+  Phone,
+  ShieldCheck,
 } from "lucide-react";
 import { ParsedPropertyData, PropertyType, ListingType } from "@/types/database";
 import { saveListingToMemory, DEMO_BROKER } from "@/lib/store";
@@ -27,15 +34,15 @@ import { saveListingToMemory, DEMO_BROKER } from "@/lib/store";
 const PRESET_EXAMPLES = [
   {
     label: "3 BHK Flat (Ahmedabad)",
-    text: "3 BHK ekdum prime flat in Satellite Ahmedabad, 1.35 Cr final, fully furnished with covered parking and lift, near ISRO, 1750 sqft carpet area."
+    text: "3 BHK prime luxury flat in Satellite Ahmedabad, 1.35 Cr final, fully furnished with reserved parking and lift, near ISRO, 1,750 sqft carpet area."
   },
   {
-    label: "4 BHK Villa (Dubai)",
-    text: "Ultra luxury 4 bedroom villa in Palm Jumeirah Dubai, private pool, sea view, 4500 sqft, maid room, vacant on transfer, asking AED 14,500,000."
+    label: "4 BHK Villa (Jaipur)",
+    text: "Ultra luxury 4 bedroom villa in Malviya Nagar Jaipur, private terrace garden, road facing, 4200 sqft, servant quarters, immediate possession, asking 3.80 Cr."
   },
   {
     label: "2 BHK Rental (Mumbai)",
-    text: "2 BHK for rent in Andheri West Mumbai, fully modular kitchen, high floor, 70,000 per month, 10 mins to metro station, family or working bachelors allowed."
+    text: "2 BHK for rent in Andheri West Mumbai, fully modular kitchen, high floor, 70,000 per month, 10 mins to metro station, family or corporate executives."
   }
 ];
 
@@ -59,11 +66,12 @@ export default function NewListingPage() {
   const [photos, setPhotos] = useState<string[]>(DEFAULT_PHOTOS);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"preview" | "edit">("preview");
 
   // Call AI API
   async function handleGenerateAI() {
     if (!rawNotes.trim()) {
-      setGenerationError("Please enter some property notes or select an example above.");
+      setGenerationError("Please enter some property notes or select a sample template above.");
       return;
     }
 
@@ -84,6 +92,7 @@ export default function NewListingPage() {
       }
 
       setListingData(res.data);
+      setPreviewTab("preview");
     } catch (err: any) {
       console.error(err);
       setGenerationError(err.message || "Failed to communicate with AI model.");
@@ -96,7 +105,6 @@ export default function NewListingPage() {
   function handlePublish() {
     if (!listingData) return;
 
-    // Save to runtime store
     const fullListing = {
       id: "listing-" + Date.now(),
       broker_id: DEMO_BROKER.id,
@@ -134,14 +142,13 @@ export default function NewListingPage() {
 
     saveListingToMemory(fullListing);
 
-    // Save to persistent file store via API
+    // Save to disk via API
     fetch("/api/listings/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(fullListing),
     }).catch((err) => console.warn("Background disk save:", err));
 
-    // Trigger celebration confetti
     confetti({
       particleCount: 120,
       spread: 70,
@@ -154,80 +161,57 @@ export default function NewListingPage() {
 
   function handleCopy() {
     if (!publishedUrl) return;
-    const fullUrl = window.location.origin + publishedUrl;
+    const fullUrl = `${window.location.origin}${publishedUrl}`;
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 pb-24 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
-      {/* Top Banner / Breadcrumb */}
-      <div className="border-b border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
-            <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-white">
-              Dashboard
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="font-semibold text-zinc-900 dark:text-white">AI Listing Creator</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Powered by Groq Cloud (Qwen AI)</span>
-          </div>
+    <div className="min-h-screen bg-[#f8f9fa] pb-24 text-[#0a1128] transition-colors dark:bg-[#070b14] dark:text-slate-100">
+      <main className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-slate-500 mb-6">
+          <Link href="/dashboard" className="hover:text-[#0a1128] dark:hover:text-white transition">
+            Dashboard
+          </Link>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <span className="font-semibold text-[#0a1128] dark:text-white">Create New Listing</span>
         </div>
-      </div>
 
-      <main className="mx-auto mt-8 max-w-5xl px-4">
         {/* Success Modal / Banner */}
         {publishedUrl && (
-          <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-6 shadow-lg shadow-emerald-500/10 dark:border-emerald-800 dark:bg-emerald-950/40">
-            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-md">
-                <CheckCircle2 className="h-8 w-8" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-emerald-950 dark:text-emerald-200">
-                  🎉 Property Live Ho Gayi!
-                </h3>
-                <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-300">
-                  Aapka branded micro-site ready hai. Is link ko WhatsApp par buyers ya broker groups me share karein:
-                </p>
-                <div className="mt-3 flex flex-wrap items-center gap-2 font-mono text-xs">
-                  <span className="rounded-lg bg-white/80 px-3 py-1.5 font-semibold text-emerald-900 shadow-sm dark:bg-zinc-900 dark:text-emerald-300">
-                    {typeof window !== "undefined" ? window.location.origin + publishedUrl : publishedUrl}
-                  </span>
+          <div className="mb-8 rounded-3xl border border-emerald-500/40 bg-emerald-50 p-6 text-emerald-950 shadow-lg dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">Property Listing Published Live!</h3>
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                    Your luxury listing page is now ready to share on WhatsApp with prospective buyers.
+                  </p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2.5">
                 <button
+                  type="button"
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-white px-3.5 py-2 text-xs font-semibold text-emerald-900 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-700 dark:bg-zinc-900 dark:text-emerald-200"
+                  className="flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-white px-4 py-2.5 text-xs font-bold text-emerald-800 shadow-sm transition hover:bg-emerald-50 dark:bg-emerald-900/60 dark:text-emerald-200"
                 >
-                  <Copy className="h-3.5 w-3.5" />
-                  {copied ? "Copied!" : "Copy Link"}
+                  <Copy className="h-4 w-4" />
+                  <span>{copied ? "Copied Link!" : "Copy Link"}</span>
                 </button>
-
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Check out this property: ${typeof window !== "undefined" ? window.location.origin + publishedUrl : publishedUrl}`)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  Share on WhatsApp
-                </a>
 
                 <Link
                   href={publishedUrl}
                   target="_blank"
-                  className="flex items-center gap-1.5 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900"
+                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 active:scale-95"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Open Live Page
+                  <span>Open Live Page</span>
+                  <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -235,26 +219,29 @@ export default function NewListingPage() {
         )}
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          
           {/* Left Column: Raw Input & Controls */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            
+            {/* Step 1: Input */}
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-zinc-900 dark:text-white">
-                  1. Raw Notes ya WhatsApp Message
+                <h2 className="text-base font-bold text-[#0a1128] dark:text-white">
+                  1. Raw Notes or WhatsApp Text
                 </h2>
-                <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                <span className="rounded-md bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[11px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
                   Step 1
                 </span>
               </div>
 
-              <p className="mt-1 text-xs text-zinc-500">
-                Tooti-phooti Hindi, Hinglish, ya English me property ke baare me likhein ya paste karein.
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Paste any unstructured text, rough specs, or forwarded broker messages.
               </p>
 
-              {/* Presets */}
+              {/* Sample Templates */}
               <div className="mt-4">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Quick Examples Try Karein:
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Quick Sample Templates:
                 </label>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {PRESET_EXAMPLES.map((ex, idx) => (
@@ -262,7 +249,7 @@ export default function NewListingPage() {
                       key={idx}
                       type="button"
                       onClick={() => setRawNotes(ex.text)}
-                      className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-amber-400 hover:bg-amber-50/50 hover:text-amber-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                     >
                       {ex.label}
                     </button>
@@ -276,13 +263,13 @@ export default function NewListingPage() {
                   rows={6}
                   value={rawNotes}
                   onChange={(e) => setRawNotes(e.target.value)}
-                  placeholder="e.g. 3 BHK fully furnished in Satellite, 1.35 Cr, car parking, lift, ready to move..."
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 p-3 text-sm transition focus:border-amber-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                  placeholder="e.g. 3 BHK fully furnished in Satellite Ahmedabad, 1.35 Cr, car parking, lift, ready to move, 1750 sqft..."
+                  className="w-full rounded-2xl border border-slate-200 bg-[#f8f9fc] p-3.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
                 />
               </div>
 
               {generationError && (
-                <p className="mt-2 text-xs font-medium text-rose-600 dark:text-rose-400">
+                <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
                   {generationError}
                 </p>
               )}
@@ -292,41 +279,41 @@ export default function NewListingPage() {
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={isGenerating || !rawNotes.trim()}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 py-3 text-sm font-semibold text-white shadow-md shadow-amber-500/20 transition-all hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1128] py-3.5 text-sm font-bold text-white shadow-md shadow-[#0a1128]/20 border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0f182e]"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>AI Analysing Property (400ms)...</span>
+                    <Loader2 className="h-4 w-4 animate-spin text-[#c5a059]" />
+                    <span>AI Parsing Property Details (~400ms)...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="h-4 w-4" />
-                    <span>✨ AI se Listing Banao</span>
+                    <Sparkles className="h-4 w-4 text-[#c5a059]" />
+                    <span>Generate Listing with AI</span>
                   </>
                 )}
               </button>
             </div>
 
             {/* Photos Manager */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-                  2. Property Photos ({photos.length})
+                <h3 className="text-base font-bold text-[#0a1128] dark:text-white">
+                  2. Property Photographs ({photos.length})
                 </h3>
-                <span className="text-xs text-zinc-400">Auto-compressed</span>
+                <span className="text-xs text-slate-400">Auto-compressed</span>
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {photos.map((src, i) => (
-                  <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                  <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
                     <img
                       src={src}
                       alt={`Photo ${i + 1}`}
                       className="h-full w-full object-cover transition group-hover:scale-105"
                     />
                     {i === 0 && (
-                      <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                      <span className="absolute bottom-1.5 left-1.5 rounded-md bg-[#0a1128]/85 px-1.5 py-0.5 text-[9px] font-bold text-white">
                         Cover
                       </span>
                     )}
@@ -341,9 +328,9 @@ export default function NewListingPage() {
                 ))}
               </div>
 
-              <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-3 text-xs font-semibold text-zinc-600 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800">
-                <UploadCloud className="h-4 w-4" />
-                <span>Upload More Photos</span>
+              <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 py-3 text-xs font-semibold text-slate-600 transition hover:border-[#c5a059] hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900">
+                <UploadCloud className="h-4 w-4 text-[#c5a059]" />
+                <span>Upload More Property Photos</span>
                 <input
                   type="file"
                   multiple
@@ -358,212 +345,338 @@ export default function NewListingPage() {
                 />
               </label>
             </div>
+
           </div>
 
-          {/* Right Column: AI Output & Live Preview Form */}
+          {/* Right Column: AI Output & Live Preview / Edit */}
           <div className="lg:col-span-7">
             {listingData ? (
-              <div className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
+              <div className="space-y-6 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                
+                {/* Header with Switcher Tabs & Publish Action */}
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
                   <div>
-                    <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                      Step 2: AI Result
-                    </span>
-                    <h3 className="mt-1 text-lg font-bold text-zinc-900 dark:text-white">
-                      Review & Publish Listing
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        AI Generated
+                      </span>
+                      <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs dark:border-slate-700 dark:bg-slate-900">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("preview")}
+                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1 font-bold transition ${
+                            previewTab === "preview"
+                              ? "bg-white text-[#0a1128] shadow dark:bg-slate-800 dark:text-white"
+                              : "text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                          }`}
+                        >
+                          <Eye className="h-3.5 w-3.5 text-[#c5a059]" />
+                          <span>Live Preview</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("edit")}
+                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1 font-bold transition ${
+                            previewTab === "edit"
+                              ? "bg-white text-[#0a1128] shadow dark:bg-slate-800 dark:text-white"
+                              : "text-slate-500 hover:text-slate-800 dark:text-slate-400"
+                          }`}
+                        >
+                          <Edit3 className="h-3.5 w-3.5 text-[#c5a059]" />
+                          <span>Edit Details</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={handlePublish}
-                    className="flex items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0a1128] px-5 py-2.5 text-xs font-bold text-white shadow-md border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128]"
                   >
                     <span>Publish Listing</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
 
-                {/* Form Fields */}
-                <div className="space-y-4">
-                  {/* Title */}
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Listing Title
-                    </label>
-                    <input
-                      type="text"
-                      value={listingData.title}
-                      onChange={(e) => setListingData({ ...listingData, title: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                    />
-                  </div>
-
-                  {/* Grid: Price, BHK, Carpet Area, Property Type */}
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Display Price
-                      </label>
-                      <input
-                        type="text"
-                        value={listingData.display_price}
-                        onChange={(e) => setListingData({ ...listingData, display_price: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-bold text-emerald-600 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
+                {/* TAB 1: LIVE PREVIEW (Exact match to the reference mockup) */}
+                {previewTab === "preview" && (
+                  <div className="mx-auto max-w-md rounded-3xl border-2 border-slate-300/80 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-[#090e1c]">
+                    
+                    {/* Top Carousel Preview */}
+                    <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-slate-200">
+                      <img
+                        src={photos[0] || DEFAULT_PHOTOS[0]}
+                        alt=""
+                        className="h-full w-full object-cover"
                       />
+                      <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                        FOR {listingData.listing_type.toUpperCase()}
+                      </div>
+                      <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-semibold text-white">
+                        1/{photos.length}
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Bedrooms (BHK)
-                      </label>
-                      <input
-                        type="number"
-                        value={listingData.bhk || ""}
-                        onChange={(e) => setListingData({ ...listingData, bhk: Number(e.target.value) })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Carpet Area (sq.ft)
-                      </label>
-                      <input
-                        type="number"
-                        value={listingData.carpet_area_sqft || ""}
-                        onChange={(e) => setListingData({ ...listingData, carpet_area_sqft: Number(e.target.value) })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Property Type
-                      </label>
-                      <input
-                        type="text"
-                        value={listingData.property_type}
-                        onChange={(e) => setListingData({ ...listingData, property_type: e.target.value as PropertyType })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Locality / Neighborhood
-                      </label>
-                      <input
-                        type="text"
-                        value={listingData.location_locality}
-                        onChange={(e) => setListingData({ ...listingData, location_locality: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        City
-                      </label>
-                      <input
-                        type="text"
-                        value={listingData.location_city}
-                        onChange={(e) => setListingData({ ...listingData, location_city: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-2.5 text-sm font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                      />
-                    </div>
-                  </div>
-
-                  {/* 5 AI Highlights */}
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      5 Key Highlights (AI Generated)
-                    </label>
-                    <div className="mt-2 space-y-2">
-                      {listingData.ai_highlights.map((hl, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-900 dark:bg-amber-950 dark:text-amber-300">
-                            {idx + 1}
-                          </span>
-                          <input
-                            type="text"
-                            value={hl}
-                            onChange={(e) => {
-                              const updated = [...listingData.ai_highlights];
-                              updated[idx] = e.target.value;
-                              setListingData({ ...listingData, ai_highlights: updated });
-                            }}
-                            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-medium focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Amenities */}
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Amenities Detected
-                    </label>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {listingData.amenities.map((am, idx) => (
-                        <span
-                          key={idx}
-                          className="flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                          {am}
+                    {/* Meta & Title */}
+                    <div className="mt-4 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                          <MapPin className="h-3 w-3 text-[#c5a059]" />
+                          <span>{listingData.location_locality}, {listingData.location_city}</span>
                         </span>
+                        <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full dark:bg-emerald-950/40">
+                          🏡 For {listingData.listing_type}
+                        </span>
+                      </div>
+
+                      <h4 className="text-base font-extrabold text-[#0a1128] dark:text-white leading-snug">
+                        {listingData.title}
+                      </h4>
+
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400">
+                          {listingData.display_price}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 2x2 Overview Cards */}
+                    <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        PROPERTY OVERVIEW
+                      </p>
+
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
+                          <Bed className="h-4 w-4 text-[#c5a059] shrink-0" />
+                          <div>
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Configuration</span>
+                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.bhk ? `${listingData.bhk} BHK` : "Spacious"}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
+                          <Maximize2 className="h-4 w-4 text-[#c5a059] shrink-0" />
+                          <div>
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Super Built-Up</span>
+                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.carpet_area_sqft} Sq. Ft.</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
+                          <Sofa className="h-4 w-4 text-[#c5a059] shrink-0" />
+                          <div>
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Furnishing</span>
+                            <span className="font-bold text-[#0a1128] dark:text-white">Fully Furnished</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-2.5 dark:border-slate-800 dark:bg-[#0c1222]">
+                          <Building2 className="h-4 w-4 text-[#c5a059] shrink-0" />
+                          <div>
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Property Type</span>
+                            <span className="font-bold text-[#0a1128] dark:text-white">{listingData.property_type}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Highlights */}
+                    <div className="mt-3.5 space-y-1.5 border-t border-slate-100 pt-3 text-[11px] text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                      {listingData.ai_highlights.slice(0, 3).map((hl, idx) => (
+                        <p key={idx} className="flex items-center gap-1.5">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-500 shrink-0" />
+                          <span>{hl}</span>
+                        </p>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Sales Description
-                    </label>
-                    <textarea
-                      rows={4}
-                      value={listingData.description}
-                      onChange={(e) => setListingData({ ...listingData, description: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs leading-relaxed focus:border-amber-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-800"
-                    />
-                  </div>
-                </div>
+                    {/* Action Bar */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        <span>WhatsApp Broker</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="h-9 w-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </button>
+                    </div>
 
-                <div className="pt-4">
+                  </div>
+                )}
+
+                {/* TAB 2: EDIT DETAILS */}
+                {previewTab === "edit" && (
+                  <div className="space-y-4">
+                    {/* Title */}
+                    <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        Listing Title
+                      </label>
+                      <input
+                        type="text"
+                        value={listingData.title}
+                        onChange={(e) => setListingData({ ...listingData, title: e.target.value })}
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      />
+                    </div>
+
+                    {/* Grid: Price, BHK, Area, Property Type */}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Display Price
+                        </label>
+                        <input
+                          type="text"
+                          value={listingData.display_price}
+                          onChange={(e) => setListingData({ ...listingData, display_price: e.target.value })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-bold text-emerald-600 outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Bedrooms (BHK)
+                        </label>
+                        <input
+                          type="number"
+                          value={listingData.bhk || ""}
+                          onChange={(e) => setListingData({ ...listingData, bhk: Number(e.target.value) })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Carpet Area (sq.ft)
+                        </label>
+                        <input
+                          type="number"
+                          value={listingData.carpet_area_sqft || ""}
+                          onChange={(e) => setListingData({ ...listingData, carpet_area_sqft: Number(e.target.value) })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Property Type
+                        </label>
+                        <input
+                          type="text"
+                          value={listingData.property_type}
+                          onChange={(e) => setListingData({ ...listingData, property_type: e.target.value as PropertyType })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Locality / Neighborhood
+                        </label>
+                        <input
+                          type="text"
+                          value={listingData.location_locality}
+                          onChange={(e) => setListingData({ ...listingData, location_locality: e.target.value })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          City
+                        </label>
+                        <input
+                          type="text"
+                          value={listingData.location_city}
+                          onChange={(e) => setListingData({ ...listingData, location_city: e.target.value })}
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 5 Highlights */}
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Curated Highlights
+                      </label>
+                      <div className="mt-2 space-y-2">
+                        {listingData.ai_highlights.map((hl, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#fbf6ec] text-[10px] font-bold text-[#8a6828] border border-[#e8d7b3]">
+                              {idx + 1}
+                            </span>
+                            <input
+                              type="text"
+                              value={hl}
+                              onChange={(e) => {
+                                const updated = [...listingData.ai_highlights];
+                                updated[idx] = e.target.value;
+                                setListingData({ ...listingData, ai_highlights: updated });
+                              }}
+                              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        Sales Description
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={listingData.description}
+                        onChange={(e) => setListingData({ ...listingData, description: e.target.value })}
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2">
                   <button
                     type="button"
                     onClick={handlePublish}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-zinc-900 to-zinc-800 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:brightness-110 active:scale-[0.99] dark:from-white dark:to-zinc-200 dark:text-zinc-900"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1128] py-3.5 text-sm font-bold text-white shadow-lg transition hover:bg-[#16234b] active:scale-95 border border-[#c5a059]/40 dark:bg-[#c5a059] dark:text-[#0a1128]"
                   >
-                    <span>Publish Listing to {DEMO_BROKER.slug}.propfolio.co</span>
+                    <span>Publish Listing to {DEMO_BROKER.slug}.propfolio.in</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
+
               </div>
             ) : (
               /* Empty Placeholder */
-              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white/60 p-12 text-center dark:border-zinc-800 dark:bg-zinc-900/60">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white/60 p-12 text-center dark:border-slate-800 dark:bg-[#0c1222]/60">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fbf6ec] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#15120a]">
                   <Sparkles className="h-8 w-8" />
                 </div>
-                <h4 className="mt-4 text-base font-bold text-zinc-900 dark:text-white">
+                <h4 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
                   AI Listing Preview
                 </h4>
-                <p className="mt-1 max-w-sm text-xs text-zinc-500">
-                  Left side me property ke notes likhein aur <span className="font-semibold text-zinc-800 dark:text-zinc-200">"AI se Listing Banao"</span> par click karein. AI instantly yahan full listing create kar dega!
+                <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
+                  Enter property notes on the left and click <span className="font-semibold text-[#0a1128] dark:text-white">"Generate Listing with AI"</span>. Your formatted mobile & web preview will appear here in seconds.
                 </p>
               </div>
             )}
           </div>
+
         </div>
       </main>
     </div>
   );
 }
-

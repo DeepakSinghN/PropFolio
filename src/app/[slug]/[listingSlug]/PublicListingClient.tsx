@@ -18,13 +18,18 @@ import {
   X,
   Calculator,
   Compass,
-  Building,
+  Building2,
   Car,
   Layers,
   Key,
   BadgeCheck,
   ArrowUpRight,
-  Check
+  Check,
+  Bed,
+  Sofa,
+  Clock,
+  Home,
+  CheckCheck,
 } from "lucide-react";
 import { getListingFromMemory, INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
 import { Listing } from "@/types/database";
@@ -96,7 +101,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
   const currentPhoto = photos[activePhotoIdx] || photos[0];
 
-  // Financials
+  // Financials & Calculator
   const priceAmount = listing.price_amount || 13500000;
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
   const [loanTenureYears, setLoanTenureYears] = useState(20);
@@ -152,7 +157,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isLightboxOpen, photos.length]);
 
-  // Touch Swipe Handlers
+  // Touch Swipe Handlers for Mobile Carousel
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -175,7 +180,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
     }
   };
 
-  // Format Currency
+  // Format Currency (Indian Lakh / Crore)
   function formatINR(amount: number) {
     if (amount >= 10000000) {
       return `₹${(amount / 10000000).toFixed(2)} Cr`;
@@ -188,7 +193,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
   // Pre-filled WhatsApp message
   const waText = encodeURIComponent(
-    `Hi ${broker.full_name}, I saw your listing "${listing.title}" for ${listing.display_price}. Is it still available? Can we schedule a site visit?`
+    `Hi ${broker.full_name}, I saw your listing "${listing.title}" for ${listing.display_price}. Is it available? Can we schedule a site visit?`
   );
   const waLink = `https://wa.me/${broker.phone_number.replace(/\D/g, "")}?text=${waText}`;
 
@@ -211,10 +216,12 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pb-32 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
-      {/* Top Floating Glass Header */}
+    <div className="min-h-screen bg-[#f8f9fa] pb-28 sm:pb-32 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
+      
+      {/* 1. TOP STICKY HEADER */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f8f9fa]/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#070b14]/90">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          
           {/* Broker Identity */}
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -235,9 +242,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <span className="text-sm font-bold tracking-tight text-[#0a1128] dark:text-white">
                   {broker.full_name}
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
                   <BadgeCheck className="h-3 w-3 text-[#c5a059]" />
-                  Verified Advisory
+                  Verified Broker
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -255,7 +262,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#c5a059] dark:hover:bg-[#16234b]"
             >
               <FileText className="h-3.5 w-3.5 text-[#c5a059]" />
-              <span className="hidden sm:inline">PDF Dossier</span>
+              <span className="hidden sm:inline">PDF Brochure</span>
             </Link>
 
             <button
@@ -274,509 +281,563 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
         </div>
       </header>
 
-      {/* Main Luxury Architectural Showcase */}
-      <main className="mx-auto max-w-5xl px-4 pt-4 sm:px-6 sm:pt-8">
-        {/* 1. Hero Gallery */}
-        <section className="space-y-3">
-          <div
-            className="group relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-3xl bg-zinc-200 shadow-xl ring-1 ring-zinc-900/5 select-none dark:bg-zinc-900 dark:ring-white/10"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <img
-              src={currentPhoto.photo_url}
-              alt={listing.title}
-              onClick={() => setIsLightboxOpen(true)}
-              className="h-full w-full cursor-zoom-in object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
-            />
+      {/* 2. MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
+      <main className="mx-auto max-w-6xl px-4 pt-4 sm:px-6 sm:pt-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          
+          {/* ========================================================= */}
+          {/* LEFT COLUMN: HERO GALLERY & PROPERTY SPECS (8 Cols Desktop) */}
+          {/* ========================================================= */}
+          <div className="space-y-6 lg:col-span-8">
+            
+            {/* Gallery Section */}
+            <section className="space-y-3">
+              <div
+                className="group relative aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] w-full overflow-hidden rounded-3xl bg-slate-200 shadow-xl ring-1 ring-slate-900/5 select-none dark:bg-slate-900 dark:ring-white/10"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <img
+                  src={currentPhoto.photo_url}
+                  alt={listing.title}
+                  onClick={() => setIsLightboxOpen(true)}
+                  className="h-full w-full cursor-zoom-in object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
+                />
 
-            {/* Top Badges */}
-            <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 pointer-events-none">
-              <span className="rounded-full bg-[#0a1128]/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
-                {listing.listing_type === "Sale" ? "FOR SALE" : "FOR LEASE"}
-              </span>
-              <span className="rounded-full bg-[#0a1128]/85 border border-[#c5a059]/40 px-3 py-1 text-xs font-semibold text-[#d4af37] backdrop-blur-md">
-                {listing.property_type.toUpperCase()}
-              </span>
-            </div>
+                {/* Top Badges */}
+                <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2 pointer-events-none">
+                  <span className="rounded-full bg-[#0a1128]/80 px-3 py-1 text-xs font-bold text-white backdrop-blur-md shadow-sm">
+                    {listing.listing_type === "Sale" ? "FOR SALE" : "FOR RENT"}
+                  </span>
+                  <span className="rounded-full bg-[#0a1128]/85 border border-[#c5a059]/40 px-3 py-1 text-xs font-semibold text-[#d4af37] backdrop-blur-md shadow-sm">
+                    {listing.property_type.toUpperCase()}
+                  </span>
+                </div>
 
-            {/* Expand Fullscreen Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsLightboxOpen(true);
-              }}
-              className="absolute right-4 top-4 z-30 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
-              title="View Fullscreen"
-              aria-label="View Fullscreen"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </button>
-
-            {/* Photo Counter */}
-            <div className="absolute bottom-4 right-4 z-20 rounded-full bg-[#0a1128]/70 px-3 py-1 text-xs font-medium tracking-wide text-white backdrop-blur-md pointer-events-none">
-              {activePhotoIdx + 1} / {photos.length}
-            </div>
-
-            {/* Gallery Navigation Arrows (Swipe / Click) */}
-            {photos.length > 1 && (
-              <>
+                {/* Expand Fullscreen Button */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                    setIsLightboxOpen(true);
                   }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
-                  aria-label="Previous photo"
+                  className="absolute right-4 top-4 z-30 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
+                  title="View Fullscreen"
+                  aria-label="View Fullscreen"
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <Maximize2 className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActivePhotoIdx((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
-                  aria-label="Next photo"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </button>
-              </>
-            )}
-          </div>
 
-          {/* Thumbnail Strip */}
-          {photos.length > 1 && (
-            <div className="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
-              {photos.map((p, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setActivePhotoIdx(idx)}
-                  className={`relative aspect-[4/3] w-20 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-2xl border-2 transition-all pointer-events-auto ${
-                    activePhotoIdx === idx
-                      ? "border-[#c5a059] scale-95 shadow-md shadow-[#c5a059]/25"
-                      : "border-transparent opacity-65 hover:opacity-100"
-                  }`}
-                >
-                  <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+                {/* Photo Counter Pill (Matching reference mockup) */}
+                <div className="absolute bottom-4 right-4 z-20 rounded-full bg-[#0a1128]/75 border border-white/10 px-3 py-1 text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none">
+                  {activePhotoIdx + 1}/{photos.length}
+                </div>
 
-        {/* 2. Key Title & Financials Card */}
-        <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div className="space-y-2.5">
-              <div className="inline-flex items-center gap-2">
-                <span className="rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300">
-                  {listing.property_type}
-                </span>
-                <span className="rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                  Ready to Move
+                {/* Arrows */}
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
+                      }}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      aria-label="Previous photo"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIdx((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      aria-label="Next photo"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {photos.length > 1 && (
+                <div className="flex gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                  {photos.map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActivePhotoIdx(idx)}
+                      className={`relative aspect-[4/3] w-20 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-2xl border-2 transition-all pointer-events-auto ${
+                        activePhotoIdx === idx
+                          ? "border-[#c5a059] scale-95 shadow-md shadow-[#c5a059]/25"
+                          : "border-transparent opacity-65 hover:opacity-100"
+                      }`}
+                    >
+                      <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Property Key Details & Pricing */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              {/* Location Tag */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                  <MapPin className="h-3.5 w-3.5 text-[#c5a059] shrink-0" />
+                  <span>
+                    {listing.location_locality ? `${listing.location_locality}, ` : ""}
+                    {listing.location_city}
+                  </span>
+                </div>
+
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+                  <Home className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                  <span>For {listing.listing_type || "Sale"}</span>
                 </span>
               </div>
 
-              <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 sm:text-3xl md:text-4xl dark:text-white">
+              {/* Title (Editorial Hierarchy) */}
+              <h1 className="mt-3.5 text-2xl font-extrabold tracking-tight text-[#0a1128] sm:text-3xl lg:text-4xl dark:text-white leading-[1.2]">
                 {listing.title}
               </h1>
 
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-                <MapPin className="h-4 w-4 shrink-0 text-amber-500" />
-                <span>
-                  {listing.location_locality}, {listing.location_city}
-                </span>
-              </div>
-            </div>
-
-            {/* Price Box */}
-            <div className="rounded-2xl border border-zinc-100 bg-zinc-50/80 p-5 text-left md:text-right dark:border-zinc-800 dark:bg-zinc-800/40">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                Offering Price
-              </span>
-              <div className="mt-1 flex items-baseline gap-2 md:justify-end">
-                <span className="text-3xl font-black tracking-tight text-emerald-600 sm:text-4xl dark:text-emerald-400">
+              {/* Price Row */}
+              <div className="mt-4 flex flex-wrap items-baseline gap-3 border-b border-slate-100 pb-6 dark:border-slate-800/80">
+                <span className="text-3xl font-black tracking-tight text-emerald-700 sm:text-4xl dark:text-emerald-400">
                   {listing.display_price}
                 </span>
-              </div>
-              {ratePerSqft && (
-                <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                  Approx. ₹{ratePerSqft.toLocaleString("en-IN")} / sq.ft
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Key Metrics Horizontal Strip */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 border-t border-zinc-100 pt-6 dark:border-zinc-800">
-            <div className="flex items-center gap-3 rounded-2xl bg-zinc-50/80 p-4 dark:bg-zinc-800/40">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
-                <Building className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                  Configuration
-                </p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                  {listing.bhk ? `${listing.bhk} BHK` : "Spacious"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-2xl bg-zinc-50/80 p-4 dark:bg-zinc-800/40">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
-                <Layers className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                  Carpet Area
-                </p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                  {listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} sq.ft` : "Generous"}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-2xl bg-zinc-50/80 p-4 dark:bg-zinc-800/40">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
-                <Car className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                  Parking
-                </p>
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">Reserved Slot</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 rounded-2xl bg-zinc-50/80 p-4 dark:bg-zinc-800/40">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-                <Key className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                  Possession
-                </p>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Immediate</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. AI Key Selling Highlights */}
-        {listing.ai_highlights && listing.ai_highlights.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <h2 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
-                  Curated Property Highlights
-                </h2>
-              </div>
-              <span className="text-[11px] font-medium text-zinc-400">AI Verified Insights</span>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {listing.ai_highlights.map((point, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-3.5 rounded-2xl border border-zinc-100 bg-zinc-50/70 p-4 transition-all hover:border-amber-500/30 hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-800/30 dark:hover:border-amber-500/30"
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-amber-400 text-xs font-bold text-white shadow-sm shadow-amber-500/20">
-                    {idx + 1}
+                {ratePerSqft && (
+                  <span className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
+                    · Approx. ₹{ratePerSqft.toLocaleString("en-IN")} / sq.ft
                   </span>
-                  <p className="text-xs sm:text-sm font-medium leading-relaxed text-zinc-700 dark:text-zinc-200">
-                    {point}
+                )}
+                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  Negotiable
+                </span>
+              </div>
+
+              {/* ======================================================= */}
+              {/* 2x2 PROPERTY OVERVIEW CARDS (Exact match to reference) */}
+              {/* ======================================================= */}
+              <div className="mt-6">
+                <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                  Property Overview
+                </h3>
+
+                <div className="mt-3.5 grid grid-cols-2 gap-3 sm:gap-4">
+                  {/* Configuration */}
+                  <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-4 transition-colors hover:border-[#c5a059]/40 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                      <Bed className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Configuration
+                      </span>
+                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                        {listing.bhk ? `${listing.bhk} BHK` : "Spacious"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Super Built-Up Area */}
+                  <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-4 transition-colors hover:border-[#c5a059]/40 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                      <Maximize2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Super Built-Up Area
+                      </span>
+                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                        {listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq. Ft.` : "Generous"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Furnishing */}
+                  <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-4 transition-colors hover:border-[#c5a059]/40 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                      <Sofa className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Furnishing
+                      </span>
+                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                        Fully Furnished
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Property Type */}
+                  <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/90 bg-[#f8f9fc] p-4 transition-colors hover:border-[#c5a059]/40 dark:border-slate-800 dark:bg-[#090e1c]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fbf6ec] text-[#8a6828] border border-[#e8d7b3] dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Property Type
+                      </span>
+                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                        {listing.property_type || "Apartment"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Curated Highlights */}
+            {listing.ai_highlights && listing.ai_highlights.length > 0 && (
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-[#c5a059]" />
+                    <span>Curated Property Highlights</span>
+                  </h3>
+                  <span className="text-[11px] font-medium text-slate-400">AI Verified</span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {listing.ai_highlights.map((point, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-4 transition-all hover:border-[#c5a059]/30 dark:border-slate-800/80 dark:bg-[#090e1c]"
+                    >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0a1128] text-xs font-bold text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#16234b]">
+                        {idx + 1}
+                      </span>
+                      <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-700 dark:text-slate-300">
+                        {point}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* About this Property (Description) */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                About this Property
+              </h3>
+              <div className="mt-3.5 text-sm sm:text-base leading-relaxed text-slate-700 whitespace-pre-line dark:text-slate-300">
+                {listing.description}
+              </div>
+            </section>
+
+            {/* Amenities & Infrastructure */}
+            {listing.amenities && listing.amenities.length > 0 && (
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                    Amenities & Facilities
+                  </h3>
+                  <span className="text-xs text-slate-400">{listing.amenities.length} Verified Facilities</span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {listing.amenities.map((am, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2.5 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 text-xs sm:text-sm font-semibold text-[#0a1128] transition hover:bg-slate-50 dark:border-slate-800/80 dark:bg-[#090e1c] dark:text-slate-200"
+                    >
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                      <span>{am}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Location Advantages */}
+            {listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0 && (
+              <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center gap-2">
+                  <Compass className="h-4 w-4 text-[#c5a059]" />
+                  <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                    Location Advantages & Connectivity
+                  </h3>
+                </div>
+
+                <div className="mt-4 space-y-2.5">
+                  {listing.ai_neighborhood_highlights.map((nh, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 rounded-2xl bg-[#f8f9fc] p-3.5 text-xs sm:text-sm font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300"
+                    >
+                      <MapPin className="h-4 w-4 shrink-0 text-[#c5a059]" />
+                      <span>{nh}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Interactive Live EMI Estimator */}
+            <section className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
+                    <Calculator className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                      Monthly EMI & Affordability Estimator
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Calculate your home loan installments in real time
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-12">
+                <div className="space-y-4 md:col-span-7">
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-slate-600 dark:text-slate-400">
+                        Down Payment: {downPaymentPercent}%
+                      </span>
+                      <span className="text-[#0a1128] dark:text-white font-bold">
+                        {formatINR((priceAmount * downPaymentPercent) / 100)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="60"
+                      step="5"
+                      value={downPaymentPercent}
+                      onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-slate-600 dark:text-slate-400">
+                        Tenure: {loanTenureYears} Years ({loanTenureYears * 12} Mos)
+                      </span>
+                      <span className="text-[#0a1128] dark:text-white font-bold">{loanTenureYears} yrs</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="30"
+                      step="1"
+                      value={loanTenureYears}
+                      onChange={(e) => setLoanTenureYears(Number(e.target.value))}
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-slate-600 dark:text-slate-400">Interest Rate: {interestRate}% p.a.</span>
+                      <span className="text-[#0a1128] dark:text-white font-bold">Home Loan</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="7.0"
+                      max="12.0"
+                      step="0.1"
+                      value={interestRate}
+                      onChange={(e) => setInterestRate(Number(e.target.value))}
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Monthly Summary Box */}
+                <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-gradient-to-tr from-white to-[#fbf6ec]/60 p-5 md:col-span-5 dark:border-slate-800 dark:from-[#0c1222] dark:to-[#17130a]">
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                      Estimated Monthly EMI
+                    </span>
+                    <p className="mt-1 text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                      ₹{monthlyEmi.toLocaleString("en-IN")}
+                      <span className="text-xs font-semibold text-slate-400"> / mo</span>
+                    </p>
+
+                    <div className="mt-4 space-y-1.5 text-xs border-t border-slate-200/60 pt-3 dark:border-slate-800">
+                      <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                        <span>Loan Principal:</span>
+                        <span className="font-semibold text-[#0a1128] dark:text-white">{formatINR(loanPrincipal)}</span>
+                      </div>
+                      <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                        <span>Total Interest:</span>
+                        <span className="font-semibold text-[#0a1128] dark:text-white">{formatINR(totalInterest)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#0a1128] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#16234b] active:scale-95 dark:bg-white dark:text-[#0a1128]"
+                  >
+                    <span>Check Loan Eligibility on WhatsApp</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-[#c5a059]" />
+                  </a>
+                </div>
+              </div>
+            </section>
+
+          </div>
+
+          {/* ========================================================= */}
+          {/* RIGHT COLUMN: STICKY DESKTOP VALUATION & ADVISORY DESK   */}
+          {/* ========================================================= */}
+          <div className="space-y-6 lg:col-span-4">
+            <div className="sticky top-24 space-y-5">
+              
+              {/* Main Desktop Action Card */}
+              <div className="rounded-3xl border-2 border-[#c5a059]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#c5a059]/30 dark:bg-[#0c1222] dark:shadow-none">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Offering Price
+                </span>
+                
+                <div className="mt-1 flex items-baseline justify-between">
+                  <span className="text-3xl sm:text-4xl font-black tracking-tight text-emerald-700 dark:text-emerald-400">
+                    {listing.display_price}
+                  </span>
+                  {ratePerSqft && (
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      ₹{ratePerSqft.toLocaleString("en-IN")}/sqft
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-6 space-y-3">
+                  {/* Primary WhatsApp CTA */}
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 py-4 text-sm font-bold text-white shadow-lg shadow-emerald-600/30 transition hover:bg-emerald-700 active:scale-95 pointer-events-auto"
+                  >
+                    <MessageCircle className="h-5 w-5 fill-white" />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+
+                  {/* Secondary Call */}
+                  <a
+                    href={`tel:${broker.phone_number}`}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-[#f8f9fa] py-3.5 text-xs font-bold text-[#0a1128] transition hover:bg-white hover:border-[#c5a059] active:scale-95 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white pointer-events-auto"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span>Call Broker ({broker.phone_number})</span>
+                  </a>
+
+                  {/* PDF Download */}
+                  <Link
+                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-semibold text-slate-700 transition hover:border-[#c5a059] hover:bg-slate-50 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-300"
+                  >
+                    <FileText className="h-4 w-4 text-[#c5a059]" />
+                    <span>Download Branded PDF Brochure</span>
+                  </Link>
+                </div>
+
+                {/* Response SLA */}
+                <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-emerald-50/80 py-2 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Direct broker response in under 5 minutes</span>
+                </div>
+              </div>
+
+              {/* Verified Broker Profile Card */}
+              <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={broker.avatar_url}
+                    alt={broker.full_name}
+                    className="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-md dark:border-slate-800"
+                  />
+                  <div>
+                    <h4 className="text-base font-bold text-[#0a1128] dark:text-white flex items-center gap-1.5">
+                      {broker.full_name}
+                      <ShieldCheck className="h-4 w-4 text-[#c5a059]" />
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {broker.company_name} · {broker.city}
+                    </p>
+                    <p className="mt-1 text-[11px] font-semibold text-[#c5a059]">
+                      Verified Property Representative
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 space-y-1.5">
+                  <p className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span>Direct Site Visits Scheduled on Request</span>
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span>Title Clearance & Legal Documentation Verified</span>
                   </p>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
 
-        {/* 4. Interactive Live EMI Calculator */}
-        <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-5 dark:border-zinc-800">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
-                <Calculator className="h-4 w-4" />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
-                  Monthly EMI & Affordability Estimator
-                </h2>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  Estimate bank loan installments for this property in real time
-                </p>
-              </div>
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-12">
-            {/* Sliders Column */}
-            <div className="space-y-5 lg:col-span-7">
-              <div>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-zinc-600 dark:text-zinc-400">
-                    Down Payment: {downPaymentPercent}%
-                  </span>
-                  <span className="text-zinc-900 dark:text-white">
-                    {formatINR((priceAmount * downPaymentPercent) / 100)}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="60"
-                  step="5"
-                  value={downPaymentPercent}
-                  onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
-                  className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-amber-500 dark:bg-zinc-800 pointer-events-auto"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-zinc-600 dark:text-zinc-400">
-                    Loan Tenure: {loanTenureYears} Years
-                  </span>
-                  <span className="text-zinc-900 dark:text-white">{loanTenureYears * 12} Months</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="30"
-                  step="1"
-                  value={loanTenureYears}
-                  onChange={(e) => setLoanTenureYears(Number(e.target.value))}
-                  className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-amber-500 dark:bg-zinc-800 pointer-events-auto"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-zinc-600 dark:text-zinc-400">Interest Rate: {interestRate}% p.a.</span>
-                  <span className="text-zinc-900 dark:text-white">Standard Home Loan</span>
-                </div>
-                <input
-                  type="range"
-                  min="7.0"
-                  max="12.0"
-                  step="0.1"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(Number(e.target.value))}
-                  className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-200 accent-amber-500 dark:bg-zinc-800 pointer-events-auto"
-                />
-              </div>
-            </div>
-
-            {/* Calculated Monthly Summary Column */}
-            <div className="flex flex-col justify-between rounded-2xl border border-zinc-100 bg-gradient-to-tr from-zinc-50 to-amber-50/30 p-6 lg:col-span-5 dark:border-zinc-800 dark:from-zinc-800/40 dark:to-amber-950/10">
-              <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-                  Estimated Monthly EMI
-                </span>
-                <p className="mt-1 text-3xl font-black text-emerald-600 sm:text-4xl dark:text-emerald-400">
-                  ₹{monthlyEmi.toLocaleString("en-IN")}
-                  <span className="text-xs font-semibold text-zinc-400"> / mo</span>
-                </p>
-
-                <div className="mt-5 space-y-2 text-xs border-t border-zinc-200/60 pt-4 dark:border-zinc-700/60">
-                  <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-                    <span>Loan Principal:</span>
-                    <span className="font-semibold text-zinc-900 dark:text-white">
-                      {formatINR(loanPrincipal)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-                    <span>Total Interest:</span>
-                    <span className="font-semibold text-zinc-900 dark:text-white">
-                      {formatINR(totalInterest)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-zinc-600 dark:text-zinc-300">
-                    <span>Total Repayment:</span>
-                    <span className="font-semibold text-zinc-900 dark:text-white">
-                      {formatINR(totalPayable)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-3">
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 pointer-events-auto"
-                >
-                  <span>Ask Broker for Bank Loan Approval</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. Residence Description */}
-        <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-          <h2 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
-            About this Property
-          </h2>
-          <div className="mt-4 space-y-3.5 text-xs sm:text-sm leading-relaxed text-zinc-600 whitespace-pre-line dark:text-zinc-300">
-            {listing.description}
-          </div>
-        </section>
-
-        {/* 6. Amenities & Facilities */}
-        {listing.amenities && listing.amenities.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
-                Amenities & Infrastructure
-              </h2>
-              <span className="text-xs text-zinc-400">{listing.amenities.length} Verified Facilities</span>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {listing.amenities.map((am, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2.5 rounded-2xl border border-zinc-100 bg-zinc-50/70 p-3.5 text-xs sm:text-sm font-medium text-zinc-800 transition hover:bg-zinc-50 dark:border-zinc-800/60 dark:bg-zinc-800/40 dark:text-zinc-200"
-                >
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                  <span>{am}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 7. Neighborhood Perks */}
-        {listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-sm transition-colors sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/70">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:bg-amber-400/10 dark:text-amber-400">
-                <Compass className="h-4 w-4" />
-              </div>
-              <h2 className="text-lg font-bold tracking-tight text-zinc-900 sm:text-xl dark:text-white">
-                Location Perks & Strategic Access
-              </h2>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {listing.ai_neighborhood_highlights.map((nh, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 rounded-2xl bg-zinc-50/80 p-3.5 text-xs sm:text-sm font-medium text-zinc-700 dark:bg-zinc-800/30 dark:text-zinc-300"
-                >
-                  <MapPin className="h-4 w-4 shrink-0 text-amber-500" />
-                  <span>{nh}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 8. Verified Broker Advisory Card */}
-        <section className="mt-8 rounded-3xl border border-amber-500/20 bg-gradient-to-tr from-amber-500/5 via-white to-transparent p-6 sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-4">
-              <img
-                src={broker.avatar_url}
-                alt={broker.full_name}
-                className="h-16 w-16 rounded-2xl border-2 border-white object-cover shadow-md dark:border-zinc-800"
-              />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                    {broker.full_name}
-                  </h3>
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                </div>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {broker.company_name} · Professional Real Estate Consultant
-                </p>
-                <p className="mt-1 font-mono text-xs text-amber-600 dark:text-amber-400">
-                  Direct Line: {broker.phone_number}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex w-full sm:w-auto items-center gap-3">
-              <a
-                href={`tel:${broker.phone_number}`}
-                className="flex flex-1 sm:flex-initial cursor-pointer items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-xs font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white pointer-events-auto"
-              >
-                <Phone className="h-4 w-4" />
-                <span>Call Broker</span>
-              </a>
-
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-1 sm:flex-initial cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 active:scale-95 pointer-events-auto"
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span>Chat on WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        </section>
+        </div>
       </main>
 
-      {/* 9. Floating Bottom Sticky Mobile Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200/80 bg-white/95 p-3.5 pb-[calc(0.875rem+env(safe-area-inset-bottom))] backdrop-blur-xl dark:border-zinc-800/80 dark:bg-[#0c0d0e]/95 pointer-events-auto">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-          <div className="hidden sm:block">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-              Verified Consultant
+      {/* ========================================================= */}
+      {/* 3. MOBILE FLOATING STICKY ACTION BAR (Screens < 1024px)   */}
+      {/* ========================================================= */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-xl lg:hidden dark:border-slate-800 dark:bg-[#070b14]/95 pointer-events-auto">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+          
+          {/* Price Preview */}
+          <div className="min-w-0">
+            <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              For {listing.listing_type || "Sale"}
             </span>
-            <p className="text-xs font-bold text-zinc-900 dark:text-white">
-              {broker.full_name} · {listing.display_price}
-            </p>
+            <span className="block truncate text-lg font-black text-emerald-700 dark:text-emerald-400">
+              {listing.display_price}
+            </span>
           </div>
 
-          <div className="flex w-full sm:w-auto items-center gap-2">
-            <Link
-              href={`/${broker.slug}/${listing.slug}/brochure`}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-xs font-semibold text-zinc-800 shadow-sm transition hover:bg-zinc-50 active:scale-95 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white pointer-events-auto"
-            >
-              <FileText className="h-4 w-4 text-amber-500" />
-              <span className="hidden xs:inline">PDF</span>
-            </Link>
-
+          {/* Quick Buttons: Call + WhatsApp */}
+          <div className="flex items-center gap-2">
             <a
               href={`tel:${broker.phone_number}`}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-100 px-3.5 py-3 text-xs font-semibold text-zinc-800 transition hover:bg-zinc-200 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white pointer-events-auto"
+              aria-label="Call Broker"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
             >
               <Phone className="h-4 w-4" />
-              <span>Call</span>
             </a>
 
             <a
               href={waLink}
               target="_blank"
               rel="noreferrer"
-              className="flex flex-1 sm:flex-initial cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700 active:scale-95 pointer-events-auto"
+              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition hover:bg-emerald-700 active:scale-95"
             >
-              <MessageCircle className="h-4 w-4" />
-              <span>WhatsApp Inquiry</span>
+              <MessageCircle className="h-4 w-4 fill-white" />
+              <span>WhatsApp</span>
             </a>
           </div>
+
         </div>
       </div>
 
-      {/* 10. Fullscreen Lightbox Modal */}
+      {/* ========================================================= */}
+      {/* 4. FULLSCREEN LIGHTBOX MODAL                              */}
+      {/* ========================================================= */}
       {isLightboxOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md pointer-events-auto select-none"
@@ -838,6 +899,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           </div>
         </div>
       )}
+
     </div>
   );
 }

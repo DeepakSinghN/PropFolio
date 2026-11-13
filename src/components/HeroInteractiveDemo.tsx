@@ -91,7 +91,17 @@ export default function HeroInteractiveDemo() {
                   <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                     ₹3.80 Cr
                   </span>
-                  <span className="text-xs text-slate-400">· 4,200 sq.ft carpet</span>
+                  <span className="text-xs text-slate-500">· ₹9,047 / sq.ft</span>
+                </div>
+
+                {/* 2x2 Mini Overview Cards */}
+                <div className="pt-2 grid grid-cols-2 gap-2 text-[11px]">
+                  <div className="flex items-center gap-2 rounded-xl bg-white p-2 border border-slate-200/80 dark:bg-[#0c1222] dark:border-slate-800">
+                    <span className="text-[#c5a059] font-bold">🛏️ 4 BHK</span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-xl bg-white p-2 border border-slate-200/80 dark:bg-[#0c1222] dark:border-slate-800">
+                    <span className="text-[#c5a059] font-bold">📐 4,200 Sq.Ft</span>
+                  </div>
                 </div>
 
                 <div className="pt-3 flex items-center gap-2">
