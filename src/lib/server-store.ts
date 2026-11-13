@@ -1,21 +1,55 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 import { Listing, PropertyCollection } from "@/types/database";
 import { INITIAL_LISTINGS } from "./store";
 
-const dataDir = path.join(process.cwd(), ".data");
-const dataFilePath = path.join(dataDir, "listings.json");
-const collectionsFilePath = path.join(dataDir, "collections.json");
-const sessionsFilePath = path.join(dataDir, "sessions.json");
+// Global cache across serverless warm invocations
+const g = globalThis as unknown as {
+  __propfolioListingsMap?: Map<string, Listing>;
+  __propfolioCollectionsMap?: Map<string, PropertyCollection>;
+  __propfolioSessionsMap?: Map<string, UserSession>;
+};
+
+function getActiveDataDir(): string {
+  // 1. Try project root .data
+  const preferred = path.join(process.cwd(), ".data");
+  try {
+    if (!fs.existsSync(preferred)) {
+      fs.mkdirSync(preferred, { recursive: true });
+    }
+    const testFile = path.join(preferred, ".test-write");
+    fs.writeFileSync(testFile, "ok");
+    fs.unlinkSync(testFile);
+    return preferred;
+  } catch {
+    // 2. Read-only environment (e.g. Vercel Serverless / AWS Lambda) -> Use os.tmpdir()
+    const tmpDir = path.join(os.tmpdir(), "propfolio-data");
+    try {
+      if (!fs.existsSync(tmpDir)) {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+      return tmpDir;
+    } catch {
+      return os.tmpdir();
+    }
+  }
+}
+
+function getFilePath(filename: string): string {
+  return path.join(getActiveDataDir(), filename);
+}
 
 function ensureFileStore(): Map<string, Listing> {
+  if (g.__propfolioListingsMap && g.__propfolioListingsMap.size > 0) {
+    return g.__propfolioListingsMap;
+  }
+
   const map = new Map<string, Listing>();
   INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
 
+  const dataFilePath = getFilePath("listings.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     if (fs.existsSync(dataFilePath)) {
       const content = fs.readFileSync(dataFilePath, "utf8");
       const list: Listing[] = JSON.parse(content);
@@ -24,24 +58,24 @@ function ensureFileStore(): Map<string, Listing> {
       fs.writeFileSync(dataFilePath, JSON.stringify(INITIAL_LISTINGS, null, 2), "utf8");
     }
   } catch (err) {
-    console.error("Server store read error:", err);
+    console.warn("Server store read notice:", err);
   }
 
+  g.__propfolioListingsMap = map;
   return map;
 }
 
 export function saveListingToDisk(listing: Listing) {
   const map = ensureFileStore();
   map.set(listing.slug, listing);
+  g.__propfolioListingsMap = map;
 
+  const dataFilePath = getFilePath("listings.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const all = Array.from(map.values());
     fs.writeFileSync(dataFilePath, JSON.stringify(all, null, 2), "utf8");
   } catch (err) {
-    console.error("Server store write error:", err);
+    console.warn("Server store write notice:", err);
   }
 }
 
@@ -58,15 +92,14 @@ export function getAllListingsFromDisk(): Listing[] {
 export function deleteListingFromDisk(slug: string): boolean {
   const map = ensureFileStore();
   const deleted = map.delete(slug);
+  g.__propfolioListingsMap = map;
 
+  const dataFilePath = getFilePath("listings.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const all = Array.from(map.values());
     fs.writeFileSync(dataFilePath, JSON.stringify(all, null, 2), "utf8");
   } catch (err) {
-    console.error("Server store delete write error:", err);
+    console.warn("Server store delete write notice:", err);
   }
 
   return deleted;
@@ -80,15 +113,14 @@ export function updateListingStatusOnDisk(slug: string, status: "active" | "sold
   item.status = status;
   item.updated_at = new Date().toISOString();
   map.set(slug, item);
+  g.__propfolioListingsMap = map;
 
+  const dataFilePath = getFilePath("listings.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const all = Array.from(map.values());
     fs.writeFileSync(dataFilePath, JSON.stringify(all, null, 2), "utf8");
   } catch (err) {
-    console.error("Server store status write error:", err);
+    console.warn("Server store status write notice:", err);
   }
 
   return item;
@@ -108,27 +140,31 @@ export interface UserSession {
 }
 
 function loadSessions(): Map<string, UserSession> {
+  if (g.__propfolioSessionsMap) {
+    return g.__propfolioSessionsMap;
+  }
   const map = new Map<string, UserSession>();
+  const sessionsFilePath = getFilePath("sessions.json");
   try {
     if (fs.existsSync(sessionsFilePath)) {
       const data: Record<string, UserSession> = JSON.parse(fs.readFileSync(sessionsFilePath, "utf8"));
       Object.entries(data).forEach(([phone, sess]) => map.set(phone, sess));
     }
   } catch (err) {
-    console.error("Load sessions error:", err);
+    console.warn("Load sessions notice:", err);
   }
+  g.__propfolioSessionsMap = map;
   return map;
 }
 
 function saveSessions(map: Map<string, UserSession>) {
+  g.__propfolioSessionsMap = map;
+  const sessionsFilePath = getFilePath("sessions.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const obj = Object.fromEntries(map);
     fs.writeFileSync(sessionsFilePath, JSON.stringify(obj, null, 2), "utf8");
   } catch (err) {
-    console.error("Save sessions error:", err);
+    console.warn("Save sessions notice:", err);
   }
 }
 
@@ -191,6 +227,10 @@ export function clearUserSession(phone: string) {
 // -------------------------------------------------------------
 
 function ensureCollectionStore(): Map<string, PropertyCollection> {
+  if (g.__propfolioCollectionsMap && g.__propfolioCollectionsMap.size > 0) {
+    return g.__propfolioCollectionsMap;
+  }
+
   const map = new Map<string, PropertyCollection>();
 
   // Default sample collection
@@ -210,10 +250,8 @@ function ensureCollectionStore(): Map<string, PropertyCollection> {
   };
   map.set(defaultCollection.slug, defaultCollection);
 
+  const collectionsFilePath = getFilePath("collections.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     if (fs.existsSync(collectionsFilePath)) {
       const content = fs.readFileSync(collectionsFilePath, "utf8");
       const list: PropertyCollection[] = JSON.parse(content);
@@ -222,9 +260,10 @@ function ensureCollectionStore(): Map<string, PropertyCollection> {
       fs.writeFileSync(collectionsFilePath, JSON.stringify([defaultCollection], null, 2), "utf8");
     }
   } catch (err) {
-    console.error("Collections store read error:", err);
+    console.warn("Collections store read notice:", err);
   }
 
+  g.__propfolioCollectionsMap = map;
   return map;
 }
 
@@ -243,30 +282,28 @@ export function getCollectionFromDisk(slug: string): PropertyCollection | undefi
 export function saveCollectionToDisk(collection: PropertyCollection) {
   const map = ensureCollectionStore();
   map.set(collection.slug, collection);
+  g.__propfolioCollectionsMap = map;
 
+  const collectionsFilePath = getFilePath("collections.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const all = Array.from(map.values());
     fs.writeFileSync(collectionsFilePath, JSON.stringify(all, null, 2), "utf8");
   } catch (err) {
-    console.error("Collections store write error:", err);
+    console.warn("Collections store write notice:", err);
   }
 }
 
 export function deleteCollectionFromDisk(slug: string): boolean {
   const map = ensureCollectionStore();
   const deleted = map.delete(slug);
+  g.__propfolioCollectionsMap = map;
 
+  const collectionsFilePath = getFilePath("collections.json");
   try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
     const all = Array.from(map.values());
     fs.writeFileSync(collectionsFilePath, JSON.stringify(all, null, 2), "utf8");
   } catch (err) {
-    console.error("Collections store delete error:", err);
+    console.warn("Collections store delete notice:", err);
   }
 
   return deleted;

@@ -18,11 +18,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
     INITIAL_LISTINGS[0];
 
+  const appBaseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://prop-folio-eosin.vercel.app";
+
+  let coverPhoto = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&auto=format&fit=crop&q=80";
   const rawCover = listing.photos?.[0]?.photo_url;
-  const coverPhoto =
-    rawCover && !rawCover.startsWith("blob:")
-      ? rawCover
-      : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&auto=format&fit=crop&q=80";
+
+  if (rawCover) {
+    if (rawCover.startsWith("data:image/")) {
+      coverPhoto = `${appBaseUrl}/api/listings/${listing.slug}/cover`;
+    } else if (rawCover.startsWith("http://") || rawCover.startsWith("https://")) {
+      coverPhoto = rawCover;
+    } else if (rawCover.startsWith("/")) {
+      coverPhoto = `${appBaseUrl}${rawCover}`;
+    }
+  }
 
   // Exact clean title format (e.g. "3 BHK Apartment for Sale in Satellite, Ahmedabad")
   const title = `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Apartment"} for ${

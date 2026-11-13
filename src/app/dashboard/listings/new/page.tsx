@@ -67,6 +67,42 @@ export default function NewListingPage() {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [previewTab, setPreviewTab] = useState<"preview" | "edit">("preview");
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  // Compress client image before saving to prevent payload limits
+  async function compressImageFile(file: File): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDimension = 1200;
+        let width = img.width;
+        let height = img.height;
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.78));
+        } else {
+          resolve(img.src);
+        }
+      };
+      reader.onerror = () => resolve(DEFAULT_PHOTOS[0]);
+      reader.readAsDataURL(file);
+    });
+  }
 
   // Call AI API
   async function handleGenerateAI() {
@@ -102,8 +138,9 @@ export default function NewListingPage() {
   }
 
   // Publish Listing
-  function handlePublish() {
-    if (!listingData) return;
+  async function handlePublish() {
+    if (!listingData || isPublishing) return;
+    setIsPublishing(true);
 
     const fullListing = {
       id: "listing-" + Date.now(),
@@ -142,12 +179,18 @@ export default function NewListingPage() {
 
     saveListingToMemory(fullListing);
 
-    // Save to disk via API
-    fetch("/api/listings/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(fullListing),
-    }).catch((err) => console.warn("Background disk save:", err));
+    try {
+      // Save to server persistence
+      await fetch("/api/listings/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fullListing),
+      });
+    } catch (err) {
+      console.warn("Server listing save warning:", err);
+    } finally {
+      setIsPublishing(false);
+    }
 
     confetti({
       particleCount: 120,
@@ -339,16 +382,10 @@ export default function NewListingPage() {
                   onChange={async (e) => {
                     if (e.target.files && e.target.files.length > 0) {
                       const files = Array.from(e.target.files);
-                      const base64Promises = files.map((file) => {
-                        return new Promise<string>((resolve) => {
-                          const reader = new FileReader();
-                          reader.onload = () => resolve(reader.result as string);
-                          reader.onerror = () => resolve(DEFAULT_PHOTOS[0]);
-                          reader.readAsDataURL(file);
-                        });
-                      });
-                      const results = await Promise.all(base64Promises);
-                      setPhotos((prev) => [...prev, ...results]);
+                      const compressed = await Promise.all(
+                        files.map((file) => compressImageFile(file))
+                      );
+                      setPhotos((prev) => [...prev, ...compressed]);
                     }
                   }}
                 />
@@ -401,9 +438,10 @@ export default function NewListingPage() {
                   <button
                     type="button"
                     onClick={handlePublish}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0a1128] px-5 py-2.5 text-xs font-bold text-white shadow-md border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    disabled={isPublishing}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[#0a1128] px-5 py-2.5 text-xs font-bold text-white shadow-md border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 disabled:opacity-50 dark:bg-[#c5a059] dark:text-[#0a1128]"
                   >
-                    <span>Publish Listing</span>
+                    <span>{isPublishing ? "Publishing..." : "Publish Listing"}</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>

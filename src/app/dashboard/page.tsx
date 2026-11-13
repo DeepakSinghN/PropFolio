@@ -237,14 +237,14 @@ export default function DashboardPage() {
             />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-[#0a1128] sm:text-2xl dark:text-white truncate">
+                <h1 className="text-xl font-bold tracking-tight text-[#0a1128] sm:text-2xl dark:text-white truncate">
                   {broker.full_name}
                 </h1>
-                <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-0.5 text-xs font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
                   Verified Broker
                 </span>
               </div>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
+              <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">
                 {broker.company_name} · {broker.city} ·{" "}
                 <span className="font-mono text-slate-700 dark:text-slate-300">
                   {broker.slug}.propfolio.co
@@ -268,51 +268,51 @@ export default function DashboardPage() {
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Active Listings</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Active Listings</span>
               <Building2 className="h-4 w-4 text-[#c5a059]" />
             </div>
-            <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-[#0a1128] dark:text-white">
               {listings.length}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 truncate">All live on public links</p>
+            <p className="mt-1 text-xs sm:text-[13px] text-emerald-600 dark:text-emerald-400 truncate">All live on public links</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Buyer Views</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Buyer Views</span>
               <Eye className="h-4 w-4 text-blue-500" />
             </div>
-            <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-[#0a1128] dark:text-white">
               {totalViews}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 shrink-0" />
+            <p className="mt-1 text-xs sm:text-[13px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <TrendingUp className="h-3.5 w-3.5 shrink-0" />
               <span>+34% this week</span>
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Listings Remaining</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Listings Remaining</span>
               <Layers className="h-4 w-4 text-[#c5a059]" />
             </div>
-            <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-[#0a1128] dark:text-white">
               {remainingListings} Left
             </p>
-            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+            <p className="mt-1 text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 truncate">
               {listings.length} of {planLimit} plan used
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Portfolio Value</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Portfolio Value</span>
               <Wallet className="h-4 w-4 text-emerald-500" />
             </div>
-            <p className="mt-2 text-xl sm:text-2xl font-bold text-[#0a1128] dark:text-white truncate">
+            <p className="mt-2 text-2xl sm:text-3xl font-bold text-[#0a1128] dark:text-white truncate">
               {formatPortfolioValue(totalPortfolioValue)}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 truncate">Active inventory value</p>
+            <p className="mt-1 text-xs sm:text-[13px] text-emerald-600 dark:text-emerald-400 truncate">Active inventory value</p>
           </div>
         </div>
 
@@ -505,11 +505,11 @@ export default function DashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800 gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-bold text-[#0a1128] dark:text-white">
+                  <h2 className="text-lg sm:text-xl font-bold text-[#0a1128] dark:text-white">
                     Your Property Portfolio ({listings.length})
                   </h2>
                 </div>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                   Manage active inventory, mark completed deals as Sold, or share direct WhatsApp links.
                 </p>
 
@@ -620,21 +620,21 @@ export default function DashboardPage() {
                           {/* Tags */}
                           <div className="flex flex-wrap items-center gap-1.5">
                             {isSold ? (
-                              <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-300">
+                              <span className="rounded bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-800 dark:bg-rose-950 dark:text-rose-300">
                                 SOLD
                               </span>
                             ) : (
-                              <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                              <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                                 Active
                               </span>
                             )}
-                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                            <span className="text-xs sm:text-[13px] font-medium text-slate-500 dark:text-slate-400">
                               {item.bhk ? `${item.bhk} BHK` : ""} {item.property_type}
                             </span>
                           </div>
 
                           {/* Title */}
-                          <h3 className={`text-xs sm:text-sm font-semibold leading-snug line-clamp-2 break-words ${
+                          <h3 className={`text-sm sm:text-base font-semibold leading-snug line-clamp-2 break-words ${
                             isSold ? "text-slate-500 line-through dark:text-slate-400" : "text-[#0a1128] dark:text-white"
                           }`}>
                             {item.title}
@@ -642,18 +642,18 @@ export default function DashboardPage() {
 
                           {/* Price & Specs */}
                           <div className="pt-0.5">
-                            <div className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                            <div className="text-base sm:text-lg font-bold text-emerald-700 dark:text-emerald-400">
                               {item.display_price}
                             </div>
 
-                            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                              <span className="inline-flex items-center gap-1 truncate max-w-[150px] sm:max-w-none">
-                                <MapPin className="h-3 w-3 shrink-0 text-[#c5a059]" />
+                            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-[13px] text-slate-500 dark:text-slate-400">
+                              <span className="inline-flex items-center gap-1 truncate max-w-[170px] sm:max-w-none">
+                                <MapPin className="h-3.5 w-3.5 shrink-0 text-[#c5a059]" />
                                 <span className="truncate">{item.location_locality}, {item.location_city}</span>
                               </span>
                               <span>•</span>
                               <span className="inline-flex items-center gap-1 shrink-0">
-                                <Eye className="h-3 w-3 text-slate-400" />
+                                <Eye className="h-3.5 w-3.5 text-slate-400" />
                                 {item.views_count || 1} views
                               </span>
                             </div>
