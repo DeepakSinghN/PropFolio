@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     // Try sending WhatsApp verification message
     const waResult = await sendWhatsAppMessage({
       to: cleanPhone,
-      text: `🔐 *PropFolio Login Verification*\n\nAapka login verification code hai: *${code}*\n\nYeh code agle 10 minute ke liye valid hai. Apne dashboard me login karne ke liye isse enter karein.`,
+      text: `🔐 *Property Snaps Login Verification*\n\nAapka login verification code hai: *${code}*\n\nYeh code agle 10 minute ke liye valid hai. Apne dashboard me login karne ke liye isse enter karein.`,
     });
 
     return NextResponse.json({

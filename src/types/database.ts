@@ -47,6 +47,9 @@ export interface Listing {
   amenities: string[];
   ai_highlights: string[];
   ai_neighborhood_highlights: string[];
+  property_features?: Array<{ id: string; section: string; label: string; value: string }>;
+  enquiry_form_url?: string;
+  enquiry_form_gate?: boolean;
   status: "active" | "sold" | "draft";
   views_count: number;
   created_at: string;

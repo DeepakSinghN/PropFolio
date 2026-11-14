@@ -122,7 +122,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-base sm:text-lg font-bold tracking-tight text-[#0a1128] dark:text-white leading-tight">
-                Prop<span className="text-[#c5a059] dark:text-[#d4af37]">Folio</span>
+                Property<span className="text-[#c5a059] dark:text-[#d4af37]"> Snaps</span>
               </span>
               <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Private Office AI
@@ -250,7 +250,7 @@ export default function Navbar() {
               <div className="rounded-2xl border border-slate-200/90 bg-[#f8f9fa] p-3.5 dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-bold text-sm text-[#0a1128] dark:text-white">Join PropFolio Pro</h4>
+                    <h4 className="font-bold text-sm text-[#0a1128] dark:text-white">Join Property Snaps Pro</h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Build instant luxury real estate micro-sites</p>
                   </div>
                   <Link
@@ -367,7 +367,7 @@ export default function Navbar() {
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200/80 bg-rose-50/50 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-400"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Log Out of PropFolio</span>
+                  <span>Log Out of Property Snaps</span>
                 </button>
               ) : (
                 <Link

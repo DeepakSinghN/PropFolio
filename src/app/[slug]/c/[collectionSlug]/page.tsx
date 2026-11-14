@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const collection = getCollectionFromDisk(collectionSlug);
 
   if (!collection) {
-    return { title: "Collection Not Found — PropFolio" };
+    return { title: "Collection Not Found — Property Snaps" };
   }
 
   const allListings = getAllListingsFromDisk();
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: "website",
-      siteName: "PropFolio Curated Collections",
+      siteName: "Property Snaps Curated Collections",
       images: [
         {
           url: coverPhoto,

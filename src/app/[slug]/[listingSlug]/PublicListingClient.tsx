@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 import {
   MessageCircle,
@@ -30,9 +31,31 @@ import {
   Clock,
   Home,
   CheckCheck,
+  Zap,
+  Droplets,
+  Camera,
+  Waves,
+  Dumbbell,
+  Trees,
+  ArrowUpDown,
+  Bath,
+  FileCheck,
+  Landmark,
+  IndianRupee,
+  Train,
+  Calendar,
+  Sun,
+  UtensilsCrossed,
+  Wind,
+  Eye,
+  LayoutGrid,
+  ArrowLeft,
+  Pencil,
+  ClipboardList,
+  ExternalLink,
 } from "lucide-react";
-import { getListingFromMemory, INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
-import { Listing } from "@/types/database";
+import { getListingFromMemory, saveListingToMemory, INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
+import { Listing, ListingPhoto } from "@/types/database";
 
 interface ClientProps {
   slug: string;
@@ -75,7 +98,44 @@ const DEFAULT_GALLERY_PHOTOS = [
   },
 ];
 
+function getFeatureIcon(label: string) {
+  const l = label.toLowerCase();
+  if (l.includes("config") || l.includes("bhk") || l.includes("bed")) return Bed;
+  if (l.includes("carpet") || l.includes("area") || l.includes("size") || l.includes("sq")) return Maximize2;
+  if (l.includes("built") || l.includes("super") || l.includes("layout")) return Layers;
+  if (l.includes("bath") || l.includes("wash") || l.includes("toilet")) return Bath;
+  if (l.includes("floor") || l.includes("storey") || l.includes("tower")) return Building2;
+  if (l.includes("furnish") || l.includes("sofa")) return Sofa;
+  if (l.includes("facing") || l.includes("direction") || l.includes("highway") || l.includes("road")) return Compass;
+  if (l.includes("possession") || l.includes("date") || l.includes("age") || l.includes("year")) return Calendar;
+  if (l.includes("balcony") || l.includes("terrace") || l.includes("light") || l.includes("sun")) return Sun;
+  if (l.includes("kitchen") || l.includes("cooking")) return UtensilsCrossed;
+  if (l.includes("wardrobe") || l.includes("closet")) return Layers;
+  if (l.includes("air") || l.includes("ac") || l.includes("ventilat") || l.includes("wind")) return Wind;
+  if (l.includes("view") || l.includes("sight")) return Eye;
+  if (l.includes("park") || l.includes("car") || l.includes("vehicle") || l.includes("visitor")) return Car;
+  if (l.includes("lift") || l.includes("elevator")) return ArrowUpDown;
+  if (l.includes("kid") || l.includes("child") || l.includes("play")) return Sparkles;
+  if (l.includes("society") || l.includes("community") || l.includes("building")) return Building2;
+  if (l.includes("water") || l.includes("supply")) return Droplets;
+  if (l.includes("power") || l.includes("backup") || l.includes("electr")) return Zap;
+  if (l.includes("security") || l.includes("guard")) return ShieldCheck;
+  if (l.includes("cctv") || l.includes("camera")) return Camera;
+  if (l.includes("intercom") || l.includes("phone")) return Phone;
+  if (l.includes("pool") || l.includes("swim")) return Waves;
+  if (l.includes("gym") || l.includes("fitness")) return Dumbbell;
+  if (l.includes("club") || l.includes("party")) return Building2;
+  if (l.includes("jogging") || l.includes("track") || l.includes("lawn") || l.includes("yoga") || l.includes("garden")) return Trees;
+  if (l.includes("rera") || l.includes("title")) return FileCheck;
+  if (l.includes("loan") || l.includes("bank")) return Landmark;
+  if (l.includes("maint") || l.includes("cost") || l.includes("price") || l.includes("fee")) return IndianRupee;
+  if (l.includes("negotiable")) return Sparkles;
+  if (l.includes("metro") || l.includes("station") || l.includes("train")) return Train;
+  return CheckCircle2;
+}
+
 export default function PublicListingClient({ slug, listingSlug, initialListing }: ClientProps) {
+  const router = useRouter();
   const listing =
     initialListing ||
     getListingFromMemory(listingSlug) ||
@@ -92,12 +152,55 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Fallback to gallery photos if listing has 0 photos
-  const photos = useMemo(() => {
+  const initialPhotos = useMemo(() => {
     if (listing.photos && listing.photos.length > 0) {
       return listing.photos;
     }
     return DEFAULT_GALLERY_PHOTOS;
   }, [listing.photos]);
+
+  const [photos, setPhotos] = useState<ListingPhoto[]>(initialPhotos);
+  const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
+  const [savedOrderToast, setSavedOrderToast] = useState(false);
+
+  useEffect(() => {
+    setPhotos(initialPhotos);
+  }, [initialPhotos]);
+
+  const handleMovePhoto = (fromIdx: number, toIdx: number) => {
+    if (toIdx < 0 || toIdx >= photos.length) return;
+    const next = [...photos];
+    const item = next.splice(fromIdx, 1)[0];
+    next.splice(toIdx, 0, item);
+    const updated = next.map((p, i) => ({
+      ...p,
+      display_order: i + 1,
+      is_cover: i === 0,
+    }));
+    setPhotos(updated);
+  };
+
+  const handleMakeCover = (idx: number) => {
+    if (idx === 0) return;
+    handleMovePhoto(idx, 0);
+  };
+
+  const handleSavePhotoOrder = () => {
+    const updatedListing: Listing = {
+      ...listing,
+      photos: photos.map((p, i) => ({
+        ...p,
+        display_order: i + 1,
+        is_cover: i === 0,
+      })),
+      updated_at: new Date().toISOString(),
+    };
+    saveListingToMemory(updatedListing);
+    setIsReorderModalOpen(false);
+    setActivePhotoIdx(0);
+    setSavedOrderToast(true);
+    setTimeout(() => setSavedOrderToast(false), 3000);
+  };
 
   const currentPhoto = photos[activePhotoIdx] || photos[0];
 
@@ -140,6 +243,62 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       totalPayable: Math.round(total),
     };
   }, [priceAmount, downPaymentPercent, loanTenureYears, interestRate]);
+
+  // Categorized Property Features (From saved listing or rich defaults)
+  const { homeFeatures, buildingFeatures, ownershipFeatures, nearbyFeatures } = useMemo(() => {
+    if (listing.property_features && listing.property_features.length > 0) {
+      const active = listing.property_features.filter((f) => f.value && f.value.trim().length > 0);
+      return {
+        homeFeatures: active.filter((f) => f.section === "Home Details"),
+        buildingFeatures: active.filter((f) => f.section === "Building & Amenities"),
+        ownershipFeatures: active.filter((f) => f.section === "Ownership & Costs"),
+        nearbyFeatures: active.filter((f) => f.section === "Nearby & Enquiry"),
+      };
+    }
+
+    // Default Fallbacks for listings
+    return {
+      homeFeatures: [
+        { label: "Configuration", value: listing.bhk ? `${listing.bhk} BHK` : "4 BHK" },
+        { label: "Carpet Area", value: listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq.Ft.` : "1,650 Sq.Ft." },
+        { label: "Super Built-Up Area", value: "2,450 Sq.Ft." },
+        { label: "Bathrooms", value: listing.bathrooms ? `${listing.bathrooms} attached` : "4 attached" },
+        { label: "Floor", value: "12th Floor" },
+        { label: "Furnishing", value: "Semi-Furnished" },
+        { label: "Facing", value: "West Facing" },
+        { label: "Possession", value: "Ready to Move, Immediate Possession" },
+        { label: "Balcony", value: "Open Balcony" },
+        { label: "Kitchen", value: "Modular Kitchen" },
+        { label: "Air Conditioning", value: "5 AC included" },
+        { label: "Ventilation", value: "Cross ventilation" },
+      ],
+      buildingFeatures: [
+        { label: "Car Parking", value: "2 Covered" },
+        { label: "Visitor Parking", value: "1 Visitor Slot" },
+        { label: "Property Age", value: "5-Year-Old" },
+        { label: "Building", value: "Premium High-Rise Tower" },
+        { label: "Lifts", value: "2 High-Speed Lifts per Tower" },
+        { label: "Society", value: "Peaceful, Green & Gated Society" },
+        { label: "Water Supply", value: "24×7" },
+        { label: "Power Backup", value: "100%" },
+        { label: "Security", value: "24×7 Surveillance" },
+        { label: "CCTV", value: "Yes" },
+        { label: "Swimming Pool", value: "Yes" },
+        { label: "Gym", value: "Yes" },
+      ],
+      ownershipFeatures: [
+        { label: "RERA", value: "Registered" },
+        { label: "Title", value: "Clear title" },
+        { label: "Bank Loan", value: "Approved (SBI, HDFC, ICICI)" },
+        { label: "Maintenance", value: "₹6,000/month" },
+        { label: "Negotiable", value: "Yes, for genuine buyers" },
+      ],
+      nearbyFeatures: [
+        { label: "Metro Station", value: "2 km away" },
+        { label: "SG Highway", value: "1.5 km away" },
+      ],
+    };
+  }, [listing]);
 
   // Keyboard navigation for Lightbox
   useEffect(() => {
@@ -218,81 +377,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
       
-      {/* 1. TOP STICKY HEADER */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f8f9fa]/90 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#070b14]/90">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-3.5 sm:px-6">
-          
-          {/* Broker Identity */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-2">
-            <div className="relative shrink-0">
-              <img
-                src={
-                  broker.avatar_url ||
-                  "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80"
-                }
-                alt={broker.full_name}
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80";
-                }}
-                className="h-10 w-10 rounded-full border border-[#c5a059]/40 object-cover ring-2 ring-white shadow-sm dark:border-[#c5a059]/30 dark:ring-slate-900"
-              />
-              <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-white ring-2 ring-white dark:ring-slate-900">
-                <Check className="h-2.5 w-2.5 stroke-[3]" />
-              </div>
-            </div>
-            
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-sm sm:text-base font-bold tracking-tight text-[#0a1128] dark:text-white truncate">
-                  {broker.full_name}
-                </span>
-                
-                {/* Desktop Verified Pill */}
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37] shrink-0">
-                  <BadgeCheck className="h-3 w-3 text-[#c5a059]" />
-                  Verified Broker
-                </span>
-
-                {/* Mobile Verified Checkmark (Takes zero extra row space) */}
-                <BadgeCheck className="h-3.5 w-3.5 sm:hidden text-[#c5a059] shrink-0" />
-              </div>
-
-              <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 truncate">
-                {broker.company_name || "Exclusive Advisory"} · {broker.city || "Representative"}
-              </p>
-            </div>
-          </div>
-
-          {/* Action Tools */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <ThemeToggle />
-
-            <Link
-              href={`/${broker.slug}/${listing.slug}/brochure`}
-              title="Download PDF Brochure"
-              className="flex h-9 w-9 sm:w-auto items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-0 sm:px-3 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#c5a059]"
-            >
-              <FileText className="h-3.5 w-3.5 text-[#c5a059]" />
-              <span className="hidden sm:inline">PDF Brochure</span>
-            </Link>
-
-            <button
-              onClick={handleShare}
-              type="button"
-              aria-label="Share property"
-              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-300 dark:hover:border-[#c5a059]"
-            >
-              {copiedShare ? (
-                <Check className="h-4 w-4 text-emerald-600" />
-              ) : (
-                <Share2 className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* 2. MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
+      {/* MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
       <main className="mx-auto max-w-6xl px-0 sm:px-6 pt-0 sm:pt-6">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           
@@ -343,7 +428,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <Maximize2 className="h-4 w-4" />
                 </button>
 
-                {/* Photo Counter Pill (Matching reference mockup exactly: 1/5) */}
+                {/* Photo Counter Pill */}
                 <div className="absolute bottom-9 right-4 sm:bottom-4 sm:right-4 z-20 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold tracking-wider text-white backdrop-blur-md pointer-events-none shadow-md">
                   {activePhotoIdx + 1}/{photos.length}
                 </div>
@@ -408,6 +493,52 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {/* Property Key Details & Pricing - Curved Sheet Overlap Effect on Mobile */}
             <section className="relative z-10 -mt-6 sm:mt-0 rounded-t-[32px] sm:rounded-3xl border-t sm:border border-slate-200/90 bg-white p-5 sm:p-6 shadow-none dark:border-slate-800 dark:bg-[#0c1222] overflow-hidden">
               
+              {/* 4 Action Options */}
+              <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 mb-5">
+                <Link
+                  href={`/dashboard/listings/new?edit=${listing.slug}&step=2`}
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
+                    } catch {}
+                  }}
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-[#1c5436] hover:bg-[#15422a] py-2 px-3 text-xs font-semibold text-white shadow-sm transition active:scale-95 whitespace-nowrap cursor-pointer"
+                >
+                  <Pencil className="h-3.5 w-3.5 text-emerald-200" />
+                  <span>Edit Listing</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => setIsReorderModalOpen(true)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 cursor-pointer whitespace-nowrap"
+                >
+                  <Camera className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Reorder Photos</span>
+                </button>
+
+                <Link
+                  href={`/${broker.slug}/${listing.slug}/brochure`}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
+                >
+                  <FileText className="h-3.5 w-3.5 text-purple-600" />
+                  <span>Download PDF</span>
+                </Link>
+
+                <Link
+                  href={`/dashboard/listings/new?edit=${listing.slug}&section=enquiry-form#enquiry-form`}
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
+                    } catch {}
+                  }}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
+                >
+                  <ClipboardList className="h-3.5 w-3.5 text-slate-500" />
+                  <span>{listing.enquiry_form_url ? "Edit Form" : "Add form"}</span>
+                </Link>
+              </div>
+
               {/* Location Landmark Tag (Matching Red Pin in Reference Mockup) */}
               <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
                 <MapPin className="h-3.5 w-3.5 shrink-0 fill-rose-600 text-white" />
@@ -445,92 +576,41 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 </span>
               </div>
 
-              {/* ======================================================= */}
-              {/* 2x2 PROPERTY OVERVIEW CARDS (Mobile-Safe, Never Overflow) */}
-              {/* ======================================================= */}
-              <div className="mt-5">
-                <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-600 dark:text-slate-400">
-                    PROPERTY OVERVIEW
-                  </h3>
-                </div>
-
-                <div className="mt-3.5 grid grid-cols-2 gap-2.5 sm:gap-3.5">
-                  {/* Configuration */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
-                      <Bed className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
-                        Configuration
-                      </span>
-                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
-                        {listing.bhk ? `${listing.bhk} BHK` : "Spacious"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Super Built-Up Area */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
-                      <Maximize2 className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
-                        Super Built-Up Area
-                      </span>
-                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
-                        {listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq.Ft.` : "Generous"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Furnishing */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
-                      <Sofa className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
-                        Furnishing
-                      </span>
-                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
-                        Fully Furnished
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Property Type */}
-                  <div className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
-                      <Building2 className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight">
-                        Property Type
-                      </span>
-                      <p className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white truncate">
-                        {listing.property_type || "Apartment"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              {/* Quick Summary Badges (Clean Strip) */}
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                {listing.bhk && (
+                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                    <Bed className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    {listing.bhk} BHK
+                  </span>
+                )}
+                {listing.carpet_area_sqft && (
+                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                    <Maximize2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    {listing.carpet_area_sqft.toLocaleString()} Sq.Ft.
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                  <Building2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  {listing.property_type || "Apartment"}
+                </span>
               </div>
             </section>
 
-            {/* Curated Highlights */}
+            {/* 1. PROPERTY HIGHLIGHTS */}
             {listing.ai_highlights && listing.ai_highlights.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
-                    <span>Curated Highlights</span>
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-[#c5a059]" />
+                    <span>PROPERTY HIGHLIGHTS</span>
                   </h3>
-                  <span className="text-[11px] font-medium text-slate-400">AI Verified</span>
+                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+                    AI Verified
+                  </span>
                 </div>
 
-                <div className="mt-3.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   {listing.ai_highlights.map((point, idx) => (
                     <div
                       key={idx}
@@ -548,27 +628,135 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               </section>
             )}
 
-            {/* About this Property (Description) */}
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-                About this Property
-              </h3>
-              <div className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 whitespace-pre-line dark:text-slate-300 break-words">
-                {listing.description}
-              </div>
-            </section>
-
-            {/* Amenities & Infrastructure */}
-            {listing.amenities && listing.amenities.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-                    Amenities & Facilities
+            {/* 2. HOME DETAILS */}
+            {homeFeatures.length > 0 && (
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Home className="h-4 w-4 text-[#c5a059]" />
+                    <span>Home Details</span>
                   </h3>
-                  <span className="text-[11px] text-slate-400">{listing.amenities.length} Verified Facilities</span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {homeFeatures.length} Specifications
+                  </span>
                 </div>
 
-                <div className="mt-3.5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+                  {homeFeatures.map((item, idx) => {
+                    const Icon = getFeatureIcon(item.label);
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                            {item.label}
+                          </span>
+                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                            {item.value}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 3. BUILDING & AMENITIES */}
+            {buildingFeatures.length > 0 && (
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-[#c5a059]" />
+                    <span>Building & Amenities</span>
+                  </h3>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {buildingFeatures.length} Features
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+                  {buildingFeatures.map((item, idx) => {
+                    const Icon = getFeatureIcon(item.label);
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                            {item.label}
+                          </span>
+                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                            {item.value}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 4. OWNERSHIP & COSTS */}
+            {ownershipFeatures.length > 0 && (
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <FileCheck className="h-4 w-4 text-[#c5a059]" />
+                    <span>Ownership & Costs</span>
+                  </h3>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    {ownershipFeatures.length} Records
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+                  {ownershipFeatures.map((item, idx) => {
+                    const Icon = getFeatureIcon(item.label);
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                            {item.label}
+                          </span>
+                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                            {item.value}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 5. AMENITIES & FACILITIES */}
+            {listing.amenities && listing.amenities.length > 0 && (
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-[#c5a059]" />
+                    <span>Amenities & Facilities</span>
+                  </h3>
+                  <span className="text-[11px] font-medium text-slate-400">{listing.amenities.length} Verified Facilities</span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {listing.amenities.map((am, idx) => (
                     <div
                       key={idx}
@@ -582,32 +770,73 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               </section>
             )}
 
-            {/* Location Advantages */}
-            {listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0 && (
-              <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-                <div className="flex items-center gap-1.5">
-                  <Compass className="h-3.5 w-3.5 text-[#c5a059]" />
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
-                    Location Advantages & Connectivity
+            {/* 6. LOCATION ADVANTAGES & CONNECTIVITY */}
+            {((listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0) || nearbyFeatures.length > 0) && (
+              <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Compass className="h-4 w-4 text-[#c5a059]" />
+                    <span>Location Advantages & Connectivity</span>
                   </h3>
                 </div>
 
-                <div className="mt-3 space-y-2">
-                  {listing.ai_neighborhood_highlights.map((nh, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2.5 rounded-xl bg-[#f8f9fc] p-2.5 sm:p-3 text-xs font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300 break-words"
-                    >
-                      <MapPin className="h-3.5 w-3.5 shrink-0 text-[#c5a059]" />
-                      <span className="break-words">{nh}</span>
-                    </div>
-                  ))}
-                </div>
+                {nearbyFeatures.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+                    {nearbyFeatures.map((item, idx) => {
+                      const Icon = getFeatureIcon(item.label);
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                              {item.label}
+                            </span>
+                            <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                              {item.value}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0 && (
+                  <div className="mt-3.5 space-y-2">
+                    {listing.ai_neighborhood_highlights.map((nh, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2.5 rounded-xl bg-[#f8f9fc] p-2.5 sm:p-3 text-xs font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300 break-words"
+                      >
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#c5a059]" />
+                        <span className="break-words">{nh}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
             )}
 
+            {/* 7. ABOUT THIS PROPERTY */}
+            <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-[#c5a059]" />
+                  <span>About this Property</span>
+                </h3>
+              </div>
+              <div className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 whitespace-pre-line dark:text-slate-300 break-words">
+                {listing.description}
+              </div>
+            </section>
+
             {/* Interactive Live EMI Estimator */}
-            <section className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+            <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-400">
@@ -726,7 +955,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             <div className="sticky top-24 space-y-5">
               
               {/* Main Desktop Action Card */}
-              <div className="rounded-3xl border-2 border-[#c5a059]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#c5a059]/30 dark:bg-[#0c1222] dark:shadow-none">
+              <div id="inquiry-form" className="rounded-3xl border-2 border-[#c5a059]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#c5a059]/30 dark:bg-[#0c1222] dark:shadow-none">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Offering Price
                 </span>
@@ -771,6 +1000,19 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     <FileText className="h-3.5 w-3.5 text-[#c5a059]" />
                     <span>Download PDF Brochure</span>
                   </Link>
+
+                  {listing.enquiry_form_url && (
+                    <a
+                      href={listing.enquiry_form_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-600/30 bg-emerald-50/70 py-2.5 text-xs font-bold text-[#1c5436] transition hover:bg-emerald-100/70 active:scale-95 dark:border-emerald-700/50 dark:bg-emerald-950/40 dark:text-emerald-300 pointer-events-auto"
+                    >
+                      <ClipboardList className="h-3.5 w-3.5" />
+                      <span>Share Requirement (Google Form)</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
                 </div>
 
                 {/* Response SLA */}
@@ -920,6 +1162,152 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               Photo {activePhotoIdx + 1} of {photos.length} · Tap anywhere outside or press ESC to exit
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 5. REORDER PHOTOS MODAL                                   */}
+      {/* ========================================================= */}
+      {isReorderModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm pointer-events-auto select-none"
+          onClick={() => setIsReorderModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl bg-white shadow-2xl overflow-hidden dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-[#1c5436] dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <Camera className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#0a1128] dark:text-white">
+                    Reorder Photos
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Use arrows to adjust the sequence. Photo #1 is your cover/hero photo.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsReorderModalOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Photo Grid */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {photos.map((p, idx) => (
+                  <div
+                    key={p.id || idx}
+                    className={`relative rounded-2xl border overflow-hidden p-2 transition bg-white dark:bg-slate-900 ${
+                      idx === 0
+                        ? "border-[#1c5436] ring-2 ring-[#1c5436]/20 shadow-md"
+                        : "border-slate-200 dark:border-slate-800"
+                    }`}
+                  >
+                    {/* Thumbnail Image */}
+                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                      <img
+                        src={p.photo_url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                      {/* Badge */}
+                      <div className="absolute top-2 left-2">
+                        {idx === 0 ? (
+                          <span className="rounded-full bg-[#1c5436] px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                            ★ Cover Photo
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                            #{idx + 1}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Controls below each photo */}
+                    <div className="mt-2 flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMovePhoto(idx, idx - 1)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          title="Move earlier"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === photos.length - 1}
+                          onClick={() => handleMovePhoto(idx, idx + 1)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          title="Move later"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {idx !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleMakeCover(idx)}
+                          className="text-[10px] font-bold text-[#1c5436] hover:underline dark:text-emerald-400"
+                        >
+                          Make Cover
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-slate-100 p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+              <Link
+                href={`/dashboard/listings/new?edit=${listing.slug}&step=1`}
+                className="text-xs font-semibold text-slate-600 hover:text-[#1c5436] dark:text-slate-400 dark:hover:text-emerald-400 flex items-center gap-1"
+              >
+                <span>Full Photo Editor & Uploads</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsReorderModalOpen(false)}
+                  className="flex-1 sm:flex-initial rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSavePhotoOrder}
+                  className="flex-1 sm:flex-initial rounded-xl bg-[#1c5436] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#15422a] transition active:scale-95"
+                >
+                  Save Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reorder Saved Toast */}
+      {savedOrderToast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-2xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <CheckCircle2 className="h-4 w-4" />
+          <span>Photo sequence updated successfully!</span>
         </div>
       )}
 

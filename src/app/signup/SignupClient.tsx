@@ -115,7 +115,7 @@ export default function SignupClient() {
             <Building2 className="h-5 w-5" />
           </div>
           <span className="text-base font-bold text-zinc-900 dark:text-white">
-            Prop<span className="text-amber-600">Folio</span>
+            Property<span className="text-amber-600"> Snaps</span>
           </span>
         </Link>
         <ThemeToggle />

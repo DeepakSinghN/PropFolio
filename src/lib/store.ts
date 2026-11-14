@@ -48,6 +48,8 @@ export const INITIAL_LISTINGS: Listing[] = [
       "Top schools & multispeciality hospitals within 1.5 km"
     ],
     status: "active",
+    enquiry_form_url: "https://docs.google.com/forms/d/e/1FAIpQLSeSfbXZRIBHqEbm0LkCsClh-kjHjeWGLMFeteaPjMZFkKnOFg/viewform?usp=publish-editor",
+    enquiry_form_gate: false,
     views_count: 142,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

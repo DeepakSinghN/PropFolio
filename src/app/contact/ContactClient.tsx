@@ -40,7 +40,7 @@ export default function ContactClient() {
   };
 
   const whatsappInquiryUrl = `https://wa.me/919876543210?text=${encodeURIComponent(
-    `Hi PropFolio Support Team! My name is ${formData.name || "a real estate broker"}. I have an inquiry regarding PropFolio: ${formData.message || "I would like to know more about your plans."}`
+    `Hi Property Snaps Support Team! My name is ${formData.name || "a real estate broker"}. I have an inquiry regarding Property Snaps: ${formData.message || "I would like to know more about your plans."}`
   )}`;
 
   return (
@@ -54,7 +54,7 @@ export default function ContactClient() {
             <span>We are here to assist real estate brokers 7 days a week</span>
           </div>
           <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-[#0a1128] sm:text-5xl dark:text-white">
-            Get in Touch with <span className="text-[#c5a059]">PropFolio</span>
+            Get in Touch with <span className="text-[#c5a059]">Property Snaps</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-slate-400">
             Have questions about creating listing pages, WhatsApp bot integration, or custom agency plans?
@@ -96,7 +96,7 @@ export default function ContactClient() {
                     Connect directly with our broker support team. Send your questions or request a live walkthrough.
                   </p>
                   <a
-                    href="https://wa.me/919876543210?text=Hi%20PropFolio%20Team%2C%20I%20have%20a%20question%20regarding%20the%20platform."
+                    href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Team%2C%20I%20have%20a%20question%20regarding%20the%20platform."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 active:scale-95"
@@ -119,10 +119,10 @@ export default function ContactClient() {
                     Email Support
                   </h4>
                   <a
-                    href="mailto:support@propfolio.in"
+                    href="mailto:support@propertysnaps.in"
                     className="text-sm font-bold text-[#0a1128] hover:text-[#c5a059] dark:text-white dark:hover:text-[#c5a059]"
                   >
-                    support@propfolio.in
+                    support@propertysnaps.in
                   </a>
                 </div>
               </div>
@@ -163,7 +163,7 @@ export default function ContactClient() {
                       Headquarters (Gujarat)
                     </h4>
                     <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      PropFolio Technologies, Sindhu Bhavan Road, Bodakdev, Ahmedabad, Gujarat 380054
+                      Property Snaps Technologies, Sindhu Bhavan Road, Bodakdev, Ahmedabad, Gujarat 380054
                     </p>
                   </div>
                   <div>
@@ -388,7 +388,7 @@ export default function ContactClient() {
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-8 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-[#0a1128] dark:hover:text-white">Pricing</Link>
             <Link href="/privacy" className="hover:text-[#0a1128] dark:hover:text-white">Privacy Policy</Link>

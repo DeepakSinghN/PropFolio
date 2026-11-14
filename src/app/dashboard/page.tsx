@@ -23,7 +23,8 @@ import {
   Folder,
   X,
   ExternalLink,
-  Share2
+  Share2,
+  Pencil
 } from "lucide-react";
 import { getAllMemoryListings, DEMO_BROKER } from "@/lib/store";
 import { useState, useEffect } from "react";
@@ -247,7 +248,7 @@ export default function DashboardPage() {
               <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate">
                 {broker.company_name} · {broker.city} ·{" "}
                 <span className="font-mono text-slate-700 dark:text-slate-300">
-                  {broker.slug}.propfolio.co
+                  {broker.slug}.propertysnaps.in
                 </span>
               </p>
             </div>
@@ -711,6 +712,24 @@ export default function DashboardPage() {
                         {openMenuSlug === item.slug && (
                           <div className="absolute right-0 top-10 z-40 w-56 rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-2xl ring-1 ring-black/5 dark:border-slate-700 dark:bg-[#0c1222] animate-in fade-in zoom-in-95 duration-150">
                             
+                            {/* 0. Edit Listing */}
+                            <Link
+                              href={`/dashboard/listings/new?edit=${item.slug}&step=2`}
+                              onClick={() => {
+                                setOpenMenuSlug(null);
+                                try {
+                                  localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(item));
+                                } catch {}
+                              }}
+                              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80"
+                            >
+                              <Pencil className="h-4 w-4 text-[#1c5436] shrink-0" />
+                              <div>
+                                <p className="font-semibold text-slate-800 dark:text-white">Edit Listing</p>
+                                <p className="text-[10px] text-slate-400">Modify details, price & photos</p>
+                              </div>
+                            </Link>
+
                             {/* 1. Add to Collection */}
                             <button
                               type="button"

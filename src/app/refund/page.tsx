@@ -3,8 +3,8 @@ import { ArrowLeft, RefreshCw, CheckCircle2, Building2, HelpCircle, ShieldCheck,
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
-  title: "Refund & Cancellation Policy — PropFolio",
-  description: "Learn about PropFolio's 7-day money-back guarantee, subscription cancellation terms, and refund process.",
+  title: "Refund & Cancellation Policy — Property Snaps",
+  description: "Learn about Property Snaps's 7-day money-back guarantee, subscription cancellation terms, and refund process.",
 };
 
 export default function RefundPage() {
@@ -68,7 +68,7 @@ export default function RefundPage() {
                 100% 7-Day Money-Back Guarantee
               </h3>
               <p className="mt-1 text-xs leading-relaxed text-emerald-900/80 dark:text-emerald-300/80">
-                We want you to be completely satisfied with PropFolio. If you upgrade to our <strong>Solo Broker Pro</strong> or <strong>Agency</strong> plan and feel it is not helping your brokerage within 7 calendar days of your initial purchase, we will refund your payment in full. No questions asked.
+                We want you to be completely satisfied with Property Snaps. If you upgrade to our <strong>Solo Broker Pro</strong> or <strong>Agency</strong> plan and feel it is not helping your brokerage within 7 calendar days of your initial purchase, we will refund your payment in full. No questions asked.
               </p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function RefundPage() {
               <span className="text-[#c5a059]">01.</span> Overview
             </h2>
             <p>
-              At <strong>PropFolio</strong> ("we", "our", or "us"), we provide software-as-a-service (SaaS) subscriptions enabling Indian real estate brokers and agencies to convert property details sent over WhatsApp into mobile-optimized web listing pages and downloadable PDF brochures.
+              At <strong>Property Snaps</strong> ("we", "our", or "us"), we provide software-as-a-service (SaaS) subscriptions enabling Indian real estate brokers and agencies to convert property details sent over WhatsApp into mobile-optimized web listing pages and downloadable PDF brochures.
             </p>
             <p>
               This policy outlines your rights regarding subscription cancellations, renewals, and refunds in accordance with the Consumer Protection (E-Commerce) Rules and payment partner standards (Razorpay, Stripe).
@@ -98,10 +98,10 @@ export default function RefundPage() {
             <p>You can cancel your subscription at any time without penalty or friction:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <strong>Self-Service Cancellation:</strong> You can cancel your paid subscription at any moment directly from your PropFolio web dashboard under <em>Settings → Billing & Subscription</em>.
+                <strong>Self-Service Cancellation:</strong> You can cancel your paid subscription at any moment directly from your Property Snaps web dashboard under <em>Settings → Billing & Subscription</em>.
               </li>
               <li>
-                <strong>WhatsApp / Email Request:</strong> Alternatively, you can message our verified WhatsApp support number or email <code>billing@propfolio.in</code> with your registered phone number. Our team will process your cancellation within 24 business hours.
+                <strong>WhatsApp / Email Request:</strong> Alternatively, you can message our verified WhatsApp support number or email <code>billing@propertysnaps.in</code> with your registered phone number. Our team will process your cancellation within 24 business hours.
               </li>
               <li>
                 <strong>End of Billing Period Access:</strong> When you cancel, your subscription will remain active until the end of your currently paid billing cycle (monthly or annual). After this date, your account reverts automatically to the free starter tier (1 active listing), and you will not be charged again.
@@ -139,7 +139,7 @@ export default function RefundPage() {
                   C. Accidental Renewal Charges
                 </h4>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                  If an automatic subscription renewal occurs and you did not intend to continue using PropFolio, notify us within 48 hours of the renewal charge (provided zero new listings were created in the new cycle), and we will gladly issue a full renewal refund.
+                  If an automatic subscription renewal occurs and you did not intend to continue using Property Snaps, notify us within 48 hours of the renewal charge (provided zero new listings were created in the new cycle), and we will gladly issue a full renewal refund.
                 </p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function RefundPage() {
             <p>The following fees are non-refundable:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <strong>Third-Party Custom Domain Registration:</strong> If you requested PropFolio to purchase a custom web domain (e.g. <code>.com</code> or <code>.in</code>) on your behalf through ICANN registrars, the registry domain cost is non-refundable as domain registries do not refund registration fees.
+                <strong>Third-Party Custom Domain Registration:</strong> If you requested Property Snaps to purchase a custom web domain (e.g. <code>.com</code> or <code>.in</code>) on your behalf through ICANN registrars, the registry domain cost is non-refundable as domain registries do not refund registration fees.
               </li>
               <li>
                 <strong>Accounts Terminated for Fraud or Illegal Use:</strong> Accounts suspended due to fraud, deceptive property listings, RERA violations, or spam violations are not eligible for a refund.
@@ -198,8 +198,8 @@ export default function RefundPage() {
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Send your registered phone number & payment receipt to:
                 </p>
-                <a href="mailto:billing@propfolio.in" className="mt-1 block text-xs font-bold text-[#c5a059] hover:underline">
-                  billing@propfolio.in
+                <a href="mailto:billing@propertysnaps.in" className="mt-1 block text-xs font-bold text-[#c5a059] hover:underline">
+                  billing@propertysnaps.in
                 </a>
               </div>
 
@@ -212,7 +212,7 @@ export default function RefundPage() {
                   Message our team with "Refund Request" on WhatsApp:
                 </p>
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20PropFolio%2C%20I%20have%20a%20billing%20question%20regarding%20my%20subscription."
+                  href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%2C%20I%20have%20a%20billing%20question%20regarding%20my%20subscription."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-1 block text-xs font-bold text-emerald-600 hover:underline dark:text-emerald-400"
@@ -229,7 +229,7 @@ export default function RefundPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-8 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-[#0a1128] dark:hover:text-white">Pricing</Link>
             <Link href="/contact" className="hover:text-[#0a1128] dark:hover:text-white">Contact</Link>

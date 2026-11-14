@@ -3,8 +3,8 @@ import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, CheckCircle2, Building2 } 
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
-  title: "Privacy Policy — PropFolio",
-  description: "Learn how PropFolio protects your data, WhatsApp communications, and property listings.",
+  title: "Privacy Policy — Property Snaps",
+  description: "Learn how Property Snaps protects your data, WhatsApp communications, and property listings.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -66,10 +66,10 @@ export default function PrivacyPolicyPage() {
               <span className="text-[#c5a059]">01.</span> Introduction
             </h2>
             <p>
-              Welcome to <strong>PropFolio</strong> ("we", "our", or "us"). PropFolio provides a technology platform that allows real estate brokers, property consultants, and real estate professionals to turn raw WhatsApp messages and photos into professional web listing pages and downloadable PDF brochures.
+              Welcome to <strong>Property Snaps</strong> ("we", "our", or "us"). Property Snaps provides a technology platform that allows real estate brokers, property consultants, and real estate professionals to turn raw WhatsApp messages and photos into professional web listing pages and downloadable PDF brochures.
             </p>
             <p>
-              We respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and safeguard your data when you visit our website (<strong>propfolio.in</strong>), interact with our Meta WhatsApp Cloud API Bot, or use our broker dashboard.
+              We respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and safeguard your data when you visit our website (<strong>propertysnaps.in</strong>), interact with our Meta WhatsApp Cloud API Bot, or use our broker dashboard.
             </p>
           </section>
 
@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
                 <strong>WhatsApp Information:</strong> When you message our WhatsApp bot, we receive your phone number (e.g., +91...), message timestamp, text descriptions of properties, and any photos you upload.
               </li>
               <li>
-                <strong>Broker Account Information:</strong> If you sign in to our web portal, we associate your phone number with your profile, full name, agency name, city, and preferred subdomain slug (e.g. <code>propfolio.in/ramesh</code>).
+                <strong>Broker Account Information:</strong> If you sign in to our web portal, we associate your phone number with your profile, full name, agency name, city, and preferred subdomain slug (e.g. <code>propertysnaps.in/ramesh</code>).
               </li>
               <li>
                 <strong>Property Listing Data:</strong> Asking prices, carpet area, property type, amenities, location highlights, and photographs that you explicitly submit to generate public listing links.
@@ -149,7 +149,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>Edit or Update:</strong> You can edit or mark any listing as "Sold" or "Archived" anytime from your dashboard.</li>
-              <li><strong>Complete Deletion:</strong> You can request immediate and permanent deletion of your profile, phone number, and all associated property photographs by emailing <code>privacy@propfolio.in</code>. Upon verification, your data will be permanently wiped within 7 business days.</li>
+              <li><strong>Complete Deletion:</strong> You can request immediate and permanent deletion of your profile, phone number, and all associated property photographs by emailing <code>privacy@propertysnaps.in</code>. Upon verification, your data will be permanently wiped within 7 business days.</li>
             </ul>
           </section>
 
@@ -162,13 +162,13 @@ export default function PrivacyPolicyPage() {
               If you have any questions, feedback, or privacy concerns regarding this policy, please reach out to our grievance officer:
             </p>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-              <p className="font-bold text-[#0a1128] dark:text-white">PropFolio Technologies</p>
+              <p className="font-bold text-[#0a1128] dark:text-white">Property Snaps Technologies</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Grievance & Privacy Officer</p>
               <p className="mt-2 text-xs">
-                Email: <a href="mailto:privacy@propfolio.in" className="text-[#c5a059] font-semibold hover:underline">privacy@propfolio.in</a>
+                Email: <a href="mailto:privacy@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">privacy@propertysnaps.in</a>
               </p>
               <p className="text-xs mt-1">
-                Support: <a href="mailto:support@propfolio.in" className="text-[#c5a059] font-semibold hover:underline">support@propfolio.in</a>
+                Support: <a href="mailto:support@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">support@propertysnaps.in</a>
               </p>
               <p className="text-xs text-slate-500 mt-1">Headquarters: Ahmedabad, Gujarat, India</p>
             </div>
@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-8 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-[#0a1128] dark:hover:text-white">Pricing</Link>
             <Link href="/contact" className="hover:text-[#0a1128] dark:hover:text-white">Contact</Link>

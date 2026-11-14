@@ -1,6 +1,6 @@
-# PropFolio — Master Architecture & Implementation Plan
+# Property Snaps — Master Architecture & Implementation Plan
 
-> **Working Title:** PropFolio  
+> **Working Title:** Property Snaps  
 > **Target Project Directory:** `c:\Users\dndee\OneDrive\Desktop\REA\real-estate`  
 > **Core Concept:** AI-Powered Real Estate Micro-Site & Brochure Generator from WhatsApp / Web.  
 > **Target Market:** Global Real Estate Brokers & Agencies (India, UAE/Dubai, US/UK, Southeast Asia).

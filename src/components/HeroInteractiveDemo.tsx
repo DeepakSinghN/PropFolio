@@ -22,7 +22,7 @@ export default function HeroInteractiveDemo() {
             }`}
           >
             <Sparkles className="h-3.5 w-3.5 text-[#c5a059] dark:text-[#d4af37]" />
-            <span>PropFolio Page (Clean & Professional)</span>
+            <span>Property Snaps Page (Clean & Professional)</span>
           </button>
 
           <button

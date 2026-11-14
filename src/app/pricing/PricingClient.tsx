@@ -29,7 +29,7 @@ export default function PricingClient() {
       yearlyPrice: 0,
       period: "forever",
       ctaText: "Start Free on WhatsApp",
-      ctaHref: "https://wa.me/919876543210?text=Hi%20PropFolio%20Team%2C%20I%20want%20to%20try%20the%20free%20listing%20creator.",
+      ctaHref: "https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Team%2C%20I%20want%20to%20try%20the%20free%20listing%20creator.",
       highlight: false,
       features: [
         "1 Active Property Listing",
@@ -38,12 +38,12 @@ export default function PricingClient() {
         "HD Photo gallery (up to 10 photos)",
         "Direct WhatsApp inquiry button for buyers",
         "Google Maps location integration",
-        "Standard propfolio.in link",
+        "Standard propertysnaps.in link",
       ],
       notIncluded: [
         "Branded PDF brochure generator",
         "Custom broker profile subdomain",
-        "Remove PropFolio watermark",
+        "Remove Property Snaps watermark",
         "Multi-agent team accounts",
       ],
     },
@@ -60,9 +60,9 @@ export default function PricingClient() {
       highlight: true,
       features: [
         "25 Active Property Listings",
-        "Custom broker subdomain (propfolio.in/yourname)",
+        "Custom broker subdomain (propertysnaps.in/yourname)",
         "1-Click Branded PDF Brochure Generator",
-        "Remove PropFolio watermark",
+        "Remove Property Snaps watermark",
         "Instant WhatsApp lead notification alerts",
         "Full Web Dashboard for easy edits",
         "Buyer view counter & engagement stats",
@@ -103,9 +103,9 @@ export default function PricingClient() {
   const comparisonRows = [
     { name: "Active Property Listings", free: "1 Listing", pro: "25 Listings", agency: "Unlimited" },
     { name: "WhatsApp AI Bot Generation", free: "Standard", pro: "Priority (~30s)", agency: "Instant Priority" },
-    { name: "Custom Broker Subdomain", free: "—", pro: "✓ (propfolio.in/you)", agency: "✓ (Custom Domain)" },
+    { name: "Custom Broker Subdomain", free: "—", pro: "✓ (propertysnaps.in/you)", agency: "✓ (Custom Domain)" },
     { name: "Downloadable PDF Brochures", free: "—", pro: "✓ 1-Click Printable", agency: "✓ Custom Agency PDF" },
-    { name: "Remove PropFolio Watermark", free: "—", pro: "✓ Included", agency: "✓ Fully White-labeled" },
+    { name: "Remove Property Snaps Watermark", free: "—", pro: "✓ Included", agency: "✓ Fully White-labeled" },
     { name: "Team WhatsApp Numbers", free: "1 Number", pro: "1 Number", agency: "Up to 5 Agents" },
     { name: "Lead Inquiry Alerts", free: "Direct WhatsApp", pro: "Direct WhatsApp + Counter", agency: "Centralized Lead CRM" },
     { name: "GST Business Tax Invoice", free: "—", pro: "✓ 18% Input Credit", agency: "✓ 18% Input Credit" },
@@ -337,7 +337,7 @@ export default function PricingClient() {
                 How does the 7-day money-back guarantee work?
               </h3>
               <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                If you subscribe to Solo Pro or Agency and feel PropFolio is not helping your brokerage within 7 days, simply email <code>billing@propfolio.in</code> or message us on WhatsApp. We will refund 100% of your payment, no questions asked.
+                If you subscribe to Solo Pro or Agency and feel Property Snaps is not helping your brokerage within 7 days, simply email <code>billing@propertysnaps.in</code> or message us on WhatsApp. We will refund 100% of your payment, no questions asked.
               </p>
             </div>
 
@@ -384,7 +384,7 @@ export default function PricingClient() {
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="https://wa.me/919876543210?text=Hi%20PropFolio%2C%20I%20want%20to%20create%20a%20listing"
+              href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%2C%20I%20want%20to%20create%20a%20listing"
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-xs font-bold text-white shadow-lg transition hover:bg-emerald-700 sm:w-auto active:scale-95"
@@ -407,7 +407,7 @@ export default function PricingClient() {
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-8 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/contact" className="hover:text-[#0a1128] dark:hover:text-white">Contact Us</Link>
             <Link href="/privacy" className="hover:text-[#0a1128] dark:hover:text-white">Privacy Policy</Link>

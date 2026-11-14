@@ -130,7 +130,7 @@ export default function LoginClient() {
             <Building2 className="h-5 w-5" />
           </div>
           <span className="text-base font-bold text-[#0a1128] dark:text-white">
-            Prop<span className="text-[#c5a059] dark:text-[#d4af37]">Folio</span>
+            Property<span className="text-[#c5a059] dark:text-[#d4af37]"> Snaps</span>
           </span>
         </Link>
         <ThemeToggle />

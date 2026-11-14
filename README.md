@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏛️ PropFolio
+# 🏛️ Property Snaps
 
 ### The WhatsApp-First AI Listing Engine for Real Estate Brokers
 
@@ -29,12 +29,12 @@ However, brokers share inventory as:
 
 ---
 
-## 💡 The Solution: PropFolio
-**PropFolio** bridges this gap by turning raw WhatsApp chats directly into luxury, branded web listing pages without leaving WhatsApp:
+## 💡 The Solution: Property Snaps
+**Property Snaps** bridges this gap by turning raw WhatsApp chats directly into luxury, branded web listing pages without leaving WhatsApp:
 
-1. **Broker forwards photos and property text to the PropFolio WhatsApp Bot.**
-2. **PropFolio AI (Gemini Flash)** parses configurations (BHK, carpet area, facing, floor, furnishing), amenities, price breakdown (Crores / Lakhs), and cleans up property titles.
-3. **In 60 seconds**, the bot replies with a live, responsive listing link: `propfolio.in/ramesh/3-bhk-satellite-ahmedabad`.
+1. **Broker forwards photos and property text to the Property Snaps WhatsApp Bot.**
+2. **Property Snaps AI (Gemini Flash)** parses configurations (BHK, carpet area, facing, floor, furnishing), amenities, price breakdown (Crores / Lakhs), and cleans up property titles.
+3. **In 60 seconds**, the bot replies with a live, responsive listing link: `propertysnaps.in/ramesh/3-bhk-satellite-ahmedabad`.
 4. **Buyers receive a luxury, Sotheby's Royal-styled web page** featuring an interactive photo gallery, Google Maps location, EMI loan calculator, and a direct WhatsApp inquiry button routed straight back to the listing broker.
 
 ---
@@ -60,7 +60,7 @@ However, brokers share inventory as:
 - **Privacy Policy (`/privacy`):** Meta WhatsApp Cloud API verification and Indian DPDP Act compliant.
 - **Terms of Service (`/terms`):** Clear SaaS technology provider disclaimer, broker RERA compliance obligations, and IP protections.
 - **Pricing & Plans (`/pricing`):** Free Starter (₹0), Solo Broker Pro (₹499/mo), and Agency & Builder Elite (₹1,499/mo) with GST invoicing support.
-- **Contact Us (`/contact`):** Direct WhatsApp support integration, verified email (`support@propfolio.in`), and interactive inquiry form.
+- **Contact Us (`/contact`):** Direct WhatsApp support integration, verified email (`support@propertysnaps.in`), and interactive inquiry form.
 - **Refund & Cancellation Policy (`/refund`):** 7-day money-back guarantee, cancellation policy, and UPI/card refund timelines.
 
 ---

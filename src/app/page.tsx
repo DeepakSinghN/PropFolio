@@ -46,7 +46,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-300">
-            Stop sending 20 scattered photos in WhatsApp chats. PropFolio turns your photos and text into a clean website link and PDF brochure that buyers take seriously.
+            Stop sending 20 scattered photos in WhatsApp chats. Property Snaps turns your photos and text into a clean website link and PDF brochure that buyers take seriously.
           </p>
 
           {/* High-Intent CTAs */}
@@ -148,7 +148,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-500">
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
-                    PropFolio AI
+                    Property Snaps AI
                   </span>
                   <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
                     Step 2
@@ -174,7 +174,7 @@ export default function HomePage() {
               <div className="mt-5">
                 <span className="text-xs font-bold text-[#c5a059] dark:text-[#d4af37]">STEP 2</span>
                 <h3 className="mt-1 text-base font-bold text-[#0a1128] dark:text-white">
-                  PropFolio builds the page
+                  Property Snaps builds the page
                 </h3>
                 <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   Title, price, photos gallery, carpet area, highlights, and loan EMI are laid out automatically in 60 seconds.
@@ -197,7 +197,7 @@ export default function HomePage() {
 
                 <div className="mt-3.5 space-y-2 text-left">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] font-mono text-slate-600 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-400 truncate">
-                    propfolio.in/ramesh/3-bhk-satellite
+                    propertysnaps.in/ramesh/3-bhk-satellite
                   </div>
                   <div className="flex items-center gap-2 pt-1">
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
@@ -252,7 +252,7 @@ export default function HomePage() {
                 All your listings under one personalized link with your name, photo, and phone number. Looks like your own private agency site.
               </p>
               <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-[11px] font-mono text-slate-600 dark:border-slate-800 dark:bg-[#090e1c] dark:text-slate-400">
-                yourname.propfolio.in
+                yourname.propertysnaps.in
               </div>
             </div>
 
@@ -348,7 +348,7 @@ export default function HomePage() {
                 Sample Listings
               </span>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
-                Live property pages created with PropFolio
+                Live property pages created with Property Snaps
               </h2>
             </div>
             <Link
@@ -516,7 +516,7 @@ export default function HomePage() {
                   <Building2 className="h-4 w-4" />
                 </div>
                 <span className="text-base font-bold text-[#0a1128] dark:text-white">
-                  Prop<span className="text-[#c5a059]">Folio</span>
+                  Property<span className="text-[#c5a059]"> Snaps</span>
                 </span>
               </div>
               <p className="max-w-sm text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -567,7 +567,7 @@ export default function HomePage() {
                 </li>
                 <li>
                   <a
-                    href="https://wa.me/919876543210?text=Hi%20PropFolio%20Support%2C%20I%20need%20help."
+                    href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Support%2C%20I%20need%20help."
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#0a1128] dark:hover:text-white transition flex items-center gap-1"
@@ -576,8 +576,8 @@ export default function HomePage() {
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:support@propfolio.in" className="hover:text-[#0a1128] dark:hover:text-white transition">
-                    support@propfolio.in
+                  <a href="mailto:support@propertysnaps.in" className="hover:text-[#0a1128] dark:hover:text-white transition">
+                    support@propertysnaps.in
                   </a>
                 </li>
               </ul>
@@ -611,7 +611,7 @@ export default function HomePage() {
 
           {/* Bottom Bar */}
           <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 text-xs text-slate-400 sm:flex-row dark:border-slate-800/80 dark:text-slate-600">
-            <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
             <p className="text-center sm:text-right">
               Built for real estate brokers & property consultants in India.
             </p>

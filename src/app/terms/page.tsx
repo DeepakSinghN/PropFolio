@@ -3,8 +3,8 @@ import { ArrowLeft, Scale, CheckCircle2, Building2 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
-  title: "Terms of Service — PropFolio",
-  description: "Terms and conditions governing your use of PropFolio's real estate listing platform and WhatsApp bot.",
+  title: "Terms of Service — Property Snaps",
+  description: "Terms and conditions governing your use of Property Snaps's real estate listing platform and WhatsApp bot.",
 };
 
 export default function TermsPage() {
@@ -53,7 +53,7 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Last Updated: {lastUpdated} · Please read these terms carefully before using PropFolio.
+            Last Updated: {lastUpdated} · Please read these terms carefully before using Property Snaps.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ export default function TermsPage() {
               <span className="text-[#c5a059]">01.</span> Agreement to Terms
             </h2>
             <p>
-              By accessing or using the services provided by <strong>PropFolio</strong> ("Platform", "we", "us"), including our website (<strong>propfolio.in</strong>), WhatsApp Cloud API bot, and broker dashboard, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue using our services immediately.
+              By accessing or using the services provided by <strong>Property Snaps</strong> ("Platform", "we", "us"), including our website (<strong>propertysnaps.in</strong>), WhatsApp Cloud API bot, and broker dashboard, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue using our services immediately.
             </p>
           </section>
 
@@ -76,10 +76,10 @@ export default function TermsPage() {
               <span className="text-[#c5a059]">02.</span> Scope of Service
             </h2>
             <p>
-              PropFolio provides software and artificial intelligence technology designed to format, host, and display real estate listings and generate downloadable promotional materials (such as PDF brochures).
+              Property Snaps provides software and artificial intelligence technology designed to format, host, and display real estate listings and generate downloadable promotional materials (such as PDF brochures).
             </p>
             <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-4 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300">
-              <strong>Important Notice:</strong> PropFolio is a technology platform and <u>not</u> a licensed real estate broker, agent, valuer, or legal advisor. We do not participate in property negotiations, do not hold customer funds in escrow, and do not guarantee the completion or legality of any real estate transaction executed between buyers and brokers.
+              <strong>Important Notice:</strong> Property Snaps is a technology platform and <u>not</u> a licensed real estate broker, agent, valuer, or legal advisor. We do not participate in property negotiations, do not hold customer funds in escrow, and do not guarantee the completion or legality of any real estate transaction executed between buyers and brokers.
             </div>
           </section>
 
@@ -88,7 +88,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
               <span className="text-[#c5a059]">03.</span> Broker Responsibilities & RERA Compliance
             </h2>
-            <p>As a broker or listing creator on PropFolio, you affirm and warrant that:</p>
+            <p>As a broker or listing creator on Property Snaps, you affirm and warrant that:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>
                 <strong>Authorization:</strong> You hold legal authorization, brokerage mandate, or owner consent to market the property described in your listing.
@@ -111,7 +111,7 @@ export default function TermsPage() {
               <span className="text-[#c5a059]">04.</span> Intellectual Property & Photo Rights
             </h2>
             <p>
-              You retain all ownership rights to the photographs, descriptions, and logos you upload. By submitting content through our WhatsApp bot or dashboard, you grant PropFolio a worldwide, non-exclusive, royalty-free license to host, format, optimize, and display this content for the sole purpose of providing your listing service.
+              You retain all ownership rights to the photographs, descriptions, and logos you upload. By submitting content through our WhatsApp bot or dashboard, you grant Property Snaps a worldwide, non-exclusive, royalty-free license to host, format, optimize, and display this content for the sole purpose of providing your listing service.
             </p>
             <p>
               You agree not to upload copyrighted images, watermarked third-party photography, or architectural renders without appropriate legal license or permission from the copyright owner.
@@ -134,7 +134,7 @@ export default function TermsPage() {
               <span className="text-[#c5a059]">06.</span> Limitation of Liability
             </h2>
             <p>
-              To the maximum extent permitted by Indian law, PropFolio shall not be liable for any indirect, incidental, punitive, or consequential damages, including loss of brokerage commission, buyer disputes, property title defects, or site visit cancellations arising from your use of the platform.
+              To the maximum extent permitted by Indian law, Property Snaps shall not be liable for any indirect, incidental, punitive, or consequential damages, including loss of brokerage commission, buyer disputes, property title defects, or site visit cancellations arising from your use of the platform.
             </p>
             <p>
               Property financial estimations (such as estimated monthly loan EMI) are provided for illustrative purposes only and do not constitute an official loan approval or interest rate commitment by any financial institution.
@@ -160,13 +160,13 @@ export default function TermsPage() {
               If you have any questions regarding these terms or wish to report an infringing listing, please contact:
             </p>
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-              <p className="font-bold text-[#0a1128] dark:text-white">PropFolio Legal Department</p>
+              <p className="font-bold text-[#0a1128] dark:text-white">Property Snaps Legal Department</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Legal & Compliance</p>
               <p className="mt-2 text-xs">
-                Email: <a href="mailto:legal@propfolio.in" className="text-[#c5a059] font-semibold hover:underline">legal@propfolio.in</a>
+                Email: <a href="mailto:legal@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">legal@propertysnaps.in</a>
               </p>
               <p className="text-xs mt-1">
-                Support: <a href="mailto:support@propfolio.in" className="text-[#c5a059] font-semibold hover:underline">support@propfolio.in</a>
+                Support: <a href="mailto:support@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">support@propertysnaps.in</a>
               </p>
             </div>
           </section>
@@ -177,7 +177,7 @@ export default function TermsPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200/80 bg-white py-8 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
-          <p>© {new Date().getFullYear()} PropFolio Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/pricing" className="hover:text-[#0a1128] dark:hover:text-white">Pricing</Link>
             <Link href="/contact" className="hover:text-[#0a1128] dark:hover:text-white">Contact</Link>

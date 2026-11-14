@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `${appBaseUrl}/${slug}/${listingSlug}`,
       type: "website",
-      siteName: "PropFolio",
+      siteName: "Property Snaps",
       images: [
         {
           url: coverPhoto,
