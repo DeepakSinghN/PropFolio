@@ -43,92 +43,106 @@ export async function POST(req: NextRequest) {
         ? trimmedTarget
         : "+91" + trimmedTarget.replace(/\D/g, "");
 
-    // 1. Supabase User & Profile Creation
-    if (supabaseUrl) {
+    // 1. Supabase User & Profile Registration
+    if (supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
-        const adminKey = supabaseServiceKey || supabaseAnonKey;
 
-        if (adminKey) {
-          const supabase = createClient(supabaseUrl, adminKey);
+        if (supabaseServiceKey && isEmail) {
+          // Admin API: creates 100% verified active user (no email confirmation block!)
+          const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
+          const { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser({
+            email: trimmedTarget.toLowerCase(),
+            password,
+            email_confirm: true,
+            user_metadata: {
+              full_name: full_name || "Real Estate Broker",
+              city: city || "India",
+              company_name: company_name || "Exclusive Advisory",
+            },
+          });
 
-          // A. Create User in auth.users
-          if (supabaseServiceKey && isEmail) {
-            // Admin API: 100% verified, no email confirmation waiting!
-            const { data: adminUser, error: adminErr } = await supabase.auth.admin.createUser({
-              email: trimmedTarget.toLowerCase(),
-              password,
-              email_confirm: true,
-              user_metadata: {
-                full_name: full_name || "Real Estate Broker",
-                city: city || "India",
-                company_name: company_name || "Exclusive Advisory",
-              },
-            });
-
-            if (adminUser?.user) {
-              supaUserId = adminUser.user.id;
-            } else if (adminErr && adminErr.message.includes("already registered")) {
-              const { data: listData } = await supabase.auth.admin.listUsers();
-              const found = listData?.users?.find(
-                (u) => u.email?.toLowerCase() === trimmedTarget.toLowerCase()
+          if (adminUser?.user) {
+            supaUserId = adminUser.user.id;
+          } else if (adminErr) {
+            if (adminErr.message.toLowerCase().includes("already registered") || adminErr.message.toLowerCase().includes("already exists")) {
+              return NextResponse.json(
+                { error: "An account with this email already exists. Please log in." },
+                { status: 400 }
               );
-              if (found) supaUserId = found.id;
             }
-          } else if (isEmail) {
-            // Standard client signup
-            const { data: supaAuth } = await supabase.auth.signUp({
-              email: trimmedTarget.toLowerCase(),
-              password,
-              options: {
-                data: {
-                  full_name: full_name || "Real Estate Broker",
-                  city,
-                  company_name,
-                },
-              },
-            });
-            if (supaAuth.user) {
-              supaUserId = supaAuth.user.id;
-            }
+            console.error("Supabase admin.createUser error:", adminErr);
+            return NextResponse.json(
+              { error: `Registration error: ${adminErr.message}` },
+              { status: 400 }
+            );
           }
 
-          // B. Upsert into public.profiles
-          const profilePayload: any = {
-            full_name: full_name || "Real Estate Broker",
-            slug: brokerSlug,
-            phone_number: safePhone,
-            company_name: company_name || "Exclusive Advisory",
-            city: city || "India",
-            plan_tier: "solo_pro",
-            listing_credits: 30,
-            is_active: true,
-            updated_at: new Date().toISOString(),
-          };
-
+          // Insert into public.profiles
           if (supaUserId) {
-            profilePayload.id = supaUserId;
-            profilePayload.user_id = supaUserId;
+            const profilePayload = {
+              id: supaUserId,
+              user_id: supaUserId,
+              full_name: full_name || "Real Estate Broker",
+              slug: brokerSlug,
+              phone_number: safePhone,
+              company_name: company_name || "Exclusive Advisory",
+              city: city || "India",
+              plan_tier: "solo_pro",
+              listing_credits: 30,
+              is_active: true,
+              updated_at: new Date().toISOString(),
+            };
+
+            const { data: insertedProf, error: profErr } = await adminSupabase
+              .from("profiles")
+              .upsert(profilePayload, { onConflict: "id" })
+              .select()
+              .maybeSingle();
+
+            if (insertedProf?.id) {
+              supaProfileId = insertedProf.id;
+            } else if (profErr) {
+              console.warn("Public profiles table insert error:", profErr);
+            }
+          }
+        } else if (isEmail && supabaseAnonKey) {
+          // Standard client signup with anon key
+          const clientSupabase = createClient(supabaseUrl, supabaseAnonKey);
+          const { data: supaAuth, error: supaErr } = await clientSupabase.auth.signUp({
+            email: trimmedTarget.toLowerCase(),
+            password,
+            options: {
+              data: {
+                full_name: full_name || "Real Estate Broker",
+                city,
+                company_name,
+              },
+            },
+          });
+
+          if (supaErr) {
+            console.error("Supabase client signUp error:", supaErr);
+            return NextResponse.json(
+              { error: supaErr.message },
+              { status: 400 }
+            );
           }
 
-          const { data: insertedProf, error: profErr } = await supabase
-            .from("profiles")
-            .upsert(profilePayload, { onConflict: "slug" })
-            .select()
-            .maybeSingle();
-
-          if (insertedProf?.id) {
-            supaProfileId = insertedProf.id;
-          } else if (profErr) {
-            console.warn("Profiles table sync notice:", profErr);
+          if (supaAuth?.user) {
+            supaUserId = supaAuth.user.id;
           }
         }
-      } catch (err) {
-        console.warn("Supabase signup sync notice:", err);
+      } catch (err: any) {
+        console.error("Supabase signup connection error:", err);
+        return NextResponse.json(
+          { error: `Database connection error: ${err.message}` },
+          { status: 500 }
+        );
       }
     }
 
-    // 2. Save user account locally
+    // 2. Build Profile
     const profile = saveUserAccount(trimmedTarget, password, {
       id: supaProfileId || supaUserId,
       user_id: supaUserId,
@@ -140,7 +154,7 @@ export async function POST(req: NextRequest) {
       email: isEmail ? trimmedTarget.toLowerCase() : undefined,
     });
 
-    // 3. Create active session
+    // 3. Create active stateless session
     const session = createPhoneSession(trimmedTarget, profile);
 
     const response = NextResponse.json({
@@ -149,11 +163,12 @@ export async function POST(req: NextRequest) {
       user: session.profile,
     });
 
+    // Set secure cookie
     response.cookies.set("propfolio-phone-session", session.sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: "/",
     });
 

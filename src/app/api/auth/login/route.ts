@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyUserPassword, createPhoneSession } from "@/lib/auth-store";
-import { createClient } from "@/lib/supabase/server";
+import { DEMO_BROKER } from "@/lib/store";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,18 +16,26 @@ export async function POST(req: NextRequest) {
     const trimmedTarget = identifier.toString().trim();
     const isEmail = trimmedTarget.includes("@");
 
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     // 1. Try Supabase Auth if email is provided
-    if (isEmail && (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)) {
+    if (isEmail && supabaseUrl && (supabaseAnonKey || supabaseServiceKey)) {
       try {
-        const supabase = await createClient();
+        const { createClient } = await import("@supabase/supabase-js");
+        const clientKey = supabaseAnonKey || supabaseServiceKey!;
+        const supabase = createClient(supabaseUrl, clientKey);
+
         const { data: supaAuth, error: supaErr } = await supabase.auth.signInWithPassword({
           email: trimmedTarget.toLowerCase(),
           password,
         });
 
-        if (!supaErr && supaAuth.user) {
-          // Fetch or ensure linked profile in Supabase
-          const { data: profile } = await supabase
+        if (supaAuth?.user) {
+          // Admin or client to query public.profiles
+          const queryClient = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey) : supabase;
+          const { data: profile } = await queryClient
             .from("profiles")
             .select("*")
             .or(`user_id.eq.${supaAuth.user.id},id.eq.${supaAuth.user.id}`)
@@ -51,7 +59,7 @@ export async function POST(req: NextRequest) {
             };
 
             try {
-              const { data: createdProf } = await supabase
+              const { data: createdProf } = await queryClient
                 .from("profiles")
                 .upsert(newPayload, { onConflict: "id" })
                 .select()
@@ -79,16 +87,31 @@ export async function POST(req: NextRequest) {
 
           return response;
         }
-      } catch (err) {
-        console.warn("Supabase password auth check fallback:", err);
+
+        // If Supabase gave an explicit auth error (e.g. invalid credentials)
+        if (supaErr) {
+          const isDemoAccount =
+            trimmedTarget === "demo@propertysnaps.co" ||
+            trimmedTarget === "9876543210";
+
+          // If not demo bypass, return the exact error from Supabase
+          if (!isDemoAccount || (password !== "demo123" && password !== "123456" && password !== "demo")) {
+            return NextResponse.json(
+              { error: supaErr.message || "Invalid email or password. Please try again." },
+              { status: 401 }
+            );
+          }
+        }
+      } catch (err: any) {
+        console.warn("Supabase auth check notice:", err);
       }
     }
 
-    // 2. Local / Demo User Password Verification
+    // 2. Local / Demo User Verification (for demo123, offline testing, or phone accounts)
     const verification = verifyUserPassword(trimmedTarget, password);
     if (!verification.success) {
       return NextResponse.json(
-        { error: verification.error || "Invalid credentials" },
+        { error: verification.error || "No account found with this phone number or email" },
         { status: 401 }
       );
     }
@@ -117,4 +140,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

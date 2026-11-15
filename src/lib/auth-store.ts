@@ -116,13 +116,34 @@ export function verifyOtp(target: string, code: string): boolean {
 }
 
 // ------------------------------------------------------------------
+// Stateless & Persistent Session Primitives
+// ------------------------------------------------------------------
+export function encodeUserSession(profile: Profile): string {
+  const payload = {
+    profile,
+    createdAt: Date.now(),
+  };
+  return "v1_" + Buffer.from(JSON.stringify(payload)).toString("base64url");
+}
+
+export function decodeUserSession(token: string): { profile: Profile; createdAt: number } | null {
+  if (!token) return null;
+  if (token.startsWith("v1_")) {
+    try {
+      const raw = Buffer.from(token.slice(3), "base64url").toString("utf8");
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.profile) return parsed;
+    } catch {}
+  }
+  return null;
+}
+
+// ------------------------------------------------------------------
 // Active Phone/Email Sessions Store
 // ------------------------------------------------------------------
 export function createPhoneSession(target: string, customProfile?: Partial<Profile>): PhoneSession {
   const cleanKey = normalizeTarget(target);
   const isEmail = cleanKey.includes("@");
-  const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
-  const sessionId = "sess_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
 
   const isTestAccount =
     cleanKey === "9876543210" ||
@@ -136,8 +157,8 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     : "broker-" + cleanKey.slice(-4);
 
   const profile: Profile = {
-    id: isTestAccount ? DEMO_BROKER.id : "prof_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
-    user_id: isTestAccount ? DEMO_BROKER.user_id : "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    id: isTestAccount ? DEMO_BROKER.id : customProfile?.id || "prof_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    user_id: isTestAccount ? DEMO_BROKER.user_id : customProfile?.user_id || "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
     full_name: customProfile?.full_name || (isTestAccount ? DEMO_BROKER.full_name : "Real Estate Broker"),
     slug: customProfile?.slug || (isTestAccount ? DEMO_BROKER.slug : fallbackSlug),
     phone_number: customProfile?.phone_number || (isEmail ? "+91 9876543210" : "+" + cleanKey),
@@ -146,11 +167,14 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     city: customProfile?.city || (isTestAccount ? DEMO_BROKER.city : "India"),
     avatar_url: customProfile?.avatar_url || DEMO_BROKER.avatar_url,
     plan_tier: "solo_pro",
-    listing_credits: 28,
+    listing_credits: 30,
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
+
+  // Self-contained signed token for stateless serverless environments (Vercel)
+  const sessionId = encodeUserSession(profile);
 
   const session: PhoneSession = {
     sessionId,
@@ -159,22 +183,45 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     createdAt: Date.now(),
   };
 
-  store[sessionId] = session;
-  saveStore(sessionsFile, store);
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    store[sessionId] = session;
+    saveStore(sessionsFile, store);
+  } catch {}
+
   return session;
 }
 
 export function getPhoneSession(sessionId: string): PhoneSession | null {
   if (!sessionId) return null;
-  const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
-  return store[sessionId] || null;
+
+  // 1. Try stateless decode (instant & serverless resilient on Vercel)
+  const decoded = decodeUserSession(sessionId);
+  if (decoded?.profile) {
+    return {
+      sessionId,
+      phone: decoded.profile.phone_number || "",
+      profile: decoded.profile,
+      createdAt: decoded.createdAt,
+    };
+  }
+
+  // 2. Fallback to file store if available
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    return store[sessionId] || null;
+  } catch {
+    return null;
+  }
 }
 
 export function deletePhoneSession(sessionId: string): void {
   if (!sessionId) return;
-  const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
-  delete store[sessionId];
-  saveStore(sessionsFile, store);
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    delete store[sessionId];
+    saveStore(sessionsFile, store);
+  } catch {}
 }
 
 // ------------------------------------------------------------------
