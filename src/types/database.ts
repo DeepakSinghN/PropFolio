@@ -16,6 +16,7 @@ export interface Profile {
   full_name: string;
   slug: string; // for [slug].propfolio.co
   phone_number: string;
+  email?: string;
   company_name?: string;
   city?: string;
   avatar_url?: string;

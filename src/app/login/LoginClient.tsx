@@ -11,7 +11,8 @@ import {
   Building2,
   RefreshCw,
   Sparkles,
-  Lock
+  Lock,
+  Mail,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -21,12 +22,18 @@ export default function LoginClient() {
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   // State
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [contactInput, setContactInput] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
+
+  // Check email vs phone
+  const isEmail = contactInput.includes("@");
+  const isValidContact = isEmail
+    ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInput.trim())
+    : contactInput.replace(/\D/g, "").length >= 10;
 
   // Start Resend Timer
   const startCountdown = () => {
@@ -42,7 +49,7 @@ export default function LoginClient() {
     }, 1000);
   };
 
-  // 1. Send WhatsApp OTP
+  // 1. Send OTP
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -52,7 +59,7 @@ export default function LoginClient() {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneNumber }),
+        body: JSON.stringify({ identifier: contactInput.trim() }),
       });
 
       const data = await res.json();
@@ -70,7 +77,7 @@ export default function LoginClient() {
     }
   };
 
-  // 2. Verify WhatsApp OTP & Open Dashboard
+  // 2. Verify OTP & Open Dashboard
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -80,7 +87,7 @@ export default function LoginClient() {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneNumber, code: otpCode }),
+        body: JSON.stringify({ identifier: contactInput.trim(), code: otpCode }),
       });
 
       const data = await res.json();
@@ -101,7 +108,7 @@ export default function LoginClient() {
     setLoading(true);
     setErrorMsg("");
     try {
-      setPhoneNumber("9876543210");
+      setContactInput("9876543210");
       setOtpCode("123456");
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
@@ -140,17 +147,17 @@ export default function LoginClient() {
         {/* Title */}
         <div className="text-center">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-3 py-1 text-xs font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
-            <MessageCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Instant WhatsApp Verification</span>
+            <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+            <span>Instant Broker Portal Sign In</span>
           </div>
 
           <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0a1128] dark:text-white">
-            {otpSent ? "Enter WhatsApp Code" : "Sign In with WhatsApp"}
+            {otpSent ? (isEmail ? "Enter Email Code" : "Enter WhatsApp Code") : "Sign In to your Account"}
           </h2>
           <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             {otpSent
-              ? `We sent a 6-digit verification code to +91 ${phoneNumber}`
-              : "No passwords to remember. Enter your number to access your dashboard."}
+              ? `We sent a 6-digit verification code to ${isEmail ? contactInput.trim() : `+91 ${contactInput.replace(/\D/g, "")}`}`
+              : "No passwords to remember. Enter your phone number or email to access your dashboard."}
           </p>
         </div>
 
@@ -188,36 +195,46 @@ export default function LoginClient() {
           )}
 
           {!otpSent ? (
-            /* STEP 1: PHONE NUMBER INPUT */
+            /* STEP 1: PHONE / EMAIL INPUT */
             <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-[#0a1128] dark:text-white">
-                  WhatsApp Mobile Number
+                  Phone number or email
                 </label>
                 <div className="relative mt-2 flex items-center">
                   <div className="absolute left-3.5 flex items-center gap-1 text-xs font-bold text-slate-500">
-                    <span>🇮🇳</span>
-                    <span>+91</span>
+                    {isEmail ? (
+                      <Mail className="h-4 w-4 text-[#c5a059]" />
+                    ) : (
+                      <>
+                        <span>🇮🇳</span>
+                        <span>+91</span>
+                      </>
+                    )}
                   </div>
                   <input
-                    type="tel"
+                    type={isEmail ? "email" : "text"}
                     required
                     autoFocus
-                    placeholder="98765 43210"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    className="w-full rounded-2xl border border-slate-200 bg-[#f8f9fc] py-3.5 pl-16 pr-4 text-base font-semibold text-[#0a1128] shadow-sm transition outline-none focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white dark:focus:border-[#c5a059]"
+                    placeholder="98765 43210 or broker@realty.com"
+                    value={contactInput}
+                    onChange={(e) => setContactInput(e.target.value)}
+                    className={`w-full rounded-2xl border border-slate-200 bg-[#f8f9fc] py-3.5 pr-4 text-sm sm:text-base font-semibold text-[#0a1128] shadow-sm transition outline-none focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white dark:focus:border-[#c5a059] ${
+                      isEmail ? "pl-11" : "pl-16"
+                    }`}
                   />
                 </div>
                 <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <ShieldCheck className="h-3.5 w-3.5 text-[#c5a059]" />
-                  Your WhatsApp number is your permanent, secure broker ID.
+                  {isEmail
+                    ? "We'll send a 6-digit confirmation code to your email."
+                    : "Your WhatsApp number connects your property listings directly."}
                 </p>
               </div>
 
               <button
                 type="submit"
-                disabled={loading || phoneNumber.length < 10}
+                disabled={loading || !isValidContact}
                 className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
@@ -225,7 +242,7 @@ export default function LoginClient() {
                 ) : (
                   <>
                     <MessageCircle className="h-4 w-4" />
-                    <span>Send Login Code</span>
+                    <span>{isEmail ? "Send Email Code" : "Send Login Code"}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -274,7 +291,7 @@ export default function LoginClient() {
                   }}
                   className="text-slate-500 hover:text-[#0a1128] dark:hover:text-white"
                 >
-                  Change Number
+                  Edit details
                 </button>
 
                 <button
@@ -283,7 +300,11 @@ export default function LoginClient() {
                   onClick={handleSendOtp}
                   className="font-semibold text-emerald-600 disabled:opacity-50 hover:underline dark:text-emerald-400"
                 >
-                  {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend WhatsApp Code"}
+                  {resendTimer > 0
+                    ? `Resend code in ${resendTimer}s`
+                    : isEmail
+                      ? "Resend Email Code"
+                      : "Resend WhatsApp Code"}
                 </button>
               </div>
             </form>

@@ -12,7 +12,9 @@ import {
   MapPin,
   Briefcase,
   User,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  Sparkles,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -25,9 +27,15 @@ export default function SignupClient() {
 
   // Profile fields
   const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [contactInput, setContactInput] = useState("");
   const [city, setCity] = useState("");
   const [companyName, setCompanyName] = useState("");
+
+  // Contact validation
+  const isEmail = contactInput.includes("@");
+  const isValidContact = isEmail
+    ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInput.trim())
+    : contactInput.replace(/\D/g, "").length >= 10;
 
   // OTP field
   const [otpCode, setOtpCode] = useState("");
@@ -46,7 +54,7 @@ export default function SignupClient() {
     }, 1000);
   };
 
-  // Step 1: Submit Profile & Send WhatsApp OTP
+  // Step 1: Submit Profile & Send OTP
   const handleStartSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -56,7 +64,7 @@ export default function SignupClient() {
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneNumber }),
+        body: JSON.stringify({ identifier: contactInput.trim() }),
       });
 
       const data = await res.json();
@@ -85,7 +93,7 @@ export default function SignupClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: phoneNumber,
+          identifier: contactInput.trim(),
           code: otpCode,
           full_name: fullName,
           city,
@@ -125,8 +133,8 @@ export default function SignupClient() {
         {/* Header Title */}
         <div className="text-center">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-            <MessageCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Fast WhatsApp Onboarding</span>
+            <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Instant Broker Onboarding</span>
           </div>
 
           <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-white">
@@ -165,27 +173,37 @@ export default function SignupClient() {
                 </div>
               </div>
 
-              {/* WhatsApp Phone */}
+              {/* Phone number or email */}
               <div>
                 <label className="block text-xs font-bold text-zinc-900 dark:text-white">
-                  WhatsApp Mobile Number
+                  Phone number or email
                 </label>
                 <div className="relative mt-1.5 flex items-center">
                   <div className="absolute left-3.5 flex items-center gap-1 text-xs font-bold text-zinc-500">
-                    <span>🇮🇳</span>
-                    <span>+91</span>
+                    {isEmail ? (
+                      <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <>
+                        <span>🇮🇳</span>
+                        <span>+91</span>
+                      </>
+                    )}
                   </div>
                   <input
-                    type="tel"
+                    type={isEmail ? "email" : "text"}
                     required
-                    placeholder="98765 43210"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-16 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                    placeholder="e.g. 98765 43210 or broker@realty.com"
+                    value={contactInput}
+                    onChange={(e) => setContactInput(e.target.value)}
+                    className={`w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white ${
+                      isEmail ? "pl-11 pr-4" : "pl-16 pr-4"
+                    }`}
                   />
                 </div>
                 <p className="mt-1 text-[11px] text-zinc-400">
-                  This connects your WhatsApp bot listings directly to your account.
+                  {isEmail
+                    ? "We'll send a 6-digit confirmation code to your email."
+                    : "Connects your WhatsApp bot listings directly to your account."}
                 </p>
               </div>
 
@@ -228,14 +246,14 @@ export default function SignupClient() {
               {/* CTA Button */}
               <button
                 type="submit"
-                disabled={loading || !fullName.trim() || phoneNumber.length < 10}
+                disabled={loading || !fullName.trim() || !isValidContact}
                 className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
-                    <span>Verify with WhatsApp Code</span>
+                    <span>{isEmail ? "Verify with Email Code" : "Verify with WhatsApp Code"}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -245,10 +263,13 @@ export default function SignupClient() {
             <form onSubmit={handleVerifySignup} className="space-y-4">
               <div className="text-center pb-2">
                 <span className="text-xs text-zinc-500">
-                  Enter the 6-digit WhatsApp code sent to
+                  {isEmail ? "Enter the 6-digit verification code sent to" : "Enter the 6-digit WhatsApp code sent to"}
                 </span>
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                  +91 {phoneNumber}
+                <p className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
+                  {isEmail ? contactInput.trim() : `+91 ${contactInput.replace(/\D/g, "")}`}
+                </p>
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                  (Test code: <span className="font-mono font-bold">123456</span>)
                 </p>
               </div>
 
@@ -298,7 +319,11 @@ export default function SignupClient() {
                   onClick={handleStartSignup}
                   className="font-semibold text-emerald-600 disabled:opacity-50 hover:underline dark:text-emerald-400"
                 >
-                  {resendTimer > 0 ? `Resend code in ${resendTimer}s` : "Resend WhatsApp Code"}
+                  {resendTimer > 0
+                    ? `Resend code in ${resendTimer}s`
+                    : isEmail
+                      ? "Resend Email Code"
+                      : "Resend WhatsApp Code"}
                 </button>
               </div>
             </form>
@@ -311,7 +336,7 @@ export default function SignupClient() {
               href="/login"
               className="font-bold text-amber-600 hover:underline dark:text-amber-400"
             >
-              Sign in with WhatsApp
+              Sign in to your account
             </Link>
           </div>
         </div>
