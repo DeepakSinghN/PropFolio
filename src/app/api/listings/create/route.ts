@@ -28,7 +28,19 @@ export async function POST(req: NextRequest) {
 
         // Ensure valid broker_id for Supabase foreign key constraint
         let brokerId = listing.broker_id;
-        if (!brokerId || brokerId === "b-1") {
+
+        const phoneCookie = req.cookies.get("propfolio-phone-session");
+        if (phoneCookie?.value) {
+          try {
+            const { getPhoneSession } = await import("@/lib/auth-store");
+            const sess = getPhoneSession(phoneCookie.value);
+            if (sess?.profile?.id && sess.profile.id.includes("-")) {
+              brokerId = sess.profile.id;
+            }
+          } catch {}
+        }
+
+        if (!brokerId || brokerId === "b-1" || !brokerId.includes("-")) {
           const { data: prof } = await supabase.from("profiles").select("id").limit(1).maybeSingle();
           if (prof?.id) {
             brokerId = prof.id;

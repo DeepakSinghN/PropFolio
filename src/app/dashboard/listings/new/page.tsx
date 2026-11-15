@@ -476,6 +476,23 @@ export function ListingEditorContent() {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [currentBroker, setCurrentBroker] = useState<any>(DEMO_BROKER);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setCurrentBroker((prev: any) => ({
+            ...prev,
+            ...data.user,
+            id: data.user.id || data.user.user_id || prev.id,
+            slug: data.user.slug || prev.slug,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   /* ── Listing Quality Score (debounced to avoid layout jitter) ── */
   const qualityScore = useMemo(() => {
@@ -709,7 +726,7 @@ export function ListingEditorContent() {
 
     const fullListing: Listing = {
       id,
-      broker_id: DEMO_BROKER.id,
+      broker_id: currentBroker.id || currentBroker.user_id || DEMO_BROKER.id,
       title: headline || `${bhk || ""} BHK ${propertyType} for ${transactionType}`,
       slug,
       description: aiDescription || "",
@@ -746,7 +763,7 @@ export function ListingEditorContent() {
         is_cover: i === 0,
         created_at: new Date().toISOString()
       })),
-      broker: DEMO_BROKER
+      broker: currentBroker
     };
 
     saveListingToMemory(fullListing);
@@ -776,7 +793,7 @@ export function ListingEditorContent() {
     }
 
     confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-    const url = `/${DEMO_BROKER.slug}/${slug}`;
+    const url = `/${currentBroker.slug || DEMO_BROKER.slug}/${slug}`;
     setPublishedUrl(url);
     setStep(3);
   }

@@ -26,24 +26,41 @@ export async function POST(req: NextRequest) {
         });
 
         if (!supaErr && supaAuth.user) {
-          // Fetch linked profile from Supabase
+          // Fetch or ensure linked profile in Supabase
           const { data: profile } = await supabase
             .from("profiles")
             .select("*")
-            .eq("email", trimmedTarget.toLowerCase())
+            .or(`user_id.eq.${supaAuth.user.id},id.eq.${supaAuth.user.id}`)
             .maybeSingle();
 
-          const userProfile = profile || {
-            id: supaAuth.user.id,
-            user_id: supaAuth.user.id,
-            full_name: supaAuth.user.user_metadata?.full_name || trimmedTarget.split("@")[0],
-            slug: trimmedTarget.split("@")[0].replace(/[^a-z0-9]/g, "-"),
-            phone_number: "+91 9876543210",
-            email: trimmedTarget.toLowerCase(),
-            plan_tier: "solo_pro",
-            listing_credits: 28,
-            is_active: true,
-          };
+          let userProfile = profile;
+
+          if (!userProfile) {
+            const fallbackSlug = (trimmedTarget.split("@")[0].replace(/[^a-z0-9]/g, "-") || "broker") + "-" + supaAuth.user.id.slice(0, 4);
+            const newPayload = {
+              id: supaAuth.user.id,
+              user_id: supaAuth.user.id,
+              full_name: supaAuth.user.user_metadata?.full_name || "Real Estate Broker",
+              slug: fallbackSlug,
+              phone_number: "+91" + Math.floor(6000000000 + Math.random() * 3999999999),
+              company_name: supaAuth.user.user_metadata?.company_name || "Exclusive Advisory",
+              city: supaAuth.user.user_metadata?.city || "India",
+              plan_tier: "solo_pro",
+              listing_credits: 30,
+              is_active: true,
+            };
+
+            try {
+              const { data: createdProf } = await supabase
+                .from("profiles")
+                .upsert(newPayload, { onConflict: "id" })
+                .select()
+                .maybeSingle();
+              userProfile = createdProf || newPayload;
+            } catch {
+              userProfile = newPayload;
+            }
+          }
 
           const session = createPhoneSession(trimmedTarget, userProfile);
           const response = NextResponse.json({
