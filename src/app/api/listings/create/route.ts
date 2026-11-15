@@ -15,11 +15,23 @@ export async function POST(req: NextRequest) {
     saveListingToDisk(listing);
 
     // Persist to Supabase if configured for multi-serverless sync
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey =
+    const rawUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
+    let supabaseUrl = rawUrl;
+    if (rawUrl) {
+      try {
+        const parsed = new URL(rawUrl);
+        supabaseUrl = `${parsed.protocol}//${parsed.host}`;
+      } catch {
+        supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
+      }
+    }
+
+    const supabaseKey = (
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      ""
+    ).trim();
 
     if (supabaseUrl && supabaseKey) {
       try {
