@@ -19,6 +19,14 @@ interface PhoneSession {
 const dataDir = path.join(process.cwd(), ".data");
 const otpFile = path.join(dataDir, "otps.json");
 const sessionsFile = path.join(dataDir, "auth-sessions.json");
+const usersFile = path.join(dataDir, "users.json");
+
+export interface UserAccount {
+  identifier: string;
+  password: string;
+  profile: Profile;
+  createdAt: number;
+}
 
 function ensureStore<T>(filePath: string, fallback: T): T {
   try {
@@ -167,5 +175,91 @@ export function deletePhoneSession(sessionId: string): void {
   const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
   delete store[sessionId];
   saveStore(sessionsFile, store);
+}
+
+// ------------------------------------------------------------------
+// Password-Based User Accounts Store
+// ------------------------------------------------------------------
+export function saveUserAccount(
+  identifier: string,
+  password: string,
+  customProfile?: Partial<Profile>
+): Profile {
+  const cleanKey = normalizeTarget(identifier);
+  const store = ensureStore<Record<string, UserAccount>>(usersFile, {});
+  const isEmail = cleanKey.includes("@");
+
+  const fallbackSlug = isEmail
+    ? cleanKey.split("@")[0].replace(/[^a-z0-9]/g, "-")
+    : "broker-" + cleanKey.slice(-4);
+
+  const profile: Profile = {
+    id: "prof_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    user_id: "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    full_name: customProfile?.full_name || (isEmail ? cleanKey.split("@")[0] : "Real Estate Broker"),
+    slug: customProfile?.slug || fallbackSlug,
+    phone_number: customProfile?.phone_number || (isEmail ? "+91 9876543210" : "+" + cleanKey),
+    email: isEmail ? cleanKey : customProfile?.email,
+    company_name: customProfile?.company_name || "Exclusive Advisory",
+    city: customProfile?.city || "India",
+    avatar_url: customProfile?.avatar_url || DEMO_BROKER.avatar_url,
+    plan_tier: "solo_pro",
+    listing_credits: 30,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  store[cleanKey] = {
+    identifier: cleanKey,
+    password,
+    profile,
+    createdAt: Date.now(),
+  };
+
+  saveStore(usersFile, store);
+  return profile;
+}
+
+export function verifyUserPassword(
+  identifier: string,
+  password: string
+): { success: boolean; profile?: Profile; error?: string } {
+  const cleanKey = normalizeTarget(identifier);
+
+  // Demo / Test accounts
+  const isDemo =
+    cleanKey === "9876543210" ||
+    cleanKey === "919876543210" ||
+    cleanKey === "demo@propertysnaps.co" ||
+    cleanKey === "demo";
+
+  if (isDemo) {
+    if (
+      password === "demo123" ||
+      password === "123456" ||
+      password === "demo" ||
+      password === "password" ||
+      password === "admin"
+    ) {
+      return { success: true, profile: DEMO_BROKER };
+    }
+  }
+
+  const store = ensureStore<Record<string, UserAccount>>(usersFile, {});
+  const user = store[cleanKey];
+
+  if (!user) {
+    if (isDemo) {
+      return { success: true, profile: DEMO_BROKER };
+    }
+    return { success: false, error: "No account found with this phone number or email" };
+  }
+
+  if (user.password !== password) {
+    return { success: false, error: "Incorrect password. Please try again." };
+  }
+
+  return { success: true, profile: user.profile };
 }
 

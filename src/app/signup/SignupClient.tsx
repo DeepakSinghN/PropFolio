@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  MessageCircle,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
@@ -15,19 +14,23 @@ import {
   RefreshCw,
   Mail,
   Sparkles,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SignupClient() {
   const router = useRouter();
 
-  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Profile fields
+  // Profile & Credentials fields
   const [fullName, setFullName] = useState("");
   const [contactInput, setContactInput] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState("");
   const [companyName, setCompanyName] = useState("");
 
@@ -37,78 +40,44 @@ export default function SignupClient() {
     ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInput.trim())
     : contactInput.replace(/\D/g, "").length >= 10;
 
-  // OTP field
-  const [otpCode, setOtpCode] = useState("");
-  const [resendTimer, setResendTimer] = useState(0);
-
-  const startCountdown = () => {
-    setResendTimer(30);
-    const interval = setInterval(() => {
-      setResendTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Step 1: Submit Profile & Send OTP
-  const handleStartSignup = async (e: React.FormEvent) => {
+  // Handle Signup
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setLoading(true);
 
-    try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: contactInput.trim() }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
-
-      setStep(2);
-      startCountdown();
-      if (data.devOtp) {
-        console.log(`[Dev Helper] Your OTP code is: ${data.devOtp}`);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to send verification code");
-    } finally {
-      setLoading(false);
+    if (!isValidContact) {
+      setErrorMsg("Please enter a valid 10-digit mobile number or email address");
+      return;
     }
-  };
 
-  // Step 2: Verify OTP & Create Broker Account
-  const handleVerifySignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
+    if (password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/verify-otp", {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          full_name: fullName.trim(),
           identifier: contactInput.trim(),
-          code: otpCode,
-          full_name: fullName,
-          city,
-          company_name: companyName,
+          password,
+          city: city.trim(),
+          company_name: companyName.trim(),
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Verification failed");
+      if (!res.ok) throw new Error(data.error || "Failed to create account");
 
-      // Redirect to dashboard
+      // Successful signup, redirect directly to dashboard
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
-      setErrorMsg(err.message || "Verification code invalid or expired");
+      setErrorMsg(err.message || "Failed to create your account");
     } finally {
       setLoading(false);
     }
@@ -153,181 +122,136 @@ export default function SignupClient() {
             </div>
           )}
 
-          {step === 1 ? (
-            <form onSubmit={handleStartSignup} className="space-y-4">
-              {/* Full Name */}
+          <form onSubmit={handleSignup} className="space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-bold text-zinc-900 dark:text-white">
+                Full Name / Contact Person
+              </label>
+              <div className="relative mt-1.5 flex items-center">
+                <User className="absolute left-3.5 h-4 w-4 text-zinc-400" />
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Shah"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Phone number or email */}
+            <div>
+              <label className="block text-xs font-bold text-zinc-900 dark:text-white">
+                Phone number or email
+              </label>
+              <div className="relative mt-1.5 flex items-center">
+                <div className="absolute left-3.5 flex items-center gap-1 text-xs font-bold text-zinc-500">
+                  {isEmail ? (
+                    <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <>
+                      <span>🇮🇳</span>
+                      <span>+91</span>
+                    </>
+                  )}
+                </div>
+                <input
+                  type={isEmail ? "email" : "text"}
+                  required
+                  placeholder="e.g. 98765 43210 or broker@realty.com"
+                  value={contactInput}
+                  onChange={(e) => setContactInput(e.target.value)}
+                  className={`w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white ${
+                    isEmail ? "pl-11 pr-4" : "pl-16 pr-4"
+                  }`}
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-400">
+                {isEmail
+                  ? "Used to log in to your account and receive buyer leads."
+                  : "Connects your WhatsApp bot listings directly to your account."}
+              </p>
+            </div>
+
+            {/* Create Password */}
+            <div>
+              <label className="block text-xs font-bold text-zinc-900 dark:text-white">
+                Create Password
+              </label>
+              <div className="relative mt-1.5 flex items-center">
+                <Lock className="absolute left-3.5 h-4 w-4 text-zinc-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  placeholder="At least 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-11 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* City & Agency (2 Columns) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-900 dark:text-white">
-                  Full Name / Contact Person
+                  Primary City / Market
                 </label>
                 <div className="relative mt-1.5 flex items-center">
-                  <User className="absolute left-3.5 h-4 w-4 text-zinc-400" />
+                  <MapPin className="absolute left-3.5 h-4 w-4 text-zinc-400" />
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Ramesh Shah"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Ahmedabad"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                     className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                   />
                 </div>
               </div>
 
-              {/* Phone number or email */}
               <div>
                 <label className="block text-xs font-bold text-zinc-900 dark:text-white">
-                  Phone number or email
+                  Agency / Firm Name (Optional)
                 </label>
                 <div className="relative mt-1.5 flex items-center">
-                  <div className="absolute left-3.5 flex items-center gap-1 text-xs font-bold text-zinc-500">
-                    {isEmail ? (
-                      <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    ) : (
-                      <>
-                        <span>🇮🇳</span>
-                        <span>+91</span>
-                      </>
-                    )}
-                  </div>
+                  <Briefcase className="absolute left-3.5 h-4 w-4 text-zinc-400" />
                   <input
-                    type={isEmail ? "email" : "text"}
-                    required
-                    placeholder="e.g. 98765 43210 or broker@realty.com"
-                    value={contactInput}
-                    onChange={(e) => setContactInput(e.target.value)}
-                    className={`w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white ${
-                      isEmail ? "pl-11 pr-4" : "pl-16 pr-4"
-                    }`}
+                    type="text"
+                    placeholder="e.g. Shah Realty"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                   />
                 </div>
-                <p className="mt-1 text-[11px] text-zinc-400">
-                  {isEmail
-                    ? "We'll send a 6-digit confirmation code to your email."
-                    : "Connects your WhatsApp bot listings directly to your account."}
-                </p>
               </div>
+            </div>
 
-              {/* City & Agency (2 Columns) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-900 dark:text-white">
-                    Primary City / Market
-                  </label>
-                  <div className="relative mt-1.5 flex items-center">
-                    <MapPin className="absolute left-3.5 h-4 w-4 text-zinc-400" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Ahmedabad"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-900 dark:text-white">
-                    Agency / Firm Name (Optional)
-                  </label>
-                  <div className="relative mt-1.5 flex items-center">
-                    <Briefcase className="absolute left-3.5 h-4 w-4 text-zinc-400" />
-                    <input
-                      type="text"
-                      placeholder="e.g. Shah Realty"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA Button */}
-              <button
-                type="submit"
-                disabled={loading || !fullName.trim() || !isValidContact}
-                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
-              >
-                {loading ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <span>{isEmail ? "Verify with Email Code" : "Verify with WhatsApp Code"}</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifySignup} className="space-y-4">
-              <div className="text-center pb-2">
-                <span className="text-xs text-zinc-500">
-                  {isEmail ? "Enter the 6-digit verification code sent to" : "Enter the 6-digit WhatsApp code sent to"}
-                </span>
-                <p className="text-sm font-bold text-zinc-900 dark:text-white mt-0.5">
-                  {isEmail ? contactInput.trim() : `+91 ${contactInput.replace(/\D/g, "")}`}
-                </p>
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
-                  (Test code: <span className="font-mono font-bold">123456</span>)
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  maxLength={6}
-                  required
-                  autoFocus
-                  placeholder="• • • • • •"
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-center text-xl font-mono tracking-widest font-black text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading || otpCode.length < 6}
-                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
-              >
-                {loading ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <span>Complete Signup & Open Dashboard</span>
-                    <CheckCircle2 className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-
-              <div className="flex items-center justify-between pt-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-                >
-                  Edit Details
-                </button>
-
-                <button
-                  type="button"
-                  disabled={resendTimer > 0 || loading}
-                  onClick={handleStartSignup}
-                  className="font-semibold text-emerald-600 disabled:opacity-50 hover:underline dark:text-emerald-400"
-                >
-                  {resendTimer > 0
-                    ? `Resend code in ${resendTimer}s`
-                    : isEmail
-                      ? "Resend Email Code"
-                      : "Resend WhatsApp Code"}
-                </button>
-              </div>
-            </form>
-          )}
+            {/* CTA Button */}
+            <button
+              type="submit"
+              disabled={loading || !fullName.trim() || !isValidContact || password.length < 6}
+              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
+            >
+              {loading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <span>Create Account & Open Dashboard</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </form>
 
           {/* Bottom Switcher */}
           <div className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
@@ -336,7 +260,7 @@ export default function SignupClient() {
               href="/login"
               className="font-bold text-amber-600 hover:underline dark:text-amber-400"
             >
-              Sign in to your account
+              Sign in with password
             </Link>
           </div>
         </div>
