@@ -751,6 +751,18 @@ export function ListingEditorContent() {
 
     saveListingToMemory(fullListing);
 
+    // Sync to local browser storage for instant client-side persistence
+    try {
+      const stored = localStorage.getItem("propfolio_listings");
+      const existing = stored ? JSON.parse(stored) : [];
+      const updated = [fullListing, ...(Array.isArray(existing) ? existing.filter((l: any) => l.slug !== fullListing.slug) : [])];
+      localStorage.setItem("propfolio_listings", JSON.stringify(updated));
+      localStorage.setItem(`propfolio_listing_${fullListing.slug}`, JSON.stringify(fullListing));
+      localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(fullListing));
+    } catch (e) {
+      console.warn("localStorage save error:", e);
+    }
+
     try {
       await fetch("/api/listings/create", {
         method: "POST",

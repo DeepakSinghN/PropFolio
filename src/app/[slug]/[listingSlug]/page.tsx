@@ -13,10 +13,23 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug, listingSlug } = await params;
-  const listing =
+  let listing =
     getListingFromDisk(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-    INITIAL_LISTINGS[0];
+    INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+
+  if (!listing && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      const { data } = await supabase.from("listings").select("*").eq("slug", listingSlug).single();
+      if (data) listing = data as any;
+    } catch {}
+  }
+
+  if (!listing) listing = INITIAL_LISTINGS[0];
 
   const appBaseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://prop-folio-eosin.vercel.app";
@@ -77,14 +90,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublicListingPage({ params }: PageProps) {
   const { slug, listingSlug } = await params;
-  const listing =
+  let listing =
     getListingFromDisk(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-    INITIAL_LISTINGS[0];
+    INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+
+  if (!listing && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      const { data } = await supabase.from("listings").select("*").eq("slug", listingSlug).single();
+      if (data) listing = data as any;
+    } catch {}
+  }
 
   return (
     <Suspense fallback={<div className="p-12 text-center text-sm">Loading listing...</div>}>
-      <PublicListingClient slug={slug} listingSlug={listingSlug} initialListing={listing} />
+      <PublicListingClient slug={slug} listingSlug={listingSlug} initialListing={listing || undefined} />
     </Suspense>
   );
 }

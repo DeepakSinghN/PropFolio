@@ -11,10 +11,28 @@ export async function GET(
   try {
     const { slug } = await params;
     const all = getAllListingsFromDisk();
-    const listing =
+    let listing =
       getListingFromDisk(slug) ||
       all.find((l) => l.slug === slug || l.id === slug) ||
       INITIAL_LISTINGS.find((l) => l.slug === slug || l.id === slug);
+
+    if (!listing && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      try {
+        const { createClient } = await import("@supabase/supabase-js");
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        );
+        const { data } = await supabase
+          .from("listings")
+          .select("*")
+          .eq("slug", slug)
+          .single();
+        if (data) {
+          listing = data as any;
+        }
+      } catch {}
+    }
 
     if (!listing) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });

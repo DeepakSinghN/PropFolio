@@ -136,16 +136,63 @@ function getFeatureIcon(label: string) {
 
 export default function PublicListingClient({ slug, listingSlug, initialListing }: ClientProps) {
   const router = useRouter();
-  const listing =
-    initialListing ||
-    getListingFromMemory(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-    INITIAL_LISTINGS[0];
+  const [listing, setListing] = useState<Listing>(() => {
+    return (
+      initialListing ||
+      getListingFromMemory(listingSlug) ||
+      INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
+      INITIAL_LISTINGS[0]
+    );
+  });
   const broker = listing.broker || DEMO_BROKER;
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+
+  // Sync latest listing from localStorage or API (handles Vercel multi-instance fallback)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const singleKey = `propfolio_listing_${listingSlug}`;
+      const singleCached = localStorage.getItem(singleKey);
+      if (singleCached) {
+        const parsed = JSON.parse(singleCached);
+        if (parsed && (parsed.slug === listingSlug || parsed.id === listingSlug)) {
+          setListing(parsed);
+          return;
+        }
+      }
+
+      const allStored = localStorage.getItem("propfolio_listings");
+      if (allStored) {
+        const parsedAll = JSON.parse(allStored);
+        if (Array.isArray(parsedAll)) {
+          const match = parsedAll.find((l: any) => l.slug === listingSlug || l.id === listingSlug);
+          if (match) {
+            setListing(match);
+            return;
+          }
+        }
+      }
+    } catch {}
+
+    fetch(`/api/listings/${listingSlug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.listing && (data.listing.slug === listingSlug || data.listing.id === listingSlug)) {
+          setListing(data.listing);
+        }
+      })
+      .catch(() => {});
+  }, [listingSlug]);
+
+  useEffect(() => {
+    if (initialListing && initialListing.slug === listingSlug) {
+      setListing(initialListing);
+    }
+  }, [initialListing, listingSlug]);
 
   // Touch Swipe State for Mobile
   const [touchStart, setTouchStart] = useState<number | null>(null);

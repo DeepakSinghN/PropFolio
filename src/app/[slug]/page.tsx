@@ -30,8 +30,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BrokerProfilePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Fetch all listings
-  const allListings = getAllListingsFromDisk();
+  // Fetch all listings from disk and Supabase
+  let allListings = getAllListingsFromDisk();
+
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      );
+      const { data } = await supabase.from("listings").select("*");
+      if (data && data.length > 0) {
+        const combined = [...data, ...allListings];
+        allListings = Array.from(new Map(combined.map((l: any) => [l.slug, l])).values());
+      }
+    } catch {}
+  }
+
   const brokerListings = allListings.length > 0 ? allListings : INITIAL_LISTINGS;
 
   return (
@@ -42,3 +58,4 @@ export default async function BrokerProfilePage({ params }: PageProps) {
     />
   );
 }
+
