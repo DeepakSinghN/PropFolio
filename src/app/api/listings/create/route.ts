@@ -23,45 +23,76 @@ export async function POST(req: NextRequest) {
     const supabase = createAdminClient();
 
     if (supabase) {
-      // 1. Resolve a valid UUID for broker_id
+      // 1. Resolve logged-in broker from session cookie (HIGHEST PRIORITY)
       let brokerId: string | null = null;
+      let sessionProfile: any = null;
 
-      if (isValidUUID(listing.broker_id)) {
-        brokerId = listing.broker_id;
-      }
-
-      // Check user session cookie
-      if (!brokerId) {
-        const phoneCookie = req.cookies.get("propfolio-phone-session");
-        if (phoneCookie?.value) {
-          try {
-            const { getPhoneSession } = await import("@/lib/auth-store");
-            const sess = getPhoneSession(phoneCookie.value);
-            if (sess?.profile?.id && isValidUUID(sess.profile.id)) {
+      const phoneCookie = req.cookies.get("propfolio-phone-session");
+      if (phoneCookie?.value) {
+        try {
+          const { getPhoneSession } = await import("@/lib/auth-store");
+          const sess = getPhoneSession(phoneCookie.value);
+          if (sess?.profile) {
+            sessionProfile = sess.profile;
+            if (isValidUUID(sess.profile.id)) {
               brokerId = sess.profile.id;
-            } else if (sess?.profile?.slug || sess?.profile?.phone_number) {
-              const query = supabase.from("profiles").select("id");
-              if (sess.profile.slug) {
-                const { data: p } = await query.eq("slug", sess.profile.slug).maybeSingle();
-                if (p?.id && isValidUUID(p.id)) brokerId = p.id;
-              }
             }
-          } catch {}
+          }
+        } catch {}
+      }
+
+      // If brokerId is not a UUID yet, lookup profile in Supabase using session details
+      if (!brokerId && sessionProfile) {
+        if (sessionProfile.user_id && isValidUUID(sessionProfile.user_id)) {
+          const { data: p } = await supabase
+            .from("profiles")
+            .select("id")
+            .or(`id.eq.${sessionProfile.user_id},user_id.eq.${sessionProfile.user_id}`)
+            .maybeSingle();
+          if (p?.id && isValidUUID(p.id)) brokerId = p.id;
+        }
+
+        if (!brokerId && sessionProfile.slug) {
+          const { data: p } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("slug", sessionProfile.slug)
+            .maybeSingle();
+          if (p?.id && isValidUUID(p.id)) brokerId = p.id;
+        }
+
+        if (!brokerId && sessionProfile.email) {
+          const emailPrefix = sessionProfile.email.split("@")[0];
+          const { data: p } = await supabase
+            .from("profiles")
+            .select("id")
+            .ilike("slug", `%${emailPrefix}%`)
+            .limit(1)
+            .maybeSingle();
+          if (p?.id && isValidUUID(p.id)) brokerId = p.id;
+        }
+
+        if (!brokerId && sessionProfile.phone_number) {
+          const rawPhone = sessionProfile.phone_number.replace(/[^0-9]/g, "");
+          const { data: p } = await supabase
+            .from("profiles")
+            .select("id")
+            .ilike("phone_number", `%${rawPhone.slice(-10)}%`)
+            .limit(1)
+            .maybeSingle();
+          if (p?.id && isValidUUID(p.id)) brokerId = p.id;
         }
       }
 
-      // Fallback: pick the first available profile in public.profiles
-      if (!brokerId) {
-        const { data: prof } = await supabase.from("profiles").select("id").limit(1).maybeSingle();
-        if (prof?.id && isValidUUID(prof.id)) {
-          brokerId = prof.id;
-        }
+      // Fallback to listing.broker_id only if valid UUID
+      if (!brokerId && isValidUUID(listing.broker_id)) {
+        brokerId = listing.broker_id;
       }
 
       if (!brokerId) {
         return NextResponse.json(
-          { error: "No broker profile found in database. Please sign up or log in first." },
-          { status: 400 }
+          { error: "Could not identify your logged-in broker account. Please log in again." },
+          { status: 401 }
         );
       }
 
@@ -89,10 +120,11 @@ export async function POST(req: NextRequest) {
         updated_at: new Date().toISOString(),
       };
 
-      // 2. Check if a listing with this slug already exists
+      // 2. Check if a listing with this (broker_id, slug) or slug exists
       const { data: existing } = await supabase
         .from("listings")
         .select("id")
+        .eq("broker_id", brokerId)
         .eq("slug", listing.slug)
         .maybeSingle();
 

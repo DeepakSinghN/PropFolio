@@ -36,7 +36,8 @@ import { Listing } from "@/types/database";
 const FALLBACK_PHOTO = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80";
 
 export default function DashboardPage() {
-  const [listings, setListings] = useState<Listing[]>(getAllMemoryListings());
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [isLoadingListings, setIsLoadingListings] = useState(true);
   const [collections, setCollections] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"listings" | "collections">("listings");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
@@ -54,47 +55,45 @@ export default function DashboardPage() {
   const [isSubmittingCol, setIsSubmittingCol] = useState(false);
 
   useEffect(() => {
-    // 0. Sync local storage listings
+    // 0. Clear legacy un-scoped localStorage to avoid cross-broker data bleeding
     try {
-      const stored = localStorage.getItem("propfolio_listings");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setListings((prev) => {
-            const combined = [...parsed, ...prev];
-            return Array.from(new Map(combined.map((item) => [item.slug, item])).values());
-          });
-        }
-      }
+      localStorage.removeItem("propfolio_listings");
     } catch {}
-    // 1. Fetch current auth user
+
+    // 1. Fetch current auth user and scoped listings
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
         if (data.authenticated && data.user) {
           setBroker({
             ...DEMO_BROKER,
+            ...data.user,
+            id: data.user.id || data.user.user_id || DEMO_BROKER.id,
             full_name: data.user.full_name || DEMO_BROKER.full_name,
             phone_number: data.user.phone_number || data.user.phone || DEMO_BROKER.phone_number,
             company_name: data.user.company_name || DEMO_BROKER.company_name,
             city: data.user.city || DEMO_BROKER.city,
             slug: data.user.slug || DEMO_BROKER.slug,
           });
-        }
-      })
-      .catch(() => {});
 
-    // 2. Fetch fresh listings
-    fetch("/api/listings")
+          const brokerId = data.user.id || data.user.user_id;
+          const url = brokerId ? `/api/listings?broker_id=${encodeURIComponent(brokerId)}` : "/api/listings";
+          return fetch(url);
+        }
+        return fetch("/api/listings");
+      })
       .then((res) => res.json())
       .then((data) => {
         if (data.listings && Array.isArray(data.listings)) {
           setListings(data.listings);
+        } else {
+          setListings([]);
         }
       })
-      .catch((err) => console.warn("Failed to fetch fresh listings:", err));
+      .catch((err) => console.warn("Failed to fetch fresh listings:", err))
+      .finally(() => setIsLoadingListings(false));
 
-    // 3. Fetch collections
+    // 2. Fetch collections
     fetch("/api/collections")
       .then((res) => res.json())
       .then((data) => {
@@ -102,7 +101,7 @@ export default function DashboardPage() {
       })
       .catch((err) => console.warn("Failed to fetch collections:", err));
 
-    // 4. Close open menu on outside click
+    // 3. Close open menu on outside click
     function handleOutsideClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
       if (!target.closest("[data-listing-actions]")) {
@@ -669,7 +668,12 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {filteredListings.length === 0 ? (
+            {isLoadingListings ? (
+              <div className="rounded-3xl border border-slate-200/90 bg-white py-16 text-center shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
+                <RefreshCw className="mx-auto h-8 w-8 animate-spin text-slate-400" />
+                <p className="mt-3 text-sm font-semibold text-slate-600 dark:text-slate-300">Loading your portfolio...</p>
+              </div>
+            ) : filteredListings.length === 0 ? (
               <div className="rounded-3xl border border-slate-200/90 bg-white py-16 text-center shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
                 <Building2 className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
                 <h3 className="mt-3 text-base font-bold text-slate-800 dark:text-slate-200">
