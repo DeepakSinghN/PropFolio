@@ -609,9 +609,9 @@ export default function DashboardPage() {
             )}
           </div>
         ) : (
-          /* TAB 2: PROPERTIES VIEW */
-          <div className="mt-6 rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800 gap-3">
+          /* TAB 2: PROPERTIES VIEW - Clean Flat Mobile Layout without Double Nesting */
+          <div className="mt-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-lg sm:text-xl font-bold text-[#0a1128] dark:text-white">
@@ -627,10 +627,10 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setStatusFilter("all")}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                       statusFilter === "all"
-                        ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        ? "bg-[#1c5436] text-white shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     }`}
                   >
                     All ({listings.length})
@@ -638,10 +638,10 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setStatusFilter("active")}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                       statusFilter === "active"
-                        ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        ? "bg-[#1c5436] text-white shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     }`}
                   >
                     Active ({activeCount})
@@ -649,10 +649,10 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setStatusFilter("sold")}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition ${
+                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                       statusFilter === "sold"
-                        ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        ? "bg-[#1c5436] text-white shadow-xs"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                     }`}
                   >
                     Sold ({soldCount})
@@ -662,15 +662,15 @@ export default function DashboardPage() {
 
               <Link
                 href="/dashboard/listings/new"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-800 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 self-start sm:self-auto shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 shadow-xs transition hover:border-[#1c5436] hover:text-[#1c5436] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 self-start sm:self-auto shrink-0"
               >
-                <PlusCircle className="h-3.5 w-3.5 text-[#c5a059]" />
+                <PlusCircle className="h-3.5 w-3.5 text-[#1c5436] dark:text-emerald-400" />
                 <span>+ New Listing</span>
               </Link>
             </div>
 
             {filteredListings.length === 0 ? (
-              <div className="py-16 text-center">
+              <div className="rounded-3xl border border-slate-200/90 bg-white py-16 text-center shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
                 <Building2 className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
                 <h3 className="mt-3 text-base font-bold text-slate-800 dark:text-slate-200">
                   {statusFilter === "sold" ? "No sold properties yet" : "No active listings found"}
@@ -683,15 +683,15 @@ export default function DashboardPage() {
                 {statusFilter !== "sold" && (
                   <Link
                     href="/dashboard/listings/new"
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0a1128] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16234b]"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#1c5436] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#15422a]"
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+                    <Sparkles className="h-3.5 w-3.5 text-emerald-300" />
                     <span>Create Listing</span>
                   </Link>
                 )}
               </div>
             ) : (
-              <div className="mt-4 divide-y divide-slate-100 dark:divide-slate-800/80">
+              <div className="space-y-3">
                 {filteredListings.map((item) => {
                   const rawCover = item.photos?.[0]?.photo_url;
                   const coverPhoto = (rawCover && !rawCover.startsWith("blob:")) ? rawCover : FALLBACK_PHOTO;
@@ -701,7 +701,7 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={item.id}
-                      className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between transition hover:bg-slate-50/60 dark:hover:bg-slate-900/30 rounded-2xl px-2 sm:px-3 -mx-2 sm:-mx-3"
+                      className="flex flex-col gap-3.5 rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-5 shadow-xs transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-[#0c1222]"
                     >
                       {/* Media + Info */}
                       <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
