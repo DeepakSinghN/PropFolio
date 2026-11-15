@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const isEmail = trimmedTarget.includes("@");
 
     // 1. Try Supabase Auth if email is provided
-    if (isEmail && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (isEmail && (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)) {
       try {
         const supabase = await createClient();
         const { data: supaAuth, error: supaErr } = await supabase.auth.signInWithPassword({
@@ -100,3 +100,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

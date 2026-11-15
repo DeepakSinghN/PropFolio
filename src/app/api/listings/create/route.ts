@@ -15,13 +15,26 @@ export async function POST(req: NextRequest) {
     saveListingToDisk(listing);
 
     // Persist to Supabase if configured for multi-serverless sync
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (supabaseUrl && supabaseKey) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        );
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Ensure valid broker_id for Supabase foreign key constraint
+        let brokerId = listing.broker_id;
+        if (!brokerId || brokerId === "b-1") {
+          const { data: prof } = await supabase.from("profiles").select("id").limit(1).maybeSingle();
+          if (prof?.id) {
+            brokerId = prof.id;
+          }
+        }
+
         await supabase.from("listings").upsert(
           {
             title: listing.title,
@@ -42,6 +55,7 @@ export async function POST(req: NextRequest) {
             ai_highlights: listing.ai_highlights,
             ai_neighborhood_highlights: listing.ai_neighborhood_highlights,
             status: listing.status,
+            ...(brokerId && brokerId !== "b-1" ? { broker_id: brokerId } : {}),
             updated_at: new Date().toISOString(),
           },
           { onConflict: "slug" }

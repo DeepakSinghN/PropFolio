@@ -16,13 +16,16 @@ export async function GET(
       all.find((l) => l.slug === slug || l.id === slug) ||
       INITIAL_LISTINGS.find((l) => l.slug === slug || l.id === slug);
 
-    if (!listing && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!listing && supabaseUrl && supabaseKey) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        );
+        const supabase = createClient(supabaseUrl, supabaseKey);
         const { data } = await supabase
           .from("listings")
           .select("*")

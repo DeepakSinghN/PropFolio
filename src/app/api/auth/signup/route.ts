@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     let supaUserId: string | undefined;
 
     // 1. If email, attempt Supabase user creation
-    if (isEmail && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    if (isEmail && (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)) {
       try {
         const supabase = await createClient();
         const { data: supaAuth } = await supabase.auth.signUp({
@@ -82,3 +82,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

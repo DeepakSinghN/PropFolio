@@ -33,13 +33,16 @@ export default async function BrokerProfilePage({ params }: PageProps) {
   // Fetch all listings from disk and Supabase
   let allListings = getAllListingsFromDisk();
 
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supabaseUrl && supabaseKey) {
     try {
       const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      );
+      const supabase = createClient(supabaseUrl, supabaseKey);
       const { data } = await supabase.from("listings").select("*");
       if (data && data.length > 0) {
         const combined = [...data, ...allListings];

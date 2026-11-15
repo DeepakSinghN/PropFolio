@@ -59,11 +59,15 @@ export async function POST(req: NextRequest) {
         };
 
     // Only attempt Supabase sync for non-test accounts when valid keys are configured
-    if (!isTestAccount && process.env.NEXT_PUBLIC_SUPABASE_URL && !process.env.SUPABASE_SERVICE_ROLE_KEY?.includes("...")) {
+    const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supaKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!isTestAccount && supaUrl && supaKey && !supaKey.includes("...")) {
       try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        const supabase = createClient(supaUrl, supaKey);
 
         const query = supabase.from("profiles").select("*");
         const { data: existingProfile } = isEmail
