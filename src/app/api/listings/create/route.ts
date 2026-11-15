@@ -9,6 +9,58 @@ function isValidUUID(str?: string | null): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
+async function ensureStorageBucket(supabase: any) {
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const exists = buckets?.some((b: any) => b.name === "listing-photos");
+    if (!exists) {
+      await supabase.storage.createBucket("listing-photos", { public: true });
+    }
+  } catch {}
+}
+
+async function uploadBase64ToStorage(
+  supabase: any,
+  rawUrl: string,
+  listingSlug: string,
+  idx: number
+): Promise<string> {
+  if (!rawUrl || !rawUrl.startsWith("data:image/")) {
+    return rawUrl;
+  }
+
+  try {
+    const matches = rawUrl.match(/^data:(image\/[a-zA-Z0-9.-]+);base64,(.+)$/);
+    if (!matches) return rawUrl;
+
+    const mime = matches[1];
+    const ext = mime.split("/")[1] || "jpeg";
+    const buffer = Buffer.from(matches[2], "base64");
+    const filePath = `${listingSlug}/photo-${idx}-${Date.now()}.${ext === "jpeg" ? "jpg" : ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("listing-photos")
+      .upload(filePath, buffer, {
+        contentType: mime,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.warn("Storage upload failed, keeping fallback:", uploadError.message);
+      return rawUrl;
+    }
+
+    const { data } = supabase.storage
+      .from("listing-photos")
+      .getPublicUrl(filePath);
+
+    return data?.publicUrl || rawUrl;
+  } catch (e) {
+    console.warn("Storage upload exception:", e);
+    return rawUrl;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const listing: Listing = await req.json();
@@ -161,16 +213,26 @@ export async function POST(req: NextRequest) {
         savedListingId = inserted.id;
       }
 
-      // 3. Save listing photos if provided
+      // 3. Save listing photos: upload base64 to Storage CDN and save URLs
       if (listing.photos && Array.isArray(listing.photos) && listing.photos.length > 0 && savedListingId) {
         try {
+          await ensureStorageBucket(supabase);
           await supabase.from("listing_photos").delete().eq("listing_id", savedListingId);
-          const photoRows = listing.photos.map((p: any, idx: number) => ({
-            listing_id: savedListingId,
-            photo_url: typeof p === "string" ? p : p.photo_url,
-            display_order: idx + 1,
-            is_cover: idx === 0,
-          }));
+
+          const photoRows = await Promise.all(
+            listing.photos.map(async (p: any, idx: number) => {
+              const rawPhotoUrl = typeof p === "string" ? p : p.photo_url;
+              const cdnUrl = await uploadBase64ToStorage(supabase, rawPhotoUrl, listing.slug, idx);
+
+              return {
+                listing_id: savedListingId,
+                photo_url: cdnUrl,
+                display_order: idx + 1,
+                is_cover: idx === 0,
+              };
+            })
+          );
+
           await supabase.from("listing_photos").insert(photoRows);
         } catch (photoErr) {
           console.warn("Listing photos sync notice:", photoErr);
