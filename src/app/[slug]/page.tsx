@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAllListingsFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
+import { createAdminClient } from "@/lib/supabase/server";
 import BrokerProfileClient from "./BrokerProfileClient";
 
 interface PageProps {
@@ -11,7 +12,22 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const brokerName = DEMO_BROKER.full_name;
+  let brokerName = DEMO_BROKER.full_name;
+
+  const supabase = createAdminClient();
+  if (supabase) {
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (profile?.full_name) {
+        brokerName = profile.full_name;
+      }
+    } catch {}
+  }
+
   const title = `${brokerName} | Property Portfolio & Verified Listings`;
   const description = `Explore all luxury flats, villas, and verified properties listed by ${brokerName} on Property Snaps.`;
 
@@ -30,25 +46,42 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function BrokerProfilePage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Fetch all listings from disk and Supabase
   let allListings = getAllListingsFromDisk();
+  let currentBroker = DEMO_BROKER;
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (supabaseUrl && supabaseKey) {
+  const supabase = createAdminClient();
+  if (supabase) {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data } = await supabase.from("listings").select("*");
-      if (data && data.length > 0) {
-        const combined = [...data, ...allListings];
-        allListings = Array.from(new Map(combined.map((l: any) => [l.slug, l])).values());
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (profile) {
+        currentBroker = {
+          ...DEMO_BROKER,
+          ...profile,
+        };
+
+        const { data: supaListings } = await supabase
+          .from("listings")
+          .select("*, listing_photos(*)")
+          .eq("broker_id", profile.id)
+          .order("created_at", { ascending: false });
+
+        if (supaListings && supaListings.length > 0) {
+          allListings = supaListings.map((l: any) => ({
+            ...l,
+            photos: (l.listing_photos || []).sort(
+              (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+            ),
+          }));
+        }
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Supabase broker profile error:", e);
+    }
   }
 
   const brokerListings = allListings.length > 0 ? allListings : INITIAL_LISTINGS;
@@ -56,9 +89,8 @@ export default async function BrokerProfilePage({ params }: PageProps) {
   return (
     <BrokerProfileClient
       slug={slug}
-      initialBroker={DEMO_BROKER}
+      initialBroker={currentBroker}
       initialListings={brokerListings}
     />
   );
 }
-

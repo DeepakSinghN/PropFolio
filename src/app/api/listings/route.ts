@@ -1,54 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllListingsFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS } from "@/lib/store";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const diskListings = getAllListingsFromDisk();
     const map = new Map<string, any>();
+    let hasSupabaseListings = false;
 
-    // 1. Seed defaults
-    INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
-
-    // 2. Fetch from Supabase if configured
-    const rawUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-    let supabaseUrl = rawUrl;
-    if (rawUrl) {
+    // 1. Fetch from Supabase if configured
+    const supabase = createAdminClient();
+    if (supabase) {
       try {
-        const parsed = new URL(rawUrl);
-        supabaseUrl = `${parsed.protocol}//${parsed.host}`;
-      } catch {
-        supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
-      }
-    }
-
-    const supabaseKey = (
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      ""
-    ).trim();
-
-    if (supabaseUrl && supabaseKey) {
-      try {
-        const { createClient } = await import("@supabase/supabase-js");
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("listings")
-          .select("*")
+          .select("*, listing_photos(*)")
           .order("created_at", { ascending: false });
-        if (data && Array.isArray(data)) {
-          data.forEach((l: any) => map.set(l.slug, l));
+
+        if (error) {
+          console.warn("Supabase fetch listings error:", error);
+        } else if (data && Array.isArray(data) && data.length > 0) {
+          hasSupabaseListings = true;
+          data.forEach((l: any) => {
+            const photos = (l.listing_photos || []).sort(
+              (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+            );
+            map.set(l.slug, {
+              ...l,
+              photos: photos.length > 0 ? photos : l.photos || [],
+            });
+          });
         }
       } catch (e) {
-        console.warn("Supabase fetch listings error:", e);
+        console.warn("Supabase fetch listings exception:", e);
       }
     }
 
-    // 3. Overlay disk listings
-    diskListings.forEach((l) => map.set(l.slug, l));
+    // 2. If no Supabase listings exist yet, overlay disk listings and fallback demo listings
+    if (!hasSupabaseListings) {
+      const diskListings = getAllListingsFromDisk();
+      diskListings.forEach((l) => map.set(l.slug, l));
+
+      if (map.size === 0) {
+        INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
+      }
+    }
 
     const all = Array.from(map.values()).reverse();
     return NextResponse.json({ listings: all });
@@ -56,4 +54,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-

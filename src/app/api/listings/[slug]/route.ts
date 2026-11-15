@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getListingFromDisk, getAllListingsFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS } from "@/lib/store";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,31 +11,39 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const all = getAllListingsFromDisk();
-    let listing =
-      getListingFromDisk(slug) ||
-      all.find((l) => l.slug === slug || l.id === slug) ||
-      INITIAL_LISTINGS.find((l) => l.slug === slug || l.id === slug);
+    let listing: any = null;
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!listing && supabaseUrl && supabaseKey) {
+    // 1. Check Supabase first
+    const supabase = createAdminClient();
+    if (supabase) {
       try {
-        const { createClient } = await import("@supabase/supabase-js");
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("listings")
-          .select("*")
+          .select("*, listing_photos(*)")
           .eq("slug", slug)
-          .single();
+          .maybeSingle();
+
         if (data) {
-          listing = data as any;
+          const photos = (data.listing_photos || []).sort(
+            (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+          );
+          listing = {
+            ...data,
+            photos: photos.length > 0 ? photos : data.photos || [],
+          };
         }
-      } catch {}
+      } catch (e) {
+        console.warn("Supabase fetch single listing error:", e);
+      }
+    }
+
+    // 2. Fallback to disk or initial demo listings
+    if (!listing) {
+      const all = getAllListingsFromDisk();
+      listing =
+        getListingFromDisk(slug) ||
+        all.find((l) => l.slug === slug || l.id === slug) ||
+        INITIAL_LISTINGS.find((l) => l.slug === slug || l.id === slug);
     }
 
     if (!listing) {
@@ -46,4 +55,3 @@ export async function GET(
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-

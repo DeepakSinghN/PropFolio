@@ -1,8 +1,9 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
-import PublicListingClient from "./PublicListingClient";
-import { INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
+import { Suspense } from "react";
 import { getListingFromDisk } from "@/lib/server-store";
+import { INITIAL_LISTINGS } from "@/lib/store";
+import { createAdminClient } from "@/lib/supabase/server";
+import PublicListingClient from "./PublicListingClient";
 
 interface PageProps {
   params: Promise<{
@@ -12,27 +13,35 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug, listingSlug } = await params;
-  let listing =
-    getListingFromDisk(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+  const { listingSlug } = await params;
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!listing && supabaseUrl && supabaseKey) {
+  let listing: any = null;
+  const supabase = createAdminClient();
+  if (supabase) {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data } = await supabase.from("listings").select("*").eq("slug", listingSlug).single();
-      if (data) listing = data as any;
+      const { data } = await supabase
+        .from("listings")
+        .select("*, listing_photos(*)")
+        .eq("slug", listingSlug)
+        .maybeSingle();
+      if (data) {
+        const photos = (data.listing_photos || []).sort(
+          (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+        );
+        listing = {
+          ...data,
+          photos: photos.length > 0 ? photos : data.photos || [],
+        };
+      }
     } catch {}
   }
 
-  if (!listing) listing = INITIAL_LISTINGS[0];
+  if (!listing) {
+    listing =
+      getListingFromDisk(listingSlug) ||
+      INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
+      INITIAL_LISTINGS[0];
+  }
 
   const appBaseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://prop-folio-eosin.vercel.app";
@@ -50,17 +59,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  // Exact clean title format (e.g. "3 BHK Apartment for Sale in Satellite, Ahmedabad")
-  const title = `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Apartment"} for ${
-    listing.listing_type || "Sale"
-  } in ${listing.location_locality || listing.location_city}`;
-
-  // Clean single-paragraph description for WhatsApp preview bubble
-  const description = listing.description
-    ? listing.description.replace(/\n+/g, " ").trim().slice(0, 190) + "..."
-    : `This premium ${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "apartment"} in ${
-        listing.location_locality || listing.location_city
-      } offers a spacious ${listing.carpet_area_sqft ? `${listing.carpet_area_sqft.toLocaleString()} Sq.Ft. super built-up area.` : "living area."} Move-in ready.`;
+  const title = `${listing.title} | ${listing.display_price}`;
+  const description =
+    listing.description?.slice(0, 160) ||
+    `${listing.bhk || ""} BHK ${listing.property_type} in ${listing.location_locality}, ${listing.location_city}. Verified listing with instant WhatsApp inquiry.`;
 
   return {
     title,
@@ -68,19 +70,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      url: `${appBaseUrl}/${slug}/${listingSlug}`,
-      type: "website",
-      siteName: "Property Snaps",
       images: [
         {
           url: coverPhoto,
-          secureUrl: coverPhoto,
           width: 1200,
           height: 630,
-          type: "image/jpeg",
-          alt: title,
+          alt: listing.title,
         },
       ],
+      type: "website",
     },
     twitter: {
       card: "summary_large_image",
@@ -93,23 +91,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PublicListingPage({ params }: PageProps) {
   const { slug, listingSlug } = await params;
-  let listing =
-    getListingFromDisk(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+  let listing: any = null;
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!listing && supabaseUrl && supabaseKey) {
+  const supabase = createAdminClient();
+  if (supabase) {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      const { data } = await supabase.from("listings").select("*").eq("slug", listingSlug).single();
-      if (data) listing = data as any;
+      const { data } = await supabase
+        .from("listings")
+        .select("*, listing_photos(*)")
+        .eq("slug", listingSlug)
+        .maybeSingle();
+
+      if (data) {
+        const photos = (data.listing_photos || []).sort(
+          (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+        );
+        listing = {
+          ...data,
+          photos: photos.length > 0 ? photos : data.photos || [],
+        };
+      }
     } catch {}
+  }
+
+  if (!listing) {
+    listing =
+      getListingFromDisk(listingSlug) ||
+      INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
   }
 
   return (

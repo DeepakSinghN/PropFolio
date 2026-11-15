@@ -88,7 +88,7 @@ export default function DashboardPage() {
     fetch("/api/listings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.listings && data.listings.length > 0) {
+        if (data.listings && Array.isArray(data.listings)) {
           setListings(data.listings);
         }
       })

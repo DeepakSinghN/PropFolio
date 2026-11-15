@@ -781,13 +781,20 @@ export function ListingEditorContent() {
     }
 
     try {
-      await fetch("/api/listings/create", {
+      const res = await fetch("/api/listings/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fullListing),
       });
-    } catch (err) {
-      console.warn("Server save warning:", err);
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to save listing");
+      }
+    } catch (err: any) {
+      console.error("Server save error:", err);
+      alert("Save failed: " + (err.message || "Could not save to Supabase"));
+      setIsPublishing(false);
+      return;
     } finally {
       setIsPublishing(false);
     }
