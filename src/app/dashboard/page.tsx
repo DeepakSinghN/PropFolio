@@ -263,19 +263,24 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* ── PLAN / LISTINGS REMAINING ALERT BAR ── */}
-        <div className="mb-5 flex items-center justify-between rounded-2xl border border-amber-200/90 bg-[#fffbeb] px-4 py-3 text-xs dark:border-amber-900/40 dark:bg-amber-950/20">
-          <div className="flex items-center gap-2 font-medium text-amber-900 dark:text-amber-200">
-            <Sparkles className="h-4 w-4 text-amber-600 shrink-0" />
-            <span>
-              {remainingListings > 0
-                ? `${remainingListings} listings left in your current plan`
-                : "No listings left"}
+        {/* ── PLAN / LISTINGS REMAINING ALERT BAR (Compact on Mobile) ── */}
+        <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border border-amber-200/90 bg-[#fffbeb] px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs dark:border-amber-900/40 dark:bg-amber-950/20">
+          <div className="flex items-center gap-1.5 sm:gap-2 font-medium text-amber-900 dark:text-amber-200 min-w-0">
+            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 shrink-0" />
+            <span className="truncate">
+              {remainingListings > 0 ? (
+                <>
+                  <strong className="font-bold">{remainingListings} listings left</strong>
+                  <span className="hidden sm:inline"> in your current plan</span>
+                </>
+              ) : (
+                "No listings left"
+              )}
             </span>
           </div>
           <Link
             href="/pricing"
-            className="flex items-center gap-1 rounded-xl bg-slate-900 px-3 py-1.5 text-[11px] font-bold text-white shadow-xs hover:bg-slate-800 transition dark:bg-white dark:text-slate-900"
+            className="flex items-center gap-1 shrink-0 rounded-lg sm:rounded-xl bg-slate-900 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-white shadow-xs hover:bg-slate-800 transition dark:bg-white dark:text-slate-900 whitespace-nowrap"
           >
             <Sparkles className="h-3 w-3 text-amber-400 dark:text-amber-600" />
             <span>Get more listings</span>
@@ -369,66 +374,51 @@ export default function DashboardPage() {
           <span>Create New Listing</span>
         </Link>
 
-        {/* Metrics Grid - Compact & Clean on Mobile */}
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-4">
-          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
+        {/* Metrics Grid - 3 Cards in 1 Single Row on Mobile */}
+        <div className="mt-2 grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+              <span className="text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
                 Active Listings
               </span>
-              <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#1c5436] shrink-0 ml-1" />
+              <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-[#1c5436] shrink-0 ml-1" />
             </div>
-            <p className="mt-1 sm:mt-2 text-xl sm:text-3xl font-extrabold text-[#0a1128] dark:text-white tabular-nums">
+            <p className="mt-1 sm:mt-2 text-base sm:text-3xl font-extrabold text-[#0a1128] dark:text-white tabular-nums">
               {listings.length}
             </p>
-            <p className="mt-0.5 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 truncate">
-              <span className="sm:hidden">{listings.length} live</span>
+            <p className="mt-0.5 text-[9px] sm:text-xs text-emerald-600 dark:text-emerald-400 truncate">
+              <span className="sm:hidden">Live</span>
               <span className="hidden sm:inline">{listings.length} live on your site</span>
             </p>
           </div>
 
-          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
+          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+              <span className="text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
                 Collections
               </span>
-              <Folder className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-500 shrink-0 ml-1" />
+              <Folder className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500 shrink-0 ml-1" />
             </div>
-            <p className="mt-1 sm:mt-2 text-xl sm:text-3xl font-extrabold text-[#0a1128] dark:text-white tabular-nums">
+            <p className="mt-1 sm:mt-2 text-base sm:text-3xl font-extrabold text-[#0a1128] dark:text-white tabular-nums">
               {collections.length}
             </p>
-            <p className="mt-0.5 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
-              <span className="sm:hidden">{collections.length} active</span>
+            <p className="mt-0.5 text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+              <span className="sm:hidden">Active</span>
               <span className="hidden sm:inline">{collections.length} active collections</span>
             </p>
           </div>
 
-          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
+          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
-                Left to use
-              </span>
-              <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 shrink-0 ml-1" />
-            </div>
-            <p className="mt-1 sm:mt-2 text-xl sm:text-3xl font-extrabold text-[#0a1128] dark:text-white tabular-nums">
-              {remainingListings}
-            </p>
-            <p className="mt-0.5 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
-              Out of {planLimit} limit
-            </p>
-          </div>
-
-          <div className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
-            <div className="flex items-center justify-between text-slate-400">
-              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+              <span className="text-[9px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
                 Portfolio Value
               </span>
-              <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500 shrink-0 ml-1" />
+              <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 shrink-0 ml-1" />
             </div>
-            <p className="mt-1 sm:mt-2 text-lg sm:text-2xl md:text-3xl font-extrabold text-[#0a1128] dark:text-white truncate">
+            <p className="mt-1 sm:mt-2 text-xs sm:text-2xl md:text-3xl font-extrabold text-[#0a1128] dark:text-white truncate">
               {formatPortfolioValue(totalPortfolioValue)}
             </p>
-            <p className="mt-0.5 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 truncate">
+            <p className="mt-0.5 text-[9px] sm:text-xs text-emerald-600 dark:text-emerald-400 truncate">
               <span className="sm:hidden">Total value</span>
               <span className="hidden sm:inline">Total property value</span>
             </p>
