@@ -78,6 +78,13 @@ export interface ParsedPropertyData {
   bedrooms?: number;
   bathrooms?: number;
   carpet_area_sqft?: number;
+  super_built_up_sqft?: number;
+  floor?: string;
+  furnishing?: string;
+  facing?: string;
+  possession?: string;
+  parking?: string;
+  property_age?: string;
   price_amount: number;
   display_price: string;
   currency: string;

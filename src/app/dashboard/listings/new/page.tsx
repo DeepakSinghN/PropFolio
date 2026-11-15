@@ -112,6 +112,21 @@ const PRESET_EXAMPLES = [
   }
 ];
 
+const AI_WHATSAPP_PRESETS = [
+  {
+    label: "4 BHK Bodakdev (Sale)",
+    text: "4 BHK Flat for sale in Bodakdev Ahmedabad. 1650 sqft carpet, 2450 super built-up, 12th floor, 4 attached baths, 2 covered car parking, west facing, ready to move, asking 3.25 Cr negotiable, modular kitchen, amenities: gym, swimming pool, 24x7 security, club house."
+  },
+  {
+    label: "3 BHK Satellite (Furnished)",
+    text: "Ultra modern 3 BHK Fully Furnished apartment in Satellite, Ahmedabad. 1450 sqft carpet, 7th floor, 3 baths, 2 balconies, east facing, 5-year-old society, asking 1.45 Cr negotiable. Amenities: lift, 100% power backup, CCTV, kids play area."
+  },
+  {
+    label: "2 BHK Rental (Near Metro)",
+    text: "2 BHK apartment for rent in Andheri West Mumbai. 850 sqft carpet, semi-furnished with modular kitchen, 15th floor, 2 baths, road facing, rent 65,000 per month. 5 mins walk to metro station, 24x7 water supply, 1 covered parking."
+  }
+];
+
 export interface PropertyFeatureItem {
   id: string;
   section: string;
@@ -308,6 +323,11 @@ export function ListingEditorContent() {
   const [aiNeighborhood, setAiNeighborhood] = useState<string[]>([]);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  /* ── AI Magic Auto-Fill (WhatsApp / Raw Notes) ── */
+  const [aiMagicInput, setAiMagicInput] = useState("");
+  const [aiParsedPreview, setAiParsedPreview] = useState<ParsedPropertyData | null>(null);
+  const [aiMagicSuccessMsg, setAiMagicSuccessMsg] = useState<string | null>(null);
+
   /* ── Enrich Your Listing (Optional) ── */
   const [urgencyBadge, setUrgencyBadge] = useState("");
   const [roomSortNote, setRoomSortNote] = useState("");
@@ -499,6 +519,114 @@ export function ListingEditorContent() {
     });
     setDragIdx(null);
   };
+
+  /* ── AI Magic Auto-Fill (WhatsApp / Raw Notes) ── */
+  async function handleMagicAIFill(customText?: string) {
+    const textToParse = (customText !== undefined ? customText : aiMagicInput).trim();
+    if (!textToParse) {
+      setAiError("Kripya WhatsApp message ya raw property details paste karein.");
+      return;
+    }
+    setIsGeneratingAI(true);
+    setAiError(null);
+    setAiMagicSuccessMsg(null);
+
+    try {
+      const response = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: textToParse }),
+      });
+      const res = await response.json();
+      if (!response.ok || !res.success) throw new Error(res.error || "AI generation failed");
+
+      const data = res.data as ParsedPropertyData;
+      setAiParsedPreview(data);
+
+      // Auto-populate all form fields
+      if (data.title) setHeadline(data.title);
+      if (data.property_type) {
+        setPropertyType(data.property_type);
+        const found = PROPERTY_CATEGORIES.find((c) => c.value === data.property_type);
+        if (found) setSelectedCategoryId(found.id);
+      }
+      if (data.listing_type) setTransactionType(data.listing_type);
+      if (data.display_price) setDisplayPrice(data.display_price);
+      if (data.price_amount) setPriceAmount(data.price_amount);
+      if (data.bhk) setBhk(data.bhk);
+      if (data.bedrooms) setBedrooms(data.bedrooms);
+      if (data.bathrooms) setBathrooms(data.bathrooms);
+      if (data.carpet_area_sqft) setCarpetArea(data.carpet_area_sqft);
+      if (data.super_built_up_sqft) setSuperBuiltUp(data.super_built_up_sqft);
+      if (data.floor) setFloor(data.floor);
+      if (data.furnishing) setFurnishing(data.furnishing);
+      if (data.facing) setFacing(data.facing);
+      if (data.possession) setPossession(data.possession);
+      if (data.property_age) setPropertyAge(data.property_age);
+      if (data.location_city) setLocationCity(data.location_city);
+      if (data.location_locality) setLocationLocality(data.location_locality);
+
+      // Amenities
+      if (data.amenities?.length) {
+        setSelectedAmenities((prev) => Array.from(new Set([...prev, ...data.amenities])));
+        setCustomAmenities((prev) => Array.from(new Set([...prev, ...data.amenities])));
+      }
+
+      // Descriptions and highlights
+      setAiDescription(data.description || "");
+      setAiHighlights(data.ai_highlights || []);
+      setAiNeighborhood(data.ai_neighborhood_highlights || []);
+      setRawNotes(textToParse);
+
+      // Update dynamic feature items
+      setFeaturesList((prev) =>
+        prev.map((item) => {
+          const id = item.id;
+          const label = item.label.toUpperCase();
+          if (id === "hf-1" || label.includes("CONFIGURATION")) {
+            return { ...item, value: data.bhk ? `${data.bhk} BHK` : item.value };
+          }
+          if (id === "hf-2" || label.includes("CARPET")) {
+            return { ...item, value: data.carpet_area_sqft ? `${data.carpet_area_sqft.toLocaleString()} Sq.Ft.` : item.value };
+          }
+          if (id === "hf-3" || label.includes("SUPER BUILT-UP")) {
+            return { ...item, value: data.super_built_up_sqft ? `${data.super_built_up_sqft.toLocaleString()} Sq.Ft.` : item.value };
+          }
+          if (id === "hf-4" || label.includes("BATHROOM")) {
+            return { ...item, value: data.bathrooms ? `${data.bathrooms} attached` : (data.bhk ? `${data.bhk} attached` : item.value) };
+          }
+          if (id === "hf-5" || label.includes("FLOOR")) {
+            return { ...item, value: data.floor || item.value };
+          }
+          if (id === "hf-6" || label.includes("FURNISHING")) {
+            return { ...item, value: data.furnishing || item.value };
+          }
+          if (id === "hf-7" || label.includes("FACING")) {
+            return { ...item, value: data.facing || item.value };
+          }
+          if (id === "hf-8" || label.includes("POSSESSION")) {
+            return { ...item, value: data.possession || item.value };
+          }
+          if (id === "ba-2" || label.includes("CAR PARKING")) {
+            return { ...item, value: data.parking || item.value };
+          }
+          if (id === "ba-4" || label.includes("PROPERTY AGE")) {
+            return { ...item, value: data.property_age || item.value };
+          }
+          if (id === "oc-5" || label.includes("NEGOTIABLE")) {
+            return { ...item, value: "Yes, for genuine buyers" };
+          }
+          return item;
+        })
+      );
+
+      setAiMagicSuccessMsg("✨ Saari details auto-fill ho gayi hain! Aap preview dekh sakte hain aur chahein to neeche kisi bhi field ko edit kar sakte hain.");
+    } catch (err: any) {
+      setAiError(err.message || "Failed to parse property with AI.");
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  }
 
   /* ── AI Generate ── */
   async function handleGenerateAI() {
@@ -828,6 +956,228 @@ export function ListingEditorContent() {
   const renderStep2Details = () => (
     <div className="space-y-5 animate-in fade-in duration-300">
 
+      {/* ── ⚡ AI MAGIC LISTING: WHATSAPP TO FORM AUTO-FILL ── */}
+      <div className="relative overflow-hidden rounded-2xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 p-4 sm:p-6 shadow-sm dark:border-emerald-500/20 dark:from-emerald-950/20 dark:via-[#0c1222] dark:to-slate-900">
+        
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/30 shrink-0">
+              <Sparkles className="h-4 w-4 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
+                  ⚡ AI Quick Fill: Paste WhatsApp Message
+                </h3>
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                  Save 10 Mins
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Agar saari 20+ details manual nahi bharni, toh WhatsApp forward ya rough notes yahan paste karein. AI auto-extract karke preview bana dega aur form fill kar dega!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* WhatsApp Text Input */}
+        <div className="mt-3.5">
+          <textarea
+            rows={3}
+            value={aiMagicInput}
+            onChange={(e) => setAiMagicInput(e.target.value)}
+            placeholder="Jaise WhatsApp message paste karein:&#10;'4 BHK Flat for sale in Bodakdev Ahmedabad. 1650 sqft carpet, 2450 super built-up, 12th floor, 4 attached baths, 2 covered car parking, west facing, ready to move, asking 3.25 Cr negotiable, modular kitchen, amenities: gym, swimming pool, 24x7 security...'"
+            className="w-full rounded-xl border border-emerald-200/90 bg-white/95 p-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 dark:border-emerald-900/40 dark:bg-slate-900/90 dark:text-white"
+          />
+        </div>
+
+        {/* Quick Sample Buttons */}
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-slate-500">Quick Samples:</span>
+          {AI_WHATSAPP_PRESETS.map((sample, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setAiMagicInput(sample.text);
+                handleMagicAIFill(sample.text);
+              }}
+              className="rounded-lg border border-slate-200 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-700 shadow-xs hover:border-emerald-600 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-emerald-400 cursor-pointer transition active:scale-95"
+            >
+              📋 {sample.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Action Button */}
+        <div className="mt-3.5 flex flex-col sm:flex-row items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => handleMagicAIFill()}
+            disabled={isGeneratingAI || !aiMagicInput.trim()}
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#1c5436] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#1c5436]/20 transition hover:bg-[#15422a] active:scale-95 disabled:opacity-50 cursor-pointer"
+          >
+            {isGeneratingAI ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>AI extracting & filling details...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 text-emerald-300" />
+                <span>✨ Auto-Fill All Details with AI</span>
+              </>
+            )}
+          </button>
+
+          {aiMagicInput && (
+            <button
+              type="button"
+              onClick={() => {
+                setAiMagicInput("");
+                setAiMagicSuccessMsg(null);
+                setAiParsedPreview(null);
+              }}
+              className="text-xs text-slate-500 hover:text-slate-700 hover:underline dark:text-slate-400 cursor-pointer"
+            >
+              Clear input
+            </button>
+          )}
+        </div>
+
+        {/* Error message */}
+        {aiError && (
+          <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+            ⚠️ {aiError}
+          </p>
+        )}
+
+        {/* Success Message Banner */}
+        {aiMagicSuccessMsg && (
+          <div className="mt-3.5 rounded-xl border border-emerald-300 bg-emerald-50/90 p-3 text-xs font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>{aiMagicSuccessMsg}</span>
+          </div>
+        )}
+
+        {/* Instant AI Preview Card (Like WhatsApp Property Summary) */}
+        {aiParsedPreview && (
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/90">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-slate-800">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                AI Generated Property Preview
+              </span>
+              <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                Auto-Filled in Form Below
+              </span>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <h4 className="text-sm font-bold text-[#0a1128] dark:text-white">
+                  {aiParsedPreview.title}
+                </h4>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-extrabold text-[#1c5436] dark:text-emerald-400">
+                    {aiParsedPreview.display_price}
+                  </span>
+                  <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    Negotiable
+                  </span>
+                </div>
+              </div>
+
+              {/* Key badges */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {aiParsedPreview.bhk && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🛏️ {aiParsedPreview.bhk} BHK
+                  </span>
+                )}
+                {aiParsedPreview.carpet_area_sqft && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    📐 {aiParsedPreview.carpet_area_sqft.toLocaleString()} Sq.Ft. Carpet
+                  </span>
+                )}
+                {aiParsedPreview.super_built_up_sqft && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🏗️ {aiParsedPreview.super_built_up_sqft.toLocaleString()} Sq.Ft. Super
+                  </span>
+                )}
+                {aiParsedPreview.floor && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🏢 {aiParsedPreview.floor}
+                  </span>
+                )}
+                {aiParsedPreview.furnishing && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🛋️ {aiParsedPreview.furnishing}
+                  </span>
+                )}
+                {aiParsedPreview.facing && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🧭 {aiParsedPreview.facing}
+                  </span>
+                )}
+                {aiParsedPreview.possession && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🔑 {aiParsedPreview.possession}
+                  </span>
+                )}
+                {aiParsedPreview.parking && (
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    🚗 {aiParsedPreview.parking}
+                  </span>
+                )}
+              </div>
+
+              {/* Location */}
+              <p className="text-xs text-slate-500 flex items-center gap-1 pt-1">
+                <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                <span>{aiParsedPreview.location_locality}, {aiParsedPreview.location_city}</span>
+              </p>
+
+              {/* Highlights preview */}
+              {aiParsedPreview.ai_highlights?.length > 0 && (
+                <div className="mt-2 rounded-lg bg-slate-50 p-2.5 dark:bg-slate-800/60">
+                  <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+                    Key Highlights:
+                  </p>
+                  <ul className="mt-1 space-y-1 text-xs text-slate-600 dark:text-slate-300">
+                    {aiParsedPreview.ai_highlights.slice(0, 3).map((hl, i) => (
+                      <li key={i} className="flex items-start gap-1.5">
+                        <span className="text-emerald-600 font-bold">•</span>
+                        <span>{hl}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Direct link to edit fields */}
+              <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-[11px] text-slate-500">
+                  Aap neeche form mein kisi bhi value ko modify kar sakte hain 👇
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("property-category-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="text-xs font-bold text-[#1c5436] hover:underline dark:text-emerald-400 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Review / Edit Form Fields</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Listing Quality Bar */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
         <div className="flex items-center justify-between">
@@ -908,7 +1258,7 @@ export function ListingEditorContent() {
       </div>
 
       {/* Property Category */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
+      <div id="property-category-section" className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
         <h3 className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white">
           <span className="h-5 w-1 rounded-full bg-[#1a3c34]" />
           PROPERTY CATEGORY

@@ -61,27 +61,34 @@ async function parseWithOpenAICompatible(
   const systemPrompt = `
 You are an expert real estate AI copywriter and listing data extraction system.
 Analyze the unstructured property notes sent by a real estate broker.
-The notes might be in English, Hindi, Hinglish, or casual shorthand broker jargon.
+The notes might be in English, Hindi, Hinglish, or casual shorthand broker jargon (like "4bhk flat sale bodakdev 1650 carpet 2450 sba 12th flr west facing 4 baths 2 car park ready to move asking 3.25 cr nego").
 
 Extract all details into a clean, highly structured, professional listing.
 
 Respond ONLY with valid JSON matching this exact structure:
 {
-  "title": "Crisp premium title (e.g. Luxurious 3 BHK Fully Furnished Apartment in Satellite)",
-  "slug": "url-friendly-slug (e.g. 3-bhk-satellite-ahmedabad-luxury)",
+  "title": "Crisp premium title (e.g. Luxurious 4 BHK Flat for Sale in Bodakdev, Ahmedabad)",
+  "slug": "url-friendly-slug (e.g. 4-bhk-flat-bodakdev-ahmedabad)",
   "description": "Polished 2-paragraph sales description highlighting key layout & features",
   "property_type": "Apartment", // Must be one of: Apartment, Villa, Penthouse, Builder Floor, Plot, Commercial
   "listing_type": "Sale", // Must be: Sale or Rent
-  "bhk": 3,
-  "bedrooms": 3,
-  "bathrooms": 3,
-  "carpet_area_sqft": 1750,
-  "price_amount": 13500000,
-  "display_price": "₹1.35 Cr",
+  "bhk": 4,
+  "bedrooms": 4,
+  "bathrooms": 4,
+  "carpet_area_sqft": 1650,
+  "super_built_up_sqft": 2450,
+  "floor": "12th Floor",
+  "furnishing": "Semi-Furnished", // Furnished, Semi-Furnished, or Unfurnished
+  "facing": "West Facing",
+  "possession": "Ready to Move",
+  "parking": "2 Covered Car Parking",
+  "property_age": "5-Year-Old",
+  "price_amount": 32500000,
+  "display_price": "₹3.25 Cr",
   "currency": "INR",
   "location_city": "Ahmedabad",
-  "location_locality": "Satellite",
-  "amenities": ["Lift", "Covered Parking", "24/7 Security", "Gym"],
+  "location_locality": "Bodakdev",
+  "amenities": ["Lift", "Covered Parking", "24/7 Security", "Gym", "Swimming Pool"],
   "ai_highlights": ["5 compelling selling bullet points"],
   "ai_neighborhood_highlights": ["3 nearby perks (e.g. 5 mins to metro)"]
 }
@@ -113,6 +120,13 @@ Respond ONLY with valid JSON matching this exact structure:
     bedrooms: parsed.bedrooms ? Number(parsed.bedrooms) : undefined,
     bathrooms: parsed.bathrooms ? Number(parsed.bathrooms) : undefined,
     carpet_area_sqft: parsed.carpet_area_sqft ? Number(parsed.carpet_area_sqft) : undefined,
+    super_built_up_sqft: parsed.super_built_up_sqft ? Number(parsed.super_built_up_sqft) : undefined,
+    floor: parsed.floor || undefined,
+    furnishing: parsed.furnishing || undefined,
+    facing: parsed.facing || undefined,
+    possession: parsed.possession || undefined,
+    parking: parsed.parking || undefined,
+    property_age: parsed.property_age || undefined,
     price_amount: Number(parsed.price_amount) || 0,
     display_price: parsed.display_price || "Price on Request",
     currency: parsed.currency || "INR",
@@ -166,6 +180,13 @@ ${rawNotes}
           bedrooms: { type: Type.INTEGER },
           bathrooms: { type: Type.INTEGER },
           carpet_area_sqft: { type: Type.INTEGER },
+          super_built_up_sqft: { type: Type.INTEGER },
+          floor: { type: Type.STRING },
+          furnishing: { type: Type.STRING },
+          facing: { type: Type.STRING },
+          possession: { type: Type.STRING },
+          parking: { type: Type.STRING },
+          property_age: { type: Type.STRING },
           price_amount: { type: Type.NUMBER },
           display_price: { type: Type.STRING },
           currency: { type: Type.STRING },
