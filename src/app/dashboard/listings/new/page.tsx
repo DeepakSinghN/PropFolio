@@ -33,6 +33,7 @@ import {
   IndianRupee,
   DollarSign,
   Bath,
+  Pencil,
   Layers,
   Compass,
   Calendar,
@@ -270,6 +271,7 @@ export function ListingEditorContent() {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
   /* ── Step 2: Property Details ── */
+  const [detailsMode, setDetailsMode] = useState<"ai" | "manual">("ai");
   const [selectedCategoryId, setSelectedCategoryId] = useState("residential");
   const [headline, setHeadline] = useState("");
   const [propertyType, setPropertyType] = useState<PropertyType>("Apartment");
@@ -469,6 +471,9 @@ export function ListingEditorContent() {
       setStep(1);
     } else {
       setStep(2);
+      if (editParam) {
+        setDetailsMode("manual");
+      }
     }
   }, [editParam, sectionParam, stepParam, applyListingData]);
 
@@ -541,7 +546,7 @@ export function ListingEditorContent() {
   async function handleMagicAIFill(customText?: string) {
     const textToParse = (customText !== undefined ? customText : aiMagicInput).trim();
     if (!textToParse) {
-      setAiError("Kripya WhatsApp message ya raw property details paste karein.");
+      setAiError("Please paste a WhatsApp message or property notes.");
       return;
     }
     setIsGeneratingAI(true);
@@ -637,7 +642,7 @@ export function ListingEditorContent() {
         })
       );
 
-      setAiMagicSuccessMsg("✨ Saari details auto-fill ho gayi hain! Aap preview dekh sakte hain aur chahein to neeche kisi bhi field ko edit kar sakte hain.");
+      setAiMagicSuccessMsg("✨ All property details extracted! Review the preview below or customize any field.");
     } catch (err: any) {
       setAiError(err.message || "Failed to parse property with AI.");
     } finally {
@@ -988,81 +993,71 @@ export function ListingEditorContent() {
   const renderStep2Details = () => (
     <div className="space-y-5 animate-in fade-in duration-300">
 
-      {/* ── ⚡ AI MAGIC LISTING: WHATSAPP TO FORM AUTO-FILL ── */}
-      <div className="relative overflow-hidden rounded-2xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 p-4 sm:p-6 shadow-sm dark:border-emerald-500/20 dark:from-emerald-950/20 dark:via-[#0c1222] dark:to-slate-900">
+      {/* ── 2-OPTION ENTRY MODE SELECTOR (Segmented Pill Switcher) ── */}
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-xs dark:border-slate-800 dark:bg-[#0c1222]">
+        <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-100 p-1 dark:bg-slate-900/90">
+          <button
+            type="button"
+            onClick={() => setDetailsMode("ai")}
+            className={`flex items-center justify-center gap-2 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              detailsMode === "ai"
+                ? "bg-white text-emerald-800 shadow-sm dark:bg-emerald-950 dark:text-emerald-300"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            }`}
+          >
+            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <span>⚡ AI Quick Fill</span>
+            <span className="hidden sm:inline-block rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+              Save 10m
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setDetailsMode("manual")}
+            className={`flex items-center justify-center gap-2 rounded-lg py-2 px-3 text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              detailsMode === "manual"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+            }`}
+          >
+            <Pencil className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
+            <span>✍️ Manual Entry</span>
+            <span className="hidden sm:inline-block rounded-full bg-slate-200 px-1.5 py-0.5 text-[9px] font-extrabold text-slate-700 dark:bg-slate-700 dark:text-slate-300">
+              Full Form
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── ⚡ AI MAGIC LISTING: WHATSAPP TO FORM AUTO-FILL (VISIBLE IN AI MODE) ── */}
+      {detailsMode === "ai" && (
+      <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50/60 via-white to-teal-50/30 p-4 sm:p-5 shadow-xs dark:border-emerald-500/20 dark:from-emerald-950/20 dark:via-[#0c1222] dark:to-slate-900">
         
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/30 shrink-0">
-              <Sparkles className="h-4 w-4 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm sm:text-base font-bold text-[#0a1128] dark:text-white">
-                  ⚡ AI Quick Fill: Paste WhatsApp Message
-                </h3>
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                  Save 10 Mins
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Agar saari 20+ details manual nahi bharni, toh WhatsApp forward ya rough notes yahan paste karein. AI auto-extract karke preview bana dega aur form fill kar dega!
-              </p>
-            </div>
+        {/* Header */}
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              ⚡ AI Quick Fill: Paste WhatsApp Message
+            </h3>
+            <span className="rounded-full bg-emerald-100 border border-emerald-300/60 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800 dark:text-emerald-300">
+              Save 10 Mins
+            </span>
           </div>
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Paste a WhatsApp forward or rough property notes here. AI will extract all 20+ details and fill the form instantly!
+          </p>
         </div>
 
         {/* WhatsApp Text Input */}
-        <div className="mt-3.5">
+        <div className="relative mt-3.5">
           <textarea
             rows={3}
             value={aiMagicInput}
             onChange={(e) => setAiMagicInput(e.target.value)}
-            placeholder="Jaise WhatsApp message paste karein:&#10;'4 BHK Flat for sale in Bodakdev Ahmedabad. 1650 sqft carpet, 2450 super built-up, 12th floor, 4 attached baths, 2 covered car parking, west facing, ready to move, asking 3.25 Cr negotiable, modular kitchen, amenities: gym, swimming pool, 24x7 security...'"
-            className="w-full rounded-xl border border-emerald-200/90 bg-white/95 p-3 text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 dark:border-emerald-900/40 dark:bg-slate-900/90 dark:text-white"
+            placeholder="Paste WhatsApp message or notes here, for example:&#10;'4 BHK Flat for sale in Bodakdev Ahmedabad. 1650 sqft carpet, 2450 super built-up, 12th floor, 4 attached baths, 2 covered car parking, west facing, ready to move, asking 3.25 Cr negotiable, modular kitchen, amenities: gym, swimming pool, 24x7 security...'"
+            className="w-full rounded-xl border border-emerald-200/90 bg-white/95 p-3 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-3 focus:ring-emerald-500/15 dark:border-emerald-900/50 dark:bg-slate-900/90 dark:text-white dark:placeholder:text-slate-500 transition resize-y min-h-[90px]"
           />
-        </div>
-
-        {/* Quick Sample Buttons */}
-        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-slate-500">Quick Samples:</span>
-          {AI_WHATSAPP_PRESETS.map((sample, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => {
-                setAiMagicInput(sample.text);
-                handleMagicAIFill(sample.text);
-              }}
-              className="rounded-lg border border-slate-200 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-700 shadow-xs hover:border-emerald-600 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-emerald-400 cursor-pointer transition active:scale-95"
-            >
-              📋 {sample.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Action Button */}
-        <div className="mt-3.5 flex flex-col sm:flex-row items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => handleMagicAIFill()}
-            disabled={isGeneratingAI || !aiMagicInput.trim()}
-            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-[#1c5436] px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-[#1c5436]/20 transition hover:bg-[#15422a] active:scale-95 disabled:opacity-50 cursor-pointer"
-          >
-            {isGeneratingAI ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>AI extracting & filling details...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 text-emerald-300" />
-                <span>✨ Auto-Fill All Details with AI</span>
-              </>
-            )}
-          </button>
-
           {aiMagicInput && (
             <button
               type="button"
@@ -1071,11 +1066,60 @@ export function ListingEditorContent() {
                 setAiMagicSuccessMsg(null);
                 setAiParsedPreview(null);
               }}
-              className="text-xs text-slate-500 hover:text-slate-700 hover:underline dark:text-slate-400 cursor-pointer"
+              className="absolute top-2.5 right-2.5 rounded-md bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-white transition cursor-pointer"
             >
-              Clear input
+              Clear
             </button>
           )}
+        </div>
+
+        {/* Quick Sample Buttons (Horizontal scrolling chips on mobile, clean inline on desktop) */}
+        <div className="mt-2.5 flex items-center gap-2">
+          <span className="shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            Quick Samples:
+          </span>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {AI_WHATSAPP_PRESETS.map((sample, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  setAiMagicInput(sample.text);
+                  handleMagicAIFill(sample.text);
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 shadow-2xs hover:border-emerald-500 hover:bg-emerald-50/60 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-emerald-500 dark:hover:text-emerald-400 cursor-pointer transition active:scale-95"
+              >
+                <span>📋</span>
+                <span>{sample.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="mt-3.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => handleMagicAIFill()}
+            disabled={isGeneratingAI || !aiMagicInput.trim()}
+            className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-700/20 hover:from-emerald-500 hover:to-teal-600 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isGeneratingAI ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                <span>AI extracting & filling details...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 text-emerald-200" />
+                <span>✨ Auto-Fill All Details with AI</span>
+              </>
+            )}
+          </button>
+
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 text-center sm:text-left">
+            Extracts BHK, price, area, floor, parking & 15+ amenities
+          </span>
         </div>
 
         {/* Error message */}
@@ -1095,14 +1139,14 @@ export function ListingEditorContent() {
 
         {/* Instant AI Preview Card (Like WhatsApp Property Summary) */}
         {aiParsedPreview && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/90">
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/90">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 dark:border-slate-800">
               <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 AI Generated Property Preview
               </span>
               <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                Auto-Filled in Form Below
+                Auto-Filled in Form
               </span>
             </div>
 
@@ -1189,19 +1233,23 @@ export function ListingEditorContent() {
               )}
 
               {/* Direct link to edit fields */}
-              <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <span className="text-[11px] text-slate-500">
-                  Aap neeche form mein kisi bhi value ko modify kar sakte hain 👇
+                  You can review or edit any field in the manual form below 👇
                 </span>
                 <button
                   type="button"
                   onClick={() => {
-                    const el = document.getElementById("property-category-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    setDetailsMode("manual");
+                    setTimeout(() => {
+                      const el = document.getElementById("property-category-section");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }, 50);
                   }}
-                  className="text-xs font-bold text-[#1c5436] hover:underline dark:text-emerald-400 flex items-center gap-1 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition cursor-pointer"
                 >
-                  <span>Review / Edit Form Fields</span>
+                  <Pencil className="h-3.5 w-3.5" />
+                  <span>Review / Edit in Manual Form</span>
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -1209,6 +1257,7 @@ export function ListingEditorContent() {
           </div>
         )}
       </div>
+      )}
 
       {/* Listing Quality Bar */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
@@ -1289,8 +1338,27 @@ export function ListingEditorContent() {
         )}
       </div>
 
-      {/* Property Category */}
-      <div id="property-category-section" className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
+      {/* ── OPTION 2: MANUAL FORM FIELDS (VISIBLE IN MANUAL MODE) ── */}
+      {detailsMode === "manual" && (
+        <div className="space-y-5 animate-in fade-in duration-300">
+          {/* Quick toggle banner to AI */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-emerald-200/90 bg-emerald-50/70 p-3 sm:px-4 sm:py-2.5 text-xs text-emerald-950 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-emerald-600 shrink-0" />
+              <span>Have WhatsApp text or raw property notes? Auto-fill with AI in 5s.</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDetailsMode("ai")}
+              className="inline-flex items-center gap-1 font-bold text-emerald-700 hover:underline dark:text-emerald-300 cursor-pointer self-start sm:self-auto shrink-0"
+            >
+              <span>Switch to ⚡ Option 1 (AI Magic Fill)</span>
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+
+          {/* Property Category */}
+          <div id="property-category-section" className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-[#0c1222]">
         <h3 className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white">
           <span className="h-5 w-1 rounded-full bg-[#1a3c34]" />
           PROPERTY CATEGORY
@@ -1444,7 +1512,7 @@ export function ListingEditorContent() {
       </div>
 
       {/* PROPERTY FEATURES (Full Dynamic Multi-Section Grid) */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-6 dark:border-slate-800 dark:bg-[#0c1222] space-y-6">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3 sm:p-6 dark:border-slate-800 dark:bg-[#0c1222] space-y-4 sm:space-y-6">
         <div>
           <h3 className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white">
             <span className="h-5 w-1 rounded-full bg-[#1a3c34]" />
@@ -1456,12 +1524,12 @@ export function ListingEditorContent() {
         </div>
 
         {/* Section Groups */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {featureSections.map((secName) => {
             const sectionItems = featuresList.filter((f) => f.section === secName);
 
             return (
-              <div key={secName} className="rounded-2xl border border-slate-100 bg-[#fafbfe] p-4 dark:border-slate-800/80 dark:bg-[#080d19]">
+              <div key={secName} className="rounded-xl sm:rounded-2xl border border-slate-100 bg-[#fafbfe] p-2.5 sm:p-4 dark:border-slate-800/80 dark:bg-[#080d19]">
                 {/* Editable Section Heading */}
                 <div className="flex items-center justify-between border-b border-slate-200/70 pb-3 dark:border-slate-800">
                   <div className="flex items-center gap-2 flex-1 max-w-md">
@@ -1501,22 +1569,22 @@ export function ListingEditorContent() {
                   </div>
                 </div>
 
-                {/* Features Grid for this section */}
+                {/* Features Grid for this section (Compact 2-Column Grid on Mobile) */}
                 {sectionItems.length > 0 ? (
-                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  <div className="mt-3.5 grid grid-cols-2 gap-2 sm:gap-3.5">
                     {sectionItems.map((feat) => {
                       const IconComp = getFeatureIcon(feat.label);
 
                       return (
                         <div
                           key={feat.id}
-                          className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
+                          className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-3.5 shadow-xs transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900"
                         >
                           {/* Top Row Capsule */}
-                          <div className="flex items-center justify-between rounded-full bg-[#f8f9fa] px-3 py-1.5 dark:bg-slate-800/80">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 shadow-xs dark:bg-slate-700 dark:text-slate-300">
-                                <IconComp className="h-3.5 w-3.5" />
+                          <div className="flex items-center justify-between rounded-full bg-[#f8f9fa] px-2 py-1 sm:px-3 sm:py-1.5 dark:bg-slate-800/80">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0">
+                              <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 shadow-xs dark:bg-slate-700 dark:text-slate-300">
+                                <IconComp className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               </div>
                               <input
                                 type="text"
@@ -1527,7 +1595,7 @@ export function ListingEditorContent() {
                                     prev.map((f) => (f.id === feat.id ? { ...f, label: newLabel } : f))
                                   );
                                 }}
-                                className="w-full bg-transparent text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 outline-none truncate"
+                                className="w-full bg-transparent text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 outline-none truncate"
                                 placeholder="FEATURE LABEL"
                               />
                             </div>
@@ -1535,15 +1603,15 @@ export function ListingEditorContent() {
                             <button
                               type="button"
                               onClick={() => setFeaturesList((prev) => prev.filter((f) => f.id !== feat.id))}
-                              className="text-slate-400 hover:text-rose-500 transition p-1 ml-1"
+                              className="text-slate-400 hover:text-rose-500 transition p-0.5 sm:p-1 ml-0.5 sm:ml-1 shrink-0"
                               title="Delete feature"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             </button>
                           </div>
 
                           {/* Middle Editable Value */}
-                          <div className="mt-2.5 px-1">
+                          <div className="mt-2 sm:mt-2.5 px-0.5 sm:px-1">
                             <input
                               type="text"
                               value={feat.value}
@@ -1554,14 +1622,14 @@ export function ListingEditorContent() {
                                 );
                               }}
                               placeholder={feat.placeholder || feat.label}
-                              className="w-full rounded-lg border border-transparent bg-transparent py-1 text-sm sm:text-base font-semibold text-[#0a1128] placeholder-slate-400 dark:placeholder-slate-500 dark:text-white outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50"
+                              className="w-full rounded-lg border border-transparent bg-transparent py-0.5 sm:py-1 text-xs sm:text-base font-semibold text-[#0a1128] placeholder-slate-400 dark:placeholder-slate-500 dark:text-white outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 truncate"
                             />
                           </div>
 
                           {/* Bottom Row Capsule (Move to section) */}
-                          <div className="mt-2.5 flex items-center justify-between rounded-full bg-[#f8f9fa] px-3 py-1.5 text-xs text-slate-500 dark:bg-slate-800/80">
-                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                              <LayoutGrid className="h-3 w-3 text-slate-400 shrink-0" />
+                          <div className="mt-2 sm:mt-2.5 flex items-center justify-between rounded-full bg-[#f8f9fa] px-2 py-1 sm:px-3 sm:py-1.5 text-xs text-slate-500 dark:bg-slate-800/80">
+                            <div className="flex items-center gap-1 sm:gap-1.5 flex-1 min-w-0">
+                              <LayoutGrid className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-slate-400 shrink-0" />
                               <select
                                 value={feat.section}
                                 onChange={(e) => {
@@ -1570,7 +1638,7 @@ export function ListingEditorContent() {
                                     prev.map((f) => (f.id === feat.id ? { ...f, section: targetSec } : f))
                                   );
                                 }}
-                                className="w-full bg-transparent text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 outline-none cursor-pointer"
+                                className="w-full bg-transparent text-[8px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 outline-none cursor-pointer truncate"
                                 title="Move to section"
                               >
                                 {featureSections.map((sec) => (
@@ -2242,6 +2310,8 @@ export function ListingEditorContent() {
           </span>
         </div>
       </div>
+      </div>
+      )}
 
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between">
@@ -2372,7 +2442,7 @@ export function ListingEditorContent() {
         />
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 pt-6 sm:px-6">
+      <main className="mx-auto max-w-3xl px-2.5 sm:px-6 pt-4 sm:pt-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-slate-500 mb-4">
           <Link href="/dashboard" className="hover:text-[#0a1128] dark:hover:text-white transition">
