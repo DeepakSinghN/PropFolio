@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, CheckCircle2, Building2, HelpCircle, ShieldCheck, Mail, Clock } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, RefreshCw, CheckCircle2, HelpCircle, ShieldCheck, Mail, Clock } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
@@ -27,14 +28,15 @@ export default function RefundPage() {
             <ThemeToggle />
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white"
+              className="flex items-center transition-opacity hover:opacity-90"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <span>
-                Prop<span className="text-[#c5a059]">Folio</span>
-              </span>
+              <Image
+                src="/brand-logo.png"
+                alt="PropertySnaps"
+                width={140}
+                height={41}
+                className="h-8 w-auto object-contain"
+              />
             </Link>
           </div>
         </div>
@@ -44,8 +46,8 @@ export default function RefundPage() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Page Header */}
         <div className="border-b border-slate-200/80 pb-8 dark:border-slate-800">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-3.5 py-1 text-xs font-semibold text-[#8a6828] dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <RefreshCw className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-3.5 py-1 text-xs font-semibold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
+            <RefreshCw className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Transparent Billing & Consumer Protection</span>
           </div>
 
@@ -80,7 +82,7 @@ export default function RefundPage() {
           {/* Section 1 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">01.</span> Overview
+              <span className="text-[#862e9f]">01.</span> Overview
             </h2>
             <p>
               At <strong>Property Snaps</strong> ("we", "our", or "us"), we provide software-as-a-service (SaaS) subscriptions enabling Indian real estate brokers and agencies to convert property details sent over WhatsApp into mobile-optimized web listing pages and downloadable PDF brochures.
@@ -93,7 +95,7 @@ export default function RefundPage() {
           {/* Section 2 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">02.</span> Subscription Cancellation
+              <span className="text-[#862e9f]">02.</span> Subscription Cancellation
             </h2>
             <p>You can cancel your subscription at any time without penalty or friction:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -112,12 +114,12 @@ export default function RefundPage() {
           {/* Section 3 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">03.</span> Refund Eligibility & Guidelines
+              <span className="text-[#862e9f]">03.</span> Refund Eligibility & Guidelines
             </h2>
             <p>Refunds are evaluated under the following terms:</p>
             <div className="space-y-4">
               <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#0c1222]">
-                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#c5a059]">
+                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#862e9f]">
                   A. Initial Subscription (7-Day Guarantee)
                 </h4>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -126,7 +128,7 @@ export default function RefundPage() {
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#0c1222]">
-                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#c5a059]">
+                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#862e9f]">
                   B. Annual Plan Pro-Rata Policy
                 </h4>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -135,7 +137,7 @@ export default function RefundPage() {
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#0c1222]">
-                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#c5a059]">
+                <h4 className="font-bold text-[#0a1128] dark:text-white text-xs uppercase tracking-wider text-[#862e9f]">
                   C. Accidental Renewal Charges
                 </h4>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -148,7 +150,7 @@ export default function RefundPage() {
           {/* Section 4 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">04.</span> Non-Refundable Items
+              <span className="text-[#862e9f]">04.</span> Non-Refundable Items
             </h2>
             <p>The following fees are non-refundable:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -164,7 +166,7 @@ export default function RefundPage() {
           {/* Section 5 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">05.</span> Refund Processing Timeline & Method
+              <span className="text-[#862e9f]">05.</span> Refund Processing Timeline & Method
             </h2>
             <p>
               Once your refund request is confirmed by our billing team:
@@ -185,20 +187,20 @@ export default function RefundPage() {
           {/* Section 6 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">06.</span> How to Request a Refund
+              <span className="text-[#862e9f]">06.</span> How to Request a Refund
             </h2>
             <p>To request a refund or raise a billing inquiry, simply contact us through any of the following channels:</p>
             
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-[#c5a059]" />
+                  <Mail className="h-5 w-5 text-[#862e9f]" />
                   <span className="font-bold text-[#0a1128] dark:text-white">Email Billing Support</span>
                 </div>
                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Send your registered phone number & payment receipt to:
                 </p>
-                <a href="mailto:billing@propertysnaps.in" className="mt-1 block text-xs font-bold text-[#c5a059] hover:underline">
+                <a href="mailto:billing@propertysnaps.in" className="mt-1 block text-xs font-bold text-[#862e9f] hover:underline">
                   billing@propertysnaps.in
                 </a>
               </div>

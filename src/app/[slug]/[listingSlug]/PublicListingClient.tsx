@@ -422,7 +422,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
+    <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#862e9f]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
       
       {/* MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
       <main className="mx-auto max-w-6xl px-0 sm:px-6 pt-0 sm:pt-6">
@@ -456,7 +456,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <span className="rounded-full bg-[#0a1128]/85 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-white backdrop-blur-md shadow-sm">
                     {listing.listing_type === "Sale" ? "FOR SALE" : "FOR RENT"}
                   </span>
-                  <span className="rounded-full bg-[#0a1128]/90 border border-[#c5a059]/40 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-[#d4af37] backdrop-blur-md shadow-sm">
+                  <span className="rounded-full bg-[#0a1128]/90 border border-[#862e9f]/40 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-[#a845c4] backdrop-blur-md shadow-sm">
                     {listing.property_type.toUpperCase()}
                   </span>
                 </div>
@@ -468,7 +468,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     e.stopPropagation();
                     setIsLightboxOpen(true);
                   }}
-                  className="absolute right-3.5 top-3.5 sm:right-4 sm:top-4 z-30 flex h-9 w-9 sm:h-10 sm:w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
+                  className="absolute right-3.5 top-3.5 sm:right-4 sm:top-4 z-30 flex h-9 w-9 sm:h-10 sm:w-10 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/70 border border-[#862e9f]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/95 hover:scale-105 active:scale-95 pointer-events-auto"
                   title="View Fullscreen"
                   aria-label="View Fullscreen"
                 >
@@ -489,7 +489,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         e.stopPropagation();
                         setActivePhotoIdx((prev) => (prev > 0 ? prev - 1 : photos.length - 1));
                       }}
-                      className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#862e9f]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
                       aria-label="Previous photo"
                     >
                       <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -500,7 +500,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         e.stopPropagation();
                         setActivePhotoIdx((prev) => (prev < photos.length - 1 ? prev + 1 : 0));
                       }}
-                      className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#c5a059]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
+                      className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-full bg-[#0a1128]/60 border border-[#862e9f]/30 text-white shadow-lg backdrop-blur-md transition hover:bg-[#0a1128]/90 active:scale-90 pointer-events-auto"
                       aria-label="Next photo"
                     >
                       <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -519,7 +519,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       onClick={() => setActivePhotoIdx(idx)}
                       className={`relative aspect-[4/3] w-18 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border-2 transition-all pointer-events-auto ${
                         activePhotoIdx === idx
-                          ? "border-[#c5a059] scale-[0.98] shadow-md shadow-[#c5a059]/25 ring-2 ring-[#c5a059]/30"
+                          ? "border-[#862e9f] scale-[0.98] shadow-md shadow-[#862e9f]/25 ring-2 ring-[#862e9f]/30"
                           : "border-transparent opacity-65 hover:opacity-100"
                       }`}
                     >
@@ -596,7 +596,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               </div>
 
               {/* Title (Editorial Hierarchy - Clean & Not Overly Bold) */}
-              <h1 className="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#0a1128] dark:text-white leading-snug break-words">
+              <h1 className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#0a1128] dark:text-white leading-snug break-words">
                 {listing.bhk ? `${listing.bhk} BHK ` : ""}{listing.property_type || "Apartment"} for {listing.listing_type || "Sale"} in {listing.location_locality || listing.location_city}
               </h1>
 
@@ -610,7 +610,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
               {/* Price Row (Dark green prominent display) */}
               <div className="mt-2.5 flex flex-wrap items-baseline gap-2 sm:gap-3 border-b border-slate-100 pb-5 dark:border-slate-800/80">
-                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1c5436] dark:text-emerald-400">
+                <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#00974e] dark:text-[#00b85f]">
                   {listing.display_price}
                 </span>
                 {ratePerSqft && (
@@ -649,7 +649,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-[#c5a059]" />
+                    <Sparkles className="h-4 w-4 text-[#862e9f]" />
                     <span>PROPERTY HIGHLIGHTS</span>
                   </h3>
                   <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
@@ -661,9 +661,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   {listing.ai_highlights.map((point, idx) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-2.5 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 sm:p-3.5 transition-all hover:border-[#c5a059]/30 dark:border-slate-800/80 dark:bg-[#090e1c]"
+                      className="flex items-start gap-2.5 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 sm:p-3.5 transition-all hover:border-[#862e9f]/30 dark:border-slate-800/80 dark:bg-[#090e1c]"
                     >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0a1128] text-xs font-bold text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#16234b]">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0a1128] text-xs font-bold text-[#862e9f] border border-[#862e9f]/30 dark:bg-[#16234b]">
                         {idx + 1}
                       </span>
                       <p className="text-xs sm:text-sm font-normal leading-relaxed text-slate-700 dark:text-slate-300 break-words">
@@ -680,7 +680,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <Home className="h-4 w-4 text-[#c5a059]" />
+                    <Home className="h-4 w-4 text-[#862e9f]" />
                     <span>Home Details</span>
                   </h3>
                   <span className="text-[11px] font-medium text-slate-400">
@@ -696,7 +696,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         key={idx}
                         className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -719,7 +719,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-[#c5a059]" />
+                    <Building2 className="h-4 w-4 text-[#862e9f]" />
                     <span>Building & Amenities</span>
                   </h3>
                   <span className="text-[11px] font-medium text-slate-400">
@@ -735,7 +735,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         key={idx}
                         className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -758,7 +758,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <FileCheck className="h-4 w-4 text-[#c5a059]" />
+                    <FileCheck className="h-4 w-4 text-[#862e9f]" />
                     <span>Ownership & Costs</span>
                   </h3>
                   <span className="text-[11px] font-medium text-slate-400">
@@ -774,7 +774,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         key={idx}
                         className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -797,7 +797,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-[#c5a059]" />
+                    <CheckCircle2 className="h-4 w-4 text-[#862e9f]" />
                     <span>Amenities & Facilities</span>
                   </h3>
                   <span className="text-[11px] font-medium text-slate-400">{listing.amenities.length} Verified Facilities</span>
@@ -822,7 +822,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <Compass className="h-4 w-4 text-[#c5a059]" />
+                    <Compass className="h-4 w-4 text-[#862e9f]" />
                     <span>Location Advantages & Connectivity</span>
                   </h3>
                 </div>
@@ -836,7 +836,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                           key={idx}
                           className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#d4af37] dark:border-[#3d331d]">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -860,7 +860,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         key={idx}
                         className="flex items-center gap-2.5 rounded-xl bg-[#f8f9fc] p-2.5 sm:p-3 text-xs font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300 break-words"
                       >
-                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#c5a059]" />
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#862e9f]" />
                         <span className="break-words">{nh}</span>
                       </div>
                     ))}
@@ -873,7 +873,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-[#c5a059]" />
+                  <FileText className="h-4 w-4 text-[#862e9f]" />
                   <span>About this Property</span>
                 </h3>
               </div>
@@ -918,7 +918,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       step="5"
                       value={downPaymentPercent}
                       onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
-                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#862e9f] dark:bg-slate-800 pointer-events-auto"
                     />
                   </div>
 
@@ -936,7 +936,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       step="1"
                       value={loanTenureYears}
                       onChange={(e) => setLoanTenureYears(Number(e.target.value))}
-                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#862e9f] dark:bg-slate-800 pointer-events-auto"
                     />
                   </div>
 
@@ -952,13 +952,13 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       step="0.1"
                       value={interestRate}
                       onChange={(e) => setInterestRate(Number(e.target.value))}
-                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#c5a059] dark:bg-slate-800 pointer-events-auto"
+                      className="mt-2 h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-[#862e9f] dark:bg-slate-800 pointer-events-auto"
                     />
                   </div>
                 </div>
 
                 {/* Monthly Summary Box */}
-                <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-gradient-to-tr from-white to-[#fbf6ec]/60 p-5 md:col-span-5 dark:border-slate-800 dark:from-[#0c1222] dark:to-[#17130a]">
+                <div className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-gradient-to-tr from-white to-[#862e9f]/5 p-5 md:col-span-5 dark:border-slate-800 dark:from-[#0c1222] dark:to-[#862e9f]/10">
                   <div>
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                       Estimated Monthly EMI
@@ -987,7 +987,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#0a1128] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#16234b] active:scale-95 dark:bg-white dark:text-[#0a1128]"
                   >
                     <span>Check Loan Eligibility on WhatsApp</span>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-[#c5a059]" />
+                    <ArrowUpRight className="h-3.5 w-3.5 text-[#862e9f]" />
                   </a>
                 </div>
               </div>
@@ -1002,7 +1002,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             <div className="sticky top-24 space-y-5">
               
               {/* Main Desktop Action Card */}
-              <div id="inquiry-form" className="rounded-3xl border-2 border-[#c5a059]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#c5a059]/30 dark:bg-[#0c1222] dark:shadow-none">
+              <div id="inquiry-form" className="rounded-3xl border-2 border-[#862e9f]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#862e9f]/30 dark:bg-[#0c1222] dark:shadow-none">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Offering Price
                 </span>
@@ -1033,7 +1033,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   {/* Secondary Call */}
                   <a
                     href={`tel:${broker.phone_number}`}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-[#f8f9fa] py-3 text-xs font-semibold text-[#0a1128] transition hover:bg-white hover:border-[#c5a059] active:scale-95 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white pointer-events-auto"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-[#f8f9fa] py-3 text-xs font-semibold text-[#0a1128] transition hover:bg-white hover:border-[#862e9f] active:scale-95 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white pointer-events-auto"
                   >
                     <Phone className="h-3.5 w-3.5" />
                     <span>Call Broker ({broker.phone_number})</span>
@@ -1042,9 +1042,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   {/* PDF Download */}
                   <Link
                     href={`/${broker.slug}/${listing.slug}/brochure`}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-700 transition hover:border-[#c5a059] hover:bg-slate-50 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-300"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-700 transition hover:border-[#862e9f] hover:bg-slate-50 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-300"
                   >
-                    <FileText className="h-3.5 w-3.5 text-[#c5a059]" />
+                    <FileText className="h-3.5 w-3.5 text-[#862e9f]" />
                     <span>Download PDF Brochure</span>
                   </Link>
 
@@ -1080,12 +1080,12 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <div>
                     <h4 className="text-base font-bold text-[#0a1128] dark:text-white flex items-center gap-1.5">
                       {broker.full_name}
-                      <ShieldCheck className="h-4 w-4 text-[#c5a059]" />
+                      <ShieldCheck className="h-4 w-4 text-[#862e9f]" />
                     </h4>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {broker.company_name} · {broker.city}
                     </p>
-                    <p className="mt-1 text-[11px] font-semibold text-[#c5a059]">
+                    <p className="mt-1 text-[11px] font-semibold text-[#862e9f]">
                       Verified Property Representative
                     </p>
                   </div>
@@ -1128,7 +1128,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             <a
               href={`tel:${broker.phone_number}`}
               aria-label="Call Broker"
-              className="flex h-10 w-10 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition hover:border-[#c5a059] active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition hover:border-[#862e9f] active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
             >
               <Phone className="h-4 w-4" />
             </a>

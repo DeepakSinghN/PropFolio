@@ -46,15 +46,15 @@ export default function ContactClient() {
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-[#0a1128] transition-colors dark:bg-[#070b14] dark:text-slate-100">
       {/* Header Banner */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-white via-[#fbf6ec]/30 to-[#f8f9fa] py-16 dark:border-slate-800/80 dark:from-[#0b1020] dark:via-[#090d18] dark:to-[#070b14]">
-        <div className="absolute inset-0 bg-[radial-gradient(#c5a059_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-white via-[#862e9f]/5 to-[#f8f9fa] py-16 dark:border-slate-800/80 dark:from-[#0b1020] dark:via-[#090d18] dark:to-[#070b14]">
+        <div className="absolute inset-0 bg-[radial-gradient(#862e9f_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
         <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-4 py-1.5 text-xs font-semibold text-[#8a6828] dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-4 py-1.5 text-xs font-semibold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/15 dark:text-[#a845c4]">
+            <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>We are here to assist real estate brokers 7 days a week</span>
           </div>
           <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-[#0a1128] sm:text-5xl dark:text-white">
-            Get in Touch with <span className="text-[#c5a059]">Property Snaps</span>
+            Get in Touch with <span className="text-[#862e9f]">Property Snaps</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-slate-400">
             Have questions about creating listing pages, WhatsApp bot integration, or custom agency plans?
@@ -79,27 +79,27 @@ export default function ContactClient() {
             </div>
 
             {/* Quick WhatsApp Action Card */}
-            <div className="rounded-2xl border-2 border-emerald-500/30 bg-emerald-50/50 p-6 transition-all hover:border-emerald-500 dark:border-emerald-500/20 dark:bg-emerald-950/20">
+            <div className="rounded-2xl border-2 border-[#00974e]/30 bg-[#00974e]/5 p-6 transition-all hover:border-[#00974e] dark:border-[#00974e]/20 dark:bg-[#00974e]/10">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/30">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#00974e] text-white shadow-lg shadow-[#00974e]/30">
                   <MessageCircle className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[#00974e]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#00974e] dark:text-[#00b85f]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#00974e] animate-pulse" />
                     Fastest Response (~5 mins)
                   </div>
-                  <h3 className="mt-1 text-base font-bold text-emerald-950 dark:text-emerald-200">
+                  <h3 className="mt-1 text-base font-bold text-slate-900 dark:text-white">
                     Chat on WhatsApp
                   </h3>
-                  <p className="mt-1 text-xs text-emerald-900/80 dark:text-emerald-300/80">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
                     Connect directly with our broker support team. Send your questions or request a live walkthrough.
                   </p>
                   <a
                     href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Team%2C%20I%20have%20a%20question%20regarding%20the%20platform."
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-700 active:scale-95"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#00974e] px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-[#008042] active:scale-95"
                   >
                     <MessageCircle className="h-4 w-4" />
                     <span>Open WhatsApp Chat</span>
@@ -111,7 +111,7 @@ export default function ContactClient() {
             {/* Official Email */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
                   <Mail className="h-5 w-5" />
                 </div>
                 <div>
@@ -120,7 +120,7 @@ export default function ContactClient() {
                   </h4>
                   <a
                     href="mailto:support@propertysnaps.in"
-                    className="text-sm font-bold text-[#0a1128] hover:text-[#c5a059] dark:text-white dark:hover:text-[#c5a059]"
+                    className="text-sm font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-white dark:hover:text-[#a845c4]"
                   >
                     support@propertysnaps.in
                   </a>
@@ -134,7 +134,7 @@ export default function ContactClient() {
             {/* Phone & Working Hours */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
@@ -154,7 +154,7 @@ export default function ContactClient() {
             {/* Office Locations */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div className="space-y-3">
@@ -246,7 +246,7 @@ export default function ContactClient() {
                         placeholder="e.g. Ramesh Patel"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#862e9f]"
                       />
                     </div>
 
@@ -260,7 +260,7 @@ export default function ContactClient() {
                         placeholder="e.g. 98250 12345"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#862e9f]"
                       />
                     </div>
                   </div>
@@ -276,7 +276,7 @@ export default function ContactClient() {
                         placeholder="e.g. Ahmedabad, Jaipur, Mumbai"
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#862e9f]"
                       />
                     </div>
 
@@ -287,7 +287,7 @@ export default function ContactClient() {
                       <select
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
+                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#862e9f]"
                       >
                         <option value="General Inquiry">General Inquiry</option>
                         <option value="Agency Plan & Multi-Agent">Agency Plan & Multi-Agent</option>
@@ -309,7 +309,7 @@ export default function ContactClient() {
                       placeholder="Tell us about your real estate agency, the number of active listings you manage, or any questions you have..."
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#c5a059] focus:bg-white focus:ring-2 focus:ring-[#c5a059]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#c5a059]"
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-[#862e9f]"
                     />
                   </div>
 
@@ -318,13 +318,13 @@ export default function ContactClient() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1128] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#0a1128]/20 border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 disabled:opacity-60 dark:bg-[#0f182e] dark:hover:bg-[#1b2746]"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#00974e]/20 transition hover:bg-[#008042] active:scale-95 disabled:opacity-60"
                     >
                       {isSubmitting ? (
                         <span>Sending message...</span>
                       ) : (
                         <>
-                          <Send className="h-4 w-4 text-[#c5a059]" />
+                          <Send className="h-4 w-4" />
                           <span>Submit Inquiry</span>
                         </>
                       )}
@@ -390,10 +390,10 @@ export default function ContactClient() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-xs text-slate-500 sm:flex-row sm:px-6">
           <p>© {new Date().getFullYear()} Property Snaps Technologies. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link href="/pricing" className="hover:text-[#0a1128] dark:hover:text-white">Pricing</Link>
-            <Link href="/privacy" className="hover:text-[#0a1128] dark:hover:text-white">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-[#0a1128] dark:hover:text-white">Terms of Service</Link>
-            <Link href="/refund" className="hover:text-[#0a1128] dark:hover:text-white">Refund Policy</Link>
+            <Link href="/pricing" className="hover:text-[#862e9f] dark:hover:text-white">Pricing</Link>
+            <Link href="/privacy" className="hover:text-[#862e9f] dark:hover:text-white">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-[#862e9f] dark:hover:text-white">Terms of Service</Link>
+            <Link href="/refund" className="hover:text-[#862e9f] dark:hover:text-white">Refund Policy</Link>
           </div>
         </div>
       </footer>

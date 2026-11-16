@@ -84,7 +84,7 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
       {/* Brochure Page Container (A4 Printable Canvas) */}
       <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-zinc-200/80 bg-white shadow-xl print:max-w-none print:rounded-none print:border-none print:shadow-none">
         {/* Header Branding - Sotheby's Royal Dossier */}
-        <div className="flex items-center justify-between border-b border-[#c5a059]/30 bg-[#0a1128] p-6 text-white sm:p-8">
+        <div className="flex items-center justify-between border-b border-[#862e9f]/30 bg-[#0a1128] p-6 text-white sm:p-8">
           <div className="flex items-center gap-4">
             <img
               src={
@@ -92,15 +92,15 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
                 "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80"
               }
               alt={broker.full_name}
-              className="h-16 w-16 rounded-2xl border-2 border-[#c5a059]/50 object-cover shadow-md"
+              className="h-16 w-16 rounded-2xl border-2 border-[#862e9f]/50 object-cover shadow-md"
             />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-extrabold tracking-tight text-white">{broker.full_name}</h2>
-                <ShieldCheck className="h-4 w-4 text-[#c5a059]" />
+                <ShieldCheck className="h-4 w-4 text-[#862e9f]" />
               </div>
               <p className="text-xs text-slate-300">{broker.company_name} · Exclusive Real Estate Advisory</p>
-              <p className="mt-1 font-mono text-xs text-[#c5a059] font-bold">{broker.phone_number}</p>
+              <p className="mt-1 font-mono text-xs text-[#862e9f] font-bold">{broker.phone_number}</p>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
           {/* Title & Key Specs Banner */}
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6">
             <div>
-              <span className="inline-block rounded-md bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-0.5 text-xs font-bold text-[#8a6828]">
+              <span className="inline-block rounded-md bg-[#862e9f]/10 border border-[#862e9f]/20 px-2.5 py-0.5 text-xs font-bold text-[#862e9f]">
                 {listing.listing_type === "Sale" ? "FOR SALE" : "FOR RENT"} · {listing.property_type.toUpperCase()}
               </span>
               <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#0a1128]">

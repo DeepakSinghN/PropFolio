@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Building2,
   Sparkles,
   LayoutDashboard,
   LogIn,
@@ -116,34 +116,31 @@ export default function Navbar() {
         
         {/* Brand Logo */}
         <div className="flex items-center gap-6 lg:gap-8 min-w-0">
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90 shrink-0">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 shadow-md shadow-[#0a1128]/15 dark:bg-[#0f182e] dark:text-[#d4af37]">
-              <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base sm:text-lg font-bold tracking-tight text-[#0a1128] dark:text-white leading-tight">
-                Property<span className="text-[#c5a059] dark:text-[#d4af37]"> Snaps</span>
-              </span>
-              <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Private Office AI
-              </span>
-            </div>
+          <Link href="/" className="flex items-center transition-opacity hover:opacity-90 shrink-0">
+            <Image
+              src="/brand-logo.png"
+              alt="PropertySnaps"
+              width={180}
+              height={53}
+              priority
+              className="h-10 sm:h-11 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <Link
               href="/pricing"
-              className={`transition hover:text-[#0a1128] dark:hover:text-white ${
-                pathname === "/pricing" ? "text-[#c5a059] font-bold dark:text-[#c5a059]" : ""
+              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${
+                pathname === "/pricing" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
               }`}
             >
               Pricing & Plans
             </Link>
             <Link
               href="/contact"
-              className={`transition hover:text-[#0a1128] dark:hover:text-white ${
-                pathname === "/contact" ? "text-[#c5a059] font-bold dark:text-[#c5a059]" : ""
+              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${
+                pathname === "/contact" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
               }`}
             >
               Contact Support
@@ -164,11 +161,11 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               <Link
                 href="/dashboard"
-                className={`flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#0a1128] transition hover:border-[#c5a059] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 ${
-                  pathname === "/dashboard" ? "border-[#c5a059] bg-[#fbf6ec]/40 dark:bg-slate-800" : ""
+                className={`flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#0a1128] transition hover:border-[#862e9f] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 ${
+                  pathname === "/dashboard" ? "border-[#862e9f] bg-[#862e9f]/10 text-[#862e9f] dark:bg-[#862e9f]/20" : ""
                 }`}
               >
-                <LayoutDashboard className="h-4 w-4 text-[#c5a059]" />
+                <LayoutDashboard className="h-4 w-4 text-[#862e9f]" />
                 <span>Dashboard</span>
               </Link>
 
@@ -185,9 +182,9 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               <Link
                 href="/login"
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
-                <LogIn className="h-3.5 w-3.5 text-[#c5a059]" />
+                <LogIn className="h-3.5 w-3.5 text-[#862e9f]" />
                 <span>Sign In</span>
               </Link>
             </div>
@@ -196,9 +193,9 @@ export default function Navbar() {
           {/* Primary CTA (Always visible, adapts on mobile) */}
           <Link
             href="/dashboard/listings/new"
-            className="flex items-center gap-1.5 rounded-xl bg-[#0a1128] px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#0a1128]/15 border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128] dark:hover:bg-[#d4af37]"
+            className="flex items-center gap-1.5 rounded-xl bg-[#00974e] px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#00974e]/20 border border-emerald-400/30 transition hover:bg-[#008042] active:scale-95"
           >
-            <Sparkles className="h-3.5 w-3.5 text-[#c5a059] dark:text-[#0a1128]" />
+            <Sparkles className="h-3.5 w-3.5 text-white" />
             <span className="hidden sm:inline">Create Listing</span>
             <span className="sm:hidden text-xs font-bold">+ New</span>
           </Link>
@@ -208,10 +205,10 @@ export default function Navbar() {
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
-            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-[#0a1128] shadow-sm transition hover:border-[#c5a059] active:scale-90 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200"
+            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200/90 bg-white text-[#0a1128] shadow-sm transition hover:border-[#862e9f] active:scale-90 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200"
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5 text-[#c5a059]" />
+              <X className="h-5 w-5 text-[#862e9f]" />
             ) : (
               <Menu className="h-5 w-5" />
             )}
@@ -228,7 +225,7 @@ export default function Navbar() {
             {currentUser ? (
               <div className="rounded-2xl border border-slate-200/90 bg-[#f8f9fa] p-3.5 dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0a1128] text-white font-bold text-sm border border-[#c5a059]/40 dark:bg-[#c5a059] dark:text-[#0a1128]">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#862e9f] text-white font-bold text-sm shadow-md shadow-[#862e9f]/20">
                     {currentUser.full_name ? currentUser.full_name.charAt(0).toUpperCase() : "B"}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -236,7 +233,7 @@ export default function Navbar() {
                       <p className="font-bold text-sm text-[#0a1128] dark:text-white truncate">
                         {currentUser.full_name || "Verified Broker"}
                       </p>
-                      <span className="rounded bg-[#fbf6ec] border border-[#e8d7b3] px-1.5 py-0.2 text-[9px] font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                      <span className="rounded bg-[#862e9f]/10 border border-[#862e9f]/30 px-1.5 py-0.2 text-[9px] font-bold text-[#862e9f] dark:text-[#a845c4]">
                         PRO
                       </span>
                     </div>
@@ -256,7 +253,7 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-xl bg-[#0a1128] px-3.5 py-2 text-xs font-bold text-white shadow-sm dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    className="rounded-xl bg-[#00974e] hover:bg-[#008042] px-3.5 py-2 text-xs font-bold text-white shadow-sm"
                   >
                     Sign In
                   </Link>
@@ -276,12 +273,12 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                     pathname === "/dashboard"
-                      ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                      ? "bg-[#0a1128] text-white dark:bg-[#862e9f] dark:text-white"
                       : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <LayoutDashboard className="h-4 w-4 text-[#c5a059]" />
+                    <LayoutDashboard className="h-4 w-4 text-[#862e9f]" />
                     <span>My Dashboard</span>
                   </div>
                   <ChevronRight className="h-4 w-4 opacity-50" />
@@ -293,12 +290,12 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                   pathname === "/dashboard/listings/new"
-                    ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    ? "bg-[#00974e] text-white"
                     : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-4 w-4 text-[#c5a059]" />
+                  <Sparkles className="h-4 w-4 text-[#862e9f]" />
                   <span>Create New Listing (AI)</span>
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-50" />
@@ -309,12 +306,12 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                   pathname === "/pricing"
-                    ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    ? "bg-[#862e9f] text-white"
                     : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <CreditCard className="h-4 w-4 text-[#c5a059]" />
+                  <CreditCard className="h-4 w-4 text-[#862e9f]" />
                   <span>Pricing & Plans</span>
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-50" />
@@ -325,12 +322,12 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
                   pathname === "/contact"
-                    ? "bg-[#0a1128] text-white dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    ? "bg-[#862e9f] text-white"
                     : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Headphones className="h-4 w-4 text-[#c5a059]" />
+                  <Headphones className="h-4 w-4 text-[#862e9f]" />
                   <span>Contact Support</span>
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-50" />
@@ -343,9 +340,9 @@ export default function Navbar() {
               <div className="flex items-center justify-between rounded-xl px-3 py-2 bg-slate-50 dark:bg-slate-900/60">
                 <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
                   {isDark ? (
-                    <Moon className="h-4 w-4 text-[#d4af37]" />
+                    <Moon className="h-4 w-4 text-[#a845c4]" />
                   ) : (
-                    <Sun className="h-4 w-4 text-[#c5a059]" />
+                    <Sun className="h-4 w-4 text-[#862e9f]" />
                   )}
                   <span>Appearance</span>
                 </div>
@@ -353,7 +350,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {isDark ? "Dark Theme" : "Light Theme"}
                 </button>
@@ -373,7 +370,7 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1128] py-2.5 text-xs font-bold text-white shadow-sm dark:bg-[#c5a059] dark:text-[#0a1128]"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00974e] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#008042]"
                 >
                   <LogIn className="h-4 w-4" />
                   <span>Sign In</span>

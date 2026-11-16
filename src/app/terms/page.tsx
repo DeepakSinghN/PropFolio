@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, Scale, CheckCircle2, Building2 } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Scale, CheckCircle2 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
@@ -27,14 +28,15 @@ export default function TermsPage() {
             <ThemeToggle />
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white"
+              className="flex items-center transition-opacity hover:opacity-90"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <span>
-                Prop<span className="text-[#c5a059]">Folio</span>
-              </span>
+              <Image
+                src="/brand-logo.png"
+                alt="PropertySnaps"
+                width={140}
+                height={41}
+                className="h-8 w-auto object-contain"
+              />
             </Link>
           </div>
         </div>
@@ -44,8 +46,8 @@ export default function TermsPage() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Page Header */}
         <div className="border-b border-slate-200/80 pb-8 dark:border-slate-800">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-3.5 py-1 text-xs font-semibold text-[#8a6828] dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <Scale className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-3.5 py-1 text-xs font-semibold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
+            <Scale className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Agreement & User Responsibilities</span>
           </div>
 
@@ -63,7 +65,7 @@ export default function TermsPage() {
           {/* Section 1 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">01.</span> Agreement to Terms
+              <span className="text-[#862e9f]">01.</span> Agreement to Terms
             </h2>
             <p>
               By accessing or using the services provided by <strong>Property Snaps</strong> ("Platform", "we", "us"), including our website (<strong>propertysnaps.in</strong>), WhatsApp Cloud API bot, and broker dashboard, you agree to be bound by these Terms of Service. If you do not agree to these terms, you must discontinue using our services immediately.
@@ -73,7 +75,7 @@ export default function TermsPage() {
           {/* Section 2 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">02.</span> Scope of Service
+              <span className="text-[#862e9f]">02.</span> Scope of Service
             </h2>
             <p>
               Property Snaps provides software and artificial intelligence technology designed to format, host, and display real estate listings and generate downloadable promotional materials (such as PDF brochures).
@@ -86,7 +88,7 @@ export default function TermsPage() {
           {/* Section 3 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">03.</span> Broker Responsibilities & RERA Compliance
+              <span className="text-[#862e9f]">03.</span> Broker Responsibilities & RERA Compliance
             </h2>
             <p>As a broker or listing creator on Property Snaps, you affirm and warrant that:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -108,7 +110,7 @@ export default function TermsPage() {
           {/* Section 4 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">04.</span> Intellectual Property & Photo Rights
+              <span className="text-[#862e9f]">04.</span> Intellectual Property & Photo Rights
             </h2>
             <p>
               You retain all ownership rights to the photographs, descriptions, and logos you upload. By submitting content through our WhatsApp bot or dashboard, you grant Property Snaps a worldwide, non-exclusive, royalty-free license to host, format, optimize, and display this content for the sole purpose of providing your listing service.
@@ -121,7 +123,7 @@ export default function TermsPage() {
           {/* Section 5 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">05.</span> WhatsApp Bot Fair Usage
+              <span className="text-[#862e9f]">05.</span> WhatsApp Bot Fair Usage
             </h2>
             <p>
               Our automated WhatsApp service is intended for legitimate property generation by real estate professionals. Automated scraping, reverse-engineering of bot prompts, high-volume stress testing, or sending abusive or defamatory text to the bot is strictly prohibited and will result in immediate phone number blacklisting.
@@ -131,7 +133,7 @@ export default function TermsPage() {
           {/* Section 6 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">06.</span> Limitation of Liability
+              <span className="text-[#862e9f]">06.</span> Limitation of Liability
             </h2>
             <p>
               To the maximum extent permitted by Indian law, Property Snaps shall not be liable for any indirect, incidental, punitive, or consequential damages, including loss of brokerage commission, buyer disputes, property title defects, or site visit cancellations arising from your use of the platform.
@@ -144,7 +146,7 @@ export default function TermsPage() {
           {/* Section 7 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">07.</span> Governing Law & Jurisdiction
+              <span className="text-[#862e9f]">07.</span> Governing Law & Jurisdiction
             </h2>
             <p>
               These Terms of Service are governed by and construed in accordance with the laws of India. Any legal dispute or claim arising out of or related to our platform shall be subject to the exclusive jurisdiction of the competent courts in Ahmedabad, Gujarat, India.
@@ -154,7 +156,7 @@ export default function TermsPage() {
           {/* Section 8 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">08.</span> Contact & Legal Inquiries
+              <span className="text-[#862e9f]">08.</span> Contact & Legal Inquiries
             </h2>
             <p>
               If you have any questions regarding these terms or wish to report an infringing listing, please contact:
@@ -163,10 +165,10 @@ export default function TermsPage() {
               <p className="font-bold text-[#0a1128] dark:text-white">Property Snaps Legal Department</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Legal & Compliance</p>
               <p className="mt-2 text-xs">
-                Email: <a href="mailto:legal@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">legal@propertysnaps.in</a>
+                Email: <a href="mailto:legal@propertysnaps.in" className="text-[#862e9f] font-semibold hover:underline">legal@propertysnaps.in</a>
               </p>
               <p className="text-xs mt-1">
-                Support: <a href="mailto:support@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">support@propertysnaps.in</a>
+                Support: <a href="mailto:support@propertysnaps.in" className="text-[#862e9f] font-semibold hover:underline">support@propertysnaps.in</a>
               </p>
             </div>
           </section>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, CheckCircle2, Building2 } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, CheckCircle2 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata = {
@@ -27,14 +28,15 @@ export default function PrivacyPolicyPage() {
             <ThemeToggle />
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm font-bold text-[#0a1128] dark:text-white"
+              className="flex items-center transition-opacity hover:opacity-90"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <span>
-                Prop<span className="text-[#c5a059]">Folio</span>
-              </span>
+              <Image
+                src="/brand-logo.png"
+                alt="PropertySnaps"
+                width={140}
+                height={41}
+                className="h-8 w-auto object-contain"
+              />
             </Link>
           </div>
         </div>
@@ -44,8 +46,8 @@ export default function PrivacyPolicyPage() {
       <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Page Header */}
         <div className="border-b border-slate-200/80 pb-8 dark:border-slate-800">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-3.5 py-1 text-xs font-semibold text-[#8a6828] dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <ShieldCheck className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-3.5 py-1 text-xs font-semibold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Compliance & Data Protection</span>
           </div>
 
@@ -63,7 +65,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 1 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">01.</span> Introduction
+              <span className="text-[#862e9f]">01.</span> Introduction
             </h2>
             <p>
               Welcome to <strong>Property Snaps</strong> ("we", "our", or "us"). Property Snaps provides a technology platform that allows real estate brokers, property consultants, and real estate professionals to turn raw WhatsApp messages and photos into professional web listing pages and downloadable PDF brochures.
@@ -76,7 +78,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 2 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">02.</span> Information We Collect
+              <span className="text-[#862e9f]">02.</span> Information We Collect
             </h2>
             <p>We only collect information necessary to provide our listing services to you:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -98,7 +100,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 3 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">03.</span> Meta WhatsApp Cloud API Compliance
+              <span className="text-[#862e9f]">03.</span> Meta WhatsApp Cloud API Compliance
             </h2>
             <p>
               Our automated listing generation operates via the official <strong>Meta WhatsApp Business Cloud API</strong>. In strict compliance with Meta’s Platform Terms and WhatsApp Business Messaging Policies:
@@ -114,7 +116,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 4 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">04.</span> How We Use Your Information
+              <span className="text-[#862e9f]">04.</span> How We Use Your Information
             </h2>
             <p>Your data is processed for the following legitimate purposes:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -129,7 +131,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 5 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">05.</span> Data Storage and Security
+              <span className="text-[#862e9f]">05.</span> Data Storage and Security
             </h2>
             <p>
               Your data is stored in secure, encrypted cloud databases (utilizing industry-standard TLS encryption in transit and AES-256 encryption at rest). Uploaded property photos are stored on high-speed Content Delivery Networks (CDNs) optimized for fast loading on buyers' mobile devices.
@@ -142,7 +144,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 6 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">06.</span> Your Data Rights & Deletion
+              <span className="text-[#862e9f]">06.</span> Your Data Rights & Deletion
             </h2>
             <p>
               Under Indian Digital Personal Data Protection (DPDP) standards and global privacy practices, you have full ownership over your content:
@@ -156,7 +158,7 @@ export default function PrivacyPolicyPage() {
           {/* Section 7 */}
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-[#0a1128] dark:text-white flex items-center gap-2">
-              <span className="text-[#c5a059]">07.</span> Contact Us
+              <span className="text-[#862e9f]">07.</span> Contact Us
             </h2>
             <p>
               If you have any questions, feedback, or privacy concerns regarding this policy, please reach out to our grievance officer:
@@ -165,10 +167,10 @@ export default function PrivacyPolicyPage() {
               <p className="font-bold text-[#0a1128] dark:text-white">Property Snaps Technologies</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Grievance & Privacy Officer</p>
               <p className="mt-2 text-xs">
-                Email: <a href="mailto:privacy@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">privacy@propertysnaps.in</a>
+                Email: <a href="mailto:privacy@propertysnaps.in" className="text-[#862e9f] font-semibold hover:underline">privacy@propertysnaps.in</a>
               </p>
               <p className="text-xs mt-1">
-                Support: <a href="mailto:support@propertysnaps.in" className="text-[#c5a059] font-semibold hover:underline">support@propertysnaps.in</a>
+                Support: <a href="mailto:support@propertysnaps.in" className="text-[#862e9f] font-semibold hover:underline">support@propertysnaps.in</a>
               </p>
               <p className="text-xs text-slate-500 mt-1">Headquarters: Ahmedabad, Gujarat, India</p>
             </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   MessageCircle,
@@ -142,13 +143,15 @@ export default function LoginClient() {
     <div className="flex min-h-screen flex-col justify-center bg-[#f8f9fa] py-12 sm:px-6 lg:px-8 transition-colors dark:bg-[#070b14]">
       {/* Top Navbar Header */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between max-w-5xl mx-auto">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 shadow-md shadow-[#0a1128]/20 dark:bg-[#0f182e] dark:text-[#d4af37]">
-            <Building2 className="h-5 w-5" />
-          </div>
-          <span className="text-base font-bold text-[#0a1128] dark:text-white">
-            Property<span className="text-[#c5a059] dark:text-[#d4af37]"> Snaps</span>
-          </span>
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
+          <Image
+            src="/brand-logo.png"
+            alt="PropertySnaps"
+            width={180}
+            height={53}
+            priority
+            className="h-10 sm:h-11 w-auto object-contain"
+          />
         </Link>
         <ThemeToggle />
       </div>
@@ -156,8 +159,8 @@ export default function LoginClient() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
         {/* Title */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-3 py-1 text-xs font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
-            <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#862e9f]/10 border border-[#862e9f]/20 px-3 py-1 text-xs font-bold text-[#862e9f] dark:bg-[#862e9f]/20 dark:border-[#862e9f]/30 dark:text-[#a845c4]">
+            <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Broker Portal Sign In</span>
           </div>
 
@@ -208,7 +211,7 @@ export default function LoginClient() {
                     placeholder={isEmail ? "name@example.com" : "98765 43210"}
                     value={contactInput}
                     onChange={(e) => setContactInput(e.target.value)}
-                    className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pr-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#1c5436] focus:bg-white focus:ring-2 focus:ring-[#1c5436]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-900 ${
+                    className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pr-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-[#862e9f] dark:focus:bg-slate-900 ${
                       isEmail ? "pl-10" : "pl-18"
                     }`}
                   />
@@ -228,7 +231,7 @@ export default function LoginClient() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pl-10 pr-10 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#1c5436] focus:bg-white focus:ring-2 focus:ring-[#1c5436]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-900"
+                    className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pl-10 pr-10 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-[#862e9f] dark:focus:bg-slate-900"
                   />
                   <button
                     type="button"
@@ -245,7 +248,7 @@ export default function LoginClient() {
               <button
                 type="submit"
                 disabled={loading || !isValidContact || !password}
-                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1c5436] py-3 text-sm font-bold text-white shadow-md shadow-[#1c5436]/20 transition-all hover:bg-[#15422a] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3 text-sm font-bold text-white shadow-md shadow-[#00974e]/20 transition-all hover:bg-[#008042] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
@@ -300,7 +303,7 @@ export default function LoginClient() {
                         placeholder={isEmail ? "name@example.com" : "98765 43210"}
                         value={contactInput}
                         onChange={(e) => setContactInput(e.target.value)}
-                        className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pr-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#1c5436] focus:bg-white focus:ring-2 focus:ring-[#1c5436]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-900 ${
+                        className={`w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pr-3.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-[#862e9f] dark:focus:bg-slate-900 ${
                           isEmail ? "pl-10" : "pl-18"
                         }`}
                       />
@@ -310,7 +313,7 @@ export default function LoginClient() {
                   <button
                     type="submit"
                     disabled={loading || !isValidContact}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1c5436] py-3 text-sm font-bold text-white shadow-md shadow-[#1c5436]/20 transition-all hover:bg-[#15422a] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3 text-sm font-bold text-white shadow-md shadow-[#00974e]/20 transition-all hover:bg-[#008042] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
@@ -330,7 +333,7 @@ export default function LoginClient() {
                         setErrorMsg("");
                         setAuthMode("password");
                       }}
-                      className="text-xs font-semibold text-slate-500 hover:text-[#0a1128] dark:hover:text-white underline decoration-slate-300 underline-offset-4"
+                      className="text-xs font-semibold text-slate-500 hover:text-[#862e9f] dark:hover:text-[#a845c4] underline decoration-slate-300 underline-offset-4"
                     >
                       ← Back to Password Login
                     </button>
@@ -350,14 +353,14 @@ export default function LoginClient() {
                       placeholder="• • • • • •"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                      className="mt-2 w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-3 text-center text-2xl font-mono tracking-widest font-black text-[#0a1128] outline-none transition focus:border-[#1c5436] focus:bg-white focus:ring-2 focus:ring-[#1c5436]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-emerald-500 dark:focus:bg-slate-900"
+                      className="mt-2 w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-3 text-center text-2xl font-mono tracking-widest font-black text-[#0a1128] outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white dark:focus:border-[#862e9f] dark:focus:bg-slate-900"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading || otpCode.length < 6}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1c5436] py-3 text-sm font-bold text-white shadow-md shadow-[#1c5436]/20 transition-all hover:bg-[#15422a] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3 text-sm font-bold text-white shadow-md shadow-[#00974e]/20 transition-all hover:bg-[#008042] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
@@ -385,7 +388,7 @@ export default function LoginClient() {
                       type="button"
                       disabled={resendTimer > 0 || loading}
                       onClick={handleSendOtp}
-                      className="font-semibold text-emerald-600 disabled:opacity-50 hover:underline dark:text-emerald-400"
+                      className="font-semibold text-[#00974e] disabled:opacity-50 hover:underline dark:text-[#00b85f]"
                     >
                       {resendTimer > 0
                         ? `Resend in ${resendTimer}s`
@@ -402,7 +405,7 @@ export default function LoginClient() {
             Don&apos;t have an account yet?{" "}
             <Link
               href="/signup"
-              className="font-bold text-amber-600 hover:underline dark:text-amber-400"
+              className="font-bold text-[#862e9f] hover:underline dark:text-[#a845c4]"
             >
               Sign up for free
             </Link>

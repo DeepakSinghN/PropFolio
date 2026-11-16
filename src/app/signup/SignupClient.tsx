@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -87,13 +88,15 @@ export default function SignupClient() {
     <div className="flex min-h-screen flex-col justify-center bg-[#fafaf9] py-12 sm:px-6 lg:px-8 transition-colors dark:bg-[#0c0d0e]">
       {/* Top Navbar */}
       <div className="absolute top-6 left-6 right-6 flex items-center justify-between max-w-5xl mx-auto">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
-            <Building2 className="h-5 w-5" />
-          </div>
-          <span className="text-base font-bold text-zinc-900 dark:text-white">
-            Property<span className="text-amber-600"> Snaps</span>
-          </span>
+        <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
+          <Image
+            src="/brand-logo.png"
+            alt="PropertySnaps"
+            width={180}
+            height={53}
+            priority
+            className="h-10 sm:h-11 w-auto object-contain"
+          />
         </Link>
         <ThemeToggle />
       </div>
@@ -101,8 +104,8 @@ export default function SignupClient() {
       <div className="sm:mx-auto sm:w-full sm:max-w-lg px-4">
         {/* Header Title */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#862e9f]/10 border border-[#862e9f]/20 px-3 py-1 text-xs font-bold text-[#862e9f] dark:bg-[#862e9f]/20 dark:border-[#862e9f]/30 dark:text-[#a845c4]">
+            <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Instant Broker Onboarding</span>
           </div>
 
@@ -136,7 +139,7 @@ export default function SignupClient() {
                   placeholder="e.g. Ramesh Shah"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                 />
               </div>
             </div>
@@ -149,7 +152,7 @@ export default function SignupClient() {
               <div className="relative mt-1.5 flex items-center">
                 <div className="absolute left-3.5 flex items-center gap-1 text-xs font-bold text-zinc-500">
                   {isEmail ? (
-                    <Mail className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <Mail className="h-4 w-4 text-[#862e9f] dark:text-[#a845c4]" />
                   ) : (
                     <>
                       <span>🇮🇳</span>
@@ -163,7 +166,7 @@ export default function SignupClient() {
                   placeholder="e.g. 98765 43210 or broker@realty.com"
                   value={contactInput}
                   onChange={(e) => setContactInput(e.target.value)}
-                  className={`w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white ${
+                  className={`w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white ${
                     isEmail ? "pl-11 pr-4" : "pl-16 pr-4"
                   }`}
                 />
@@ -188,7 +191,7 @@ export default function SignupClient() {
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-11 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                  className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-11 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                 />
                 <button
                   type="button"
@@ -214,7 +217,7 @@ export default function SignupClient() {
                     placeholder="e.g. Ahmedabad"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                   />
                 </div>
               </div>
@@ -230,7 +233,7 @@ export default function SignupClient() {
                     placeholder="e.g. Shah Realty"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                    className="w-full rounded-2xl border border-zinc-200 bg-[#fafaf9] py-3 pl-10 pr-4 text-sm font-semibold text-zinc-900 shadow-sm transition outline-none focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/20 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                   />
                 </div>
               </div>
@@ -240,7 +243,7 @@ export default function SignupClient() {
             <button
               type="submit"
               disabled={loading || !fullName.trim() || !isValidContact || password.length < 6}
-              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
+              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#00974e] py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#00974e]/25 transition-all hover:bg-[#008042] active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -258,7 +261,7 @@ export default function SignupClient() {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-bold text-amber-600 hover:underline dark:text-amber-400"
+              className="font-bold text-[#862e9f] hover:underline dark:text-[#a845c4]"
             >
               Sign in with password
             </Link>

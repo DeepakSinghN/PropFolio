@@ -7,10 +7,14 @@
   --foreground: #0a1128;
   --brand-navy: #0a1128;
   --brand-navy-light: #16234b;
-  --brand-gold: #c5a059;
-  --brand-gold-hover: #b08d43;
-  --brand-gold-subtle: #fbf7ee;
-  --brand-gold-border: #e8d7b3;
+  --brand-purple: #862e9f;
+  --brand-purple-hover: #722487;
+  --brand-purple-subtle: #fbf2fd;
+  --brand-purple-border: #f0d0f7;
+  --brand-green: #00974e;
+  --brand-green-hover: #008042;
+  --brand-green-subtle: #edfbf4;
+  --brand-green-border: #bbf0d7;
   color-scheme: light;
 }
 
@@ -19,19 +23,29 @@ html.dark, .dark {
   --foreground: #f1f5f9;
   --brand-navy: #070b14;
   --brand-navy-light: #0f182e;
-  --brand-gold: #d4af37;
-  --brand-gold-hover: #e5c358;
-  --brand-gold-subtle: #18140c;
-  --brand-gold-border: #3d331d;
+  --brand-purple: #a845c4;
+  --brand-purple-hover: #b854d4;
+  --brand-purple-subtle: #200d28;
+  --brand-purple-border: #4d1c5e;
+  --brand-green: #00b85f;
+  --brand-green-hover: #00cd6a;
+  --brand-green-subtle: #092014;
+  --brand-green-border: #14492e;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-hover: var(--brand-purple-hover);
+  --color-brand-purple-subtle: var(--brand-purple-subtle);
+  --color-brand-purple-border: var(--brand-purple-border);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-hover: var(--brand-green-hover);
+  --color-brand-green-subtle: var(--brand-green-subtle);
+  --color-brand-green-border: var(--brand-green-border);
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
-  --font-mono: var(--font-mono);
 }
 
 body {

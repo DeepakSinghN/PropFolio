@@ -475,7 +475,7 @@ export default function DashboardClient({
               onClick={() => setActiveTab("listings")}
               className={`flex items-center gap-2 border-b-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold transition whitespace-nowrap ${
                 activeTab === "listings"
-                  ? "border-[#c5a059] text-[#0a1128] dark:text-white"
+                  ? "border-[#862e9f] text-[#0a1128] dark:text-white"
                   : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               }`}
             >
@@ -488,13 +488,13 @@ export default function DashboardClient({
               onClick={() => setActiveTab("collections")}
               className={`flex items-center gap-2 border-b-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold transition whitespace-nowrap ${
                 activeTab === "collections"
-                  ? "border-[#c5a059] text-[#0a1128] dark:text-white"
+                  ? "border-[#862e9f] text-[#0a1128] dark:text-white"
                   : "border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
               }`}
             >
-              <Layers className="h-4 w-4 text-[#c5a059]" />
+              <Layers className="h-4 w-4 text-[#862e9f]" />
               <span>Curated Collections ({collections.length})</span>
-              <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[9px] font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+              <span className="rounded-full bg-[#862e9f]/10 border border-[#862e9f]/20 px-2 py-0.5 text-[9px] font-bold text-[#862e9f] dark:bg-[#862e9f]/20 dark:border-[#862e9f]/30 dark:text-[#a845c4]">
                 PITCH DECKS
               </span>
             </button>
@@ -508,9 +508,9 @@ export default function DashboardClient({
               setNewColDesc("");
               setIsModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/50 dark:border-slate-800 dark:bg-[#0c1222] dark:text-white self-start sm:self-auto shrink-0 mb-2 sm:mb-0"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:bg-[#862e9f]/5 dark:border-slate-800 dark:bg-[#0c1222] dark:text-white self-start sm:self-auto shrink-0 mb-2 sm:mb-0"
           >
-            <FolderPlus className="h-3.5 w-3.5 text-[#c5a059]" />
+            <FolderPlus className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>+ Create Collection</span>
           </button>
         </div>
@@ -533,7 +533,7 @@ export default function DashboardClient({
                     setNewColDesc("");
                     setIsModalOpen(true);
                   }}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0a1128] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16234b] dark:bg-[#c5a059] dark:text-[#0a1128]"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0a1128] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#16234b] dark:bg-[#862e9f] dark:text-[#0a1128]"
                 >
                   <FolderPlus className="h-3.5 w-3.5" />
                   <span>Create Your First Collection</span>
@@ -551,7 +551,7 @@ export default function DashboardClient({
                   return (
                     <div
                       key={col.id || col.slug}
-                      className="flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-sm transition hover:border-[#c5a059]/40 hover:shadow-lg dark:border-slate-800 dark:bg-[#0c1222]"
+                      className="flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-sm transition hover:border-[#862e9f]/40 hover:shadow-lg dark:border-slate-800 dark:bg-[#0c1222]"
                     >
                       <div>
                         {/* 4-Photo Collage / Preview */}
@@ -570,7 +570,7 @@ export default function DashboardClient({
 
                         <div className="p-4 sm:p-5 space-y-2">
                           <div className="flex items-center gap-1.5">
-                            <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                            <span className="rounded-full bg-[#862e9f]/10 border border-[#862e9f]/20 px-2 py-0.5 text-[10px] font-bold text-[#862e9f] dark:bg-[#862e9f]/20 dark:border-[#862e9f]/30 dark:text-[#a845c4]">
                               {col.listing_slugs?.length || col.listing_count || 0} PROPERTIES
                             </span>
                             {col.total_value > 0 && (
@@ -597,7 +597,7 @@ export default function DashboardClient({
                         <button
                           type="button"
                           onClick={() => copyCollectionLink(col.slug)}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#c5a059] active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#862e9f] active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                         >
                           {isCopied ? (
                             <>
@@ -628,7 +628,7 @@ export default function DashboardClient({
                           <Link
                             href={targetUrl}
                             target="_blank"
-                            className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#c5a059]/40 transition hover:bg-[#16234b] dark:bg-[#c5a059] dark:text-[#0a1128]"
+                            className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#862e9f]/40 transition hover:bg-[#16234b] dark:bg-[#862e9f] dark:text-[#0a1128]"
                           >
                             <span>View Live</span>
                             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -799,7 +799,7 @@ export default function DashboardClient({
 
                             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-[13px] text-slate-500 dark:text-slate-400">
                               <span className="inline-flex items-center gap-1 truncate max-w-[170px] sm:max-w-none">
-                                <MapPin className="h-3.5 w-3.5 shrink-0 text-[#c5a059]" />
+                                <MapPin className="h-3.5 w-3.5 shrink-0 text-[#862e9f]" />
                                 <span className="truncate">{item.location_locality}, {item.location_city}</span>
                               </span>
                               <span>•</span>
@@ -820,7 +820,7 @@ export default function DashboardClient({
                         <button
                           type="button"
                           onClick={() => copyLink(item.slug)}
-                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#c5a059] hover:bg-[#fbf6ec]/50 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#862e9f] hover:bg-[#862e9f]/5 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                         >
                           {copiedSlug === item.slug ? (
                             <>
@@ -838,7 +838,7 @@ export default function DashboardClient({
                         <Link
                           href={targetUrl}
                           target="_blank"
-                          className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#c5a059]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#c5a059] dark:text-[#0a1128]"
+                          className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#862e9f]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#862e9f] dark:text-[#0a1128]"
                         >
                           <span>Open Live</span>
                           <ArrowUpRight className="h-3.5 w-3.5" />
@@ -853,7 +853,7 @@ export default function DashboardClient({
                           }}
                           aria-label="Listing options"
                           title="Options (Mark as Sold, Add to Collection, Delete, Share)"
-                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-[#c5a059] hover:text-[#0a1128] active:scale-90 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 pointer-events-auto"
+                          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-[#862e9f] hover:text-[#0a1128] active:scale-90 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 pointer-events-auto"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </button>
@@ -891,7 +891,7 @@ export default function DashboardClient({
                               }}
                               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/80"
                             >
-                              <FolderPlus className="h-4 w-4 text-[#c5a059] shrink-0" />
+                              <FolderPlus className="h-4 w-4 text-[#862e9f] shrink-0" />
                               <div>
                                 <p className="font-semibold text-slate-800 dark:text-white">+ Add to Collection</p>
                                 <p className="text-[10px] text-slate-400">Bundle with other properties</p>
@@ -973,7 +973,7 @@ export default function DashboardClient({
               {/* Modal Header */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#16234b]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0a1128] text-[#862e9f] border border-[#862e9f]/30 dark:bg-[#16234b]">
                     <FolderPlus className="h-5 w-5" />
                   </div>
                   <div>
@@ -1007,7 +1007,7 @@ export default function DashboardClient({
                     value={newColTitle}
                     onChange={(e) => setNewColTitle(e.target.value)}
                     placeholder="e.g. 4 BHK Luxury Shortlist for Mr. Sharma"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs sm:text-sm font-medium outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs sm:text-sm font-medium outline-none focus:border-[#862e9f] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
                   />
                 </div>
 
@@ -1020,7 +1020,7 @@ export default function DashboardClient({
                     value={newColDesc}
                     onChange={(e) => setNewColDesc(e.target.value)}
                     placeholder="e.g. Hand-picked properties with clear title, clubhouse access, and immediate possession."
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-[#c5a059] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs outline-none focus:border-[#862e9f] focus:bg-white dark:border-slate-700 dark:bg-slate-900"
                   />
                 </div>
 
@@ -1034,7 +1034,7 @@ export default function DashboardClient({
                       <button
                         type="button"
                         onClick={() => setSelectedSlugs(listings.map((l) => l.slug))}
-                        className="text-[#c5a059] hover:underline font-medium"
+                        className="text-[#862e9f] hover:underline font-medium"
                       >
                         Select All
                       </button>
@@ -1064,7 +1064,7 @@ export default function DashboardClient({
                           }}
                           className={`flex cursor-pointer items-center gap-3 rounded-xl p-2 transition ${
                             isSelected
-                              ? "bg-white shadow-sm border border-[#c5a059] dark:bg-slate-900"
+                              ? "bg-white shadow-sm border border-[#862e9f] dark:bg-slate-900"
                               : "hover:bg-white/60 dark:hover:bg-slate-900/60"
                           }`}
                         >
@@ -1101,7 +1101,7 @@ export default function DashboardClient({
                   <button
                     type="submit"
                     disabled={isSubmittingCol || !newColTitle.trim() || selectedSlugs.length === 0}
-                    className="rounded-xl bg-[#0a1128] px-5 py-2 text-xs font-bold text-white shadow-md border border-[#c5a059]/40 hover:bg-[#16234b] disabled:opacity-50 dark:bg-[#c5a059] dark:text-[#0a1128]"
+                    className="rounded-xl bg-[#0a1128] px-5 py-2 text-xs font-bold text-white shadow-md border border-[#862e9f]/40 hover:bg-[#16234b] disabled:opacity-50 dark:bg-[#862e9f] dark:text-[#0a1128]"
                   >
                     {isSubmittingCol ? "Creating..." : "Create & Get Link"}
                   </button>

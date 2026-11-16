@@ -116,16 +116,16 @@ export default function PricingClient() {
     <div className="min-h-screen bg-[#f8f9fa] text-[#0a1128] transition-colors dark:bg-[#070b14] dark:text-slate-100">
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-white via-[#fbf6ec]/30 to-[#f8f9fa] py-16 sm:py-24 dark:border-slate-800/80 dark:from-[#0b1020] dark:via-[#090d18] dark:to-[#070b14]">
-        <div className="absolute inset-0 bg-[radial-gradient(#c5a059_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-white via-[#862e9f]/5 to-[#f8f9fa] py-16 sm:py-24 dark:border-slate-800/80 dark:from-[#0b1020] dark:via-[#090d18] dark:to-[#070b14]">
+        <div className="absolute inset-0 bg-[radial-gradient(#862e9f_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
         <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-4 py-1.5 text-xs font-semibold text-[#8a6828] dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-4 py-1.5 text-xs font-semibold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/15 dark:text-[#a845c4]">
+            <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
             <span>Simple, honest pricing. No hidden fees.</span>
           </div>
 
-          <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-[#0a1128] sm:text-5xl dark:text-white">
-            Invest in Your Deals, <span className="text-[#c5a059]">Not in Overhead</span>
+          <h1 className="mt-5 text-3xl font-bold tracking-tight text-[#0a1128] sm:text-5xl dark:text-white">
+            Invest in Your Deals, <span className="text-[#862e9f]">Not in Overhead</span>
           </h1>
 
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 dark:text-slate-400">
@@ -139,7 +139,7 @@ export default function PricingClient() {
               onClick={() => setBillingCycle("monthly")}
               className={`rounded-xl px-5 py-2 text-xs font-bold transition-all ${
                 billingCycle === "monthly"
-                  ? "bg-[#0a1128] text-white shadow dark:bg-[#c5a059] dark:text-[#0a1128]"
+                  ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
                   : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
               }`}
             >
@@ -150,12 +150,12 @@ export default function PricingClient() {
               onClick={() => setBillingCycle("yearly")}
               className={`flex items-center gap-1.5 rounded-xl px-5 py-2 text-xs font-bold transition-all ${
                 billingCycle === "yearly"
-                  ? "bg-[#0a1128] text-white shadow dark:bg-[#c5a059] dark:text-[#0a1128]"
+                  ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
                   : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
               }`}
             >
               <span>Annual Billing</span>
-              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-extrabold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+              <span className="rounded-full bg-[#00974e]/10 px-2 py-0.5 text-[10px] font-extrabold text-[#00974e] dark:bg-[#00974e]/20 dark:text-[#00b85f]">
                 Save 33%
               </span>
             </button>
@@ -186,12 +186,12 @@ export default function PricingClient() {
                 key={plan.id}
                 className={`relative flex flex-col justify-between rounded-3xl p-8 transition-all ${
                   plan.highlight
-                    ? "border-2 border-[#c5a059] bg-white shadow-2xl shadow-[#c5a059]/15 dark:border-[#c5a059] dark:bg-[#0c1222]"
+                    ? "border-2 border-[#862e9f] bg-white shadow-2xl shadow-[#862e9f]/15 dark:border-[#862e9f] dark:bg-[#0c1222]"
                     : "border border-slate-200/80 bg-white shadow-sm hover:shadow-md dark:border-slate-800 dark:bg-[#0c1222]/60"
                 }`}
               >
                 {plan.highlight && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-[#c5a059] bg-[#0a1128] px-4 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#c5a059] shadow-md">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full border border-[#862e9f] bg-[#0a1128] px-4 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-md">
                     ★ {plan.badge}
                   </div>
                 )}
@@ -231,7 +231,7 @@ export default function PricingClient() {
                       href={plan.ctaHref}
                       className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold transition-all active:scale-95 ${
                         plan.highlight
-                          ? "bg-[#0a1128] text-white shadow-lg shadow-[#0a1128]/25 border border-[#c5a059] hover:bg-[#16234b] dark:bg-[#c5a059] dark:text-[#0a1128] dark:hover:bg-[#d4af37]"
+                          ? "bg-[#00974e] text-white shadow-lg shadow-[#00974e]/25 hover:bg-[#008042]"
                           : "border border-slate-200 bg-slate-50 text-[#0a1128] hover:bg-slate-100 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
                       }`}
                     >
@@ -248,7 +248,7 @@ export default function PricingClient() {
                     <ul className="mt-3 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
                       {plan.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-2.5">
-                          <Check className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5" />
+                          <Check className="h-4 w-4 shrink-0 text-[#00974e] mt-0.5" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -293,7 +293,7 @@ export default function PricingClient() {
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
                     <th className="py-4 px-6 font-bold uppercase tracking-wider text-[11px]">Feature</th>
                     <th className="py-4 px-6 font-bold uppercase tracking-wider text-[11px]">Starter (₹0)</th>
-                    <th className="py-4 px-6 font-bold uppercase tracking-wider text-[11px] text-[#c5a059]">Solo Pro (₹499)</th>
+                    <th className="py-4 px-6 font-bold uppercase tracking-wider text-[11px] text-[#862e9f]">Solo Pro (₹499)</th>
                     <th className="py-4 px-6 font-bold uppercase tracking-wider text-[11px]">Agency (₹1,499)</th>
                   </tr>
                 </thead>
@@ -306,7 +306,7 @@ export default function PricingClient() {
                       <td className="py-4 px-6 text-slate-600 dark:text-slate-400">
                         {row.free}
                       </td>
-                      <td className="py-4 px-6 font-bold text-[#0a1128] dark:text-[#c5a059]">
+                      <td className="py-4 px-6 font-bold text-[#862e9f] dark:text-[#a845c4]">
                         {row.pro}
                       </td>
                       <td className="py-4 px-6 text-slate-700 dark:text-slate-300">
@@ -371,8 +371,8 @@ export default function PricingClient() {
         </section>
 
         {/* Bottom CTA Banner */}
-        <section className="mt-20 rounded-3xl border border-[#c5a059]/40 bg-[#0a1128] p-8 text-center text-white shadow-2xl sm:p-12 dark:bg-[#0c1222]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-white/5 px-4 py-1 text-xs font-semibold text-[#c5a059]">
+        <section className="mt-20 rounded-3xl border border-[#862e9f]/30 bg-[#0a1128] p-8 text-center text-white shadow-2xl sm:p-12 dark:bg-[#0c1222]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/40 bg-white/5 px-4 py-1 text-xs font-semibold text-[#862e9f]">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Try it right now in 60 seconds</span>
           </div>
@@ -387,7 +387,7 @@ export default function PricingClient() {
               href="https://wa.me/919876543210?text=Hi%20Property%20Snaps%2C%20I%20want%20to%20create%20a%20listing"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-xs font-bold text-white shadow-lg transition hover:bg-emerald-700 sm:w-auto active:scale-95"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#00974e] px-6 py-3.5 text-xs font-bold text-white shadow-lg transition hover:bg-[#008042] sm:w-auto active:scale-95"
             >
               <MessageCircle className="h-4 w-4" />
               <span>Send Property on WhatsApp</span>
@@ -397,7 +397,7 @@ export default function PricingClient() {
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white sm:w-auto"
             >
               <span>Explore Dashboard Demo</span>
-              <ArrowRight className="h-4 w-4 text-[#c5a059]" />
+              <ArrowRight className="h-4 w-4 text-[#862e9f]" />
             </Link>
           </div>
         </section>

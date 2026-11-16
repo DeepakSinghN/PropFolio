@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   MessageCircle,
   ArrowRight,
@@ -13,7 +14,8 @@ import {
   Check,
   Zap,
   Sliders,
-  Eye
+  Eye,
+  ArrowDown
 } from "lucide-react";
 import HeroInteractiveDemo from "@/components/HeroInteractiveDemo";
 
@@ -22,25 +24,25 @@ export default function HomePage() {
   const waBotLink = "https://wa.me/15551756346?text=Create%20listing";
 
   return (
-    <div className="flex-1 bg-[#f8f9fa] text-[#0a1128] transition-colors selection:bg-[#c5a059]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100 dark:selection:bg-[#c5a059]/30">
-      
+    <div className="flex-1 bg-[#f8f9fa] text-[#0a1128] transition-colors selection:bg-[#862e9f]/20 selection:text-[#862e9f] dark:bg-[#070b14] dark:text-slate-100 dark:selection:bg-[#862e9f]/30">
+
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden pt-14 pb-16 sm:pt-20 sm:pb-24">
-        {/* Subtle Ambient Navy/Gold Glow */}
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#c5a059]/15 via-slate-100/20 to-transparent dark:from-[#c5a059]/10 dark:via-transparent" />
+      <section className="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 min-h-[calc(84vh-4rem)] flex flex-col justify-center">
+        {/* Subtle Ambient Purple/Green Glow */}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#862e9f]/10 via-[#00974e]/5 to-transparent dark:from-[#862e9f]/15 dark:via-transparent" />
 
         <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
           {/* Eyebrow Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c5a059]/40 bg-[#fbf6ec] px-4 py-1.5 text-xs font-semibold text-[#8a6828] shadow-sm backdrop-blur-md dark:border-[#c5a059]/30 dark:bg-[#17130a] dark:text-[#d4af37]">
-            <span className="flex h-2 w-2 rounded-full bg-[#c5a059] animate-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-4 py-1.5 text-xs font-semibold text-[#862e9f] shadow-sm backdrop-blur-md dark:border-[#a845c4]/30 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
+            <span className="flex h-2 w-2 rounded-full bg-[#862e9f] animate-pulse" />
             <span>For Real Estate Brokers & Property Agents</span>
           </div>
 
           {/* Master Headline - Simple, Punchy, English */}
-          <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-[#0a1128] sm:text-5xl lg:text-6xl sm:leading-[1.18] dark:text-white">
-            Send a property on WhatsApp. <br />
-            <span className="bg-gradient-to-r from-[#0a1128] via-[#1a2850] to-[#c5a059] bg-clip-text text-transparent dark:from-white dark:via-[#e2e8f0] dark:to-[#d4af37]">
-              Get a listing page in 60 seconds.
+          <h1 className="mt-6 text-4xl sm:text-6xl lg:text-7xl font-bold  tracking-tight text-[#0a1128] sm:leading-[1.12] dark:text-white">
+            Send a property on <span className="text-[#00974e]">WhatsApp.</span><br /> Get a listing page in {" "}
+            <span className="text-[#862e9f]">
+              minutes.
             </span>
           </h1>
 
@@ -50,12 +52,12 @@ export default function HomePage() {
           </p>
 
           {/* High-Intent CTAs */}
-          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={waBotLink}
               target="_blank"
               rel="noreferrer"
-              className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 active:scale-95 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#00974e] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#00974e]/25 transition-all hover:bg-[#008042] active:scale-95 sm:w-auto"
             >
               <MessageCircle className="h-4 w-4" />
               <span>Create Free Listing on WhatsApp</span>
@@ -63,29 +65,61 @@ export default function HomePage() {
 
             <Link
               href="/ramesh/4-bhk-villa-malviya-nagar-jaipur-terrace-garden"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#c5a059] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#c5a059]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
             >
-              <Eye className="h-4 w-4 text-[#c5a059]" />
+              <Eye className="h-4 w-4 text-[#862e9f]" />
               <span>View Sample Listing</span>
             </Link>
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <div className="mt-5 flex items-center justify-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-emerald-500" /> No app to download
+              <Check className="h-3.5 w-3.5 text-[#00974e]" /> No app to download
             </span>
             <span>·</span>
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-emerald-500" /> First listing is 100% free
+              <Check className="h-3.5 w-3.5 text-[#00974e]" /> First listing is 100% free
             </span>
             <span>·</span>
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-emerald-500" /> Opens on any phone
+              <Check className="h-3.5 w-3.5 text-[#00974e]" /> Opens on any phone
             </span>
           </div>
 
-          {/* Interactive Hero Showcase */}
-          <HeroInteractiveDemo />
+          {/* Elegant Scroll Cue to Showcase */}
+          <div className="mt-10 flex justify-center">
+            <a
+              href="#transformation-showcase"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm backdrop-blur-md transition hover:border-[#862e9f] hover:text-[#862e9f] dark:border-slate-800 dark:bg-[#0c1222]/90 dark:text-slate-300 dark:hover:border-[#862e9f]"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
+              <span>See the 60-Second Transformation</span>
+              <ArrowDown className="h-3.5 w-3.5 text-[#00974e] animate-bounce" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. THE BEFORE & AFTER SHOWCASE SECTION */}
+      <section
+        id="transformation-showcase"
+        className="relative scroll-mt-16 border-t border-slate-200/80 bg-gradient-to-b from-white via-slate-50/60 to-white py-16 sm:py-24 transition-colors dark:border-slate-800/80 dark:from-[#0a0f1d] dark:via-[#070b14] dark:to-[#070b14]"
+      >
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#862e9f]/30 bg-[#862e9f]/10 px-3.5 py-1 text-xs font-bold text-[#862e9f] dark:border-[#862e9f]/30 dark:bg-[#862e9f]/20 dark:text-[#a845c4]">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>The 60-Second Transformation</span>
+          </div>
+          <h2 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#0a1128] dark:text-white leading-[1.2]">
+            From Raw WhatsApp Chat to <br /> <span className="text-[#00974e]">Live Website</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            Compare an unorganized forwarded chat against your branded Property Snaps micro-site.
+          </p>
+
+          <div className="mt-8">
+            <HeroInteractiveDemo />
+          </div>
         </div>
       </section>
 
@@ -93,10 +127,10 @@ export default function HomePage() {
       <section className="border-t border-slate-200/80 bg-white py-16 transition-colors sm:py-24 dark:border-slate-800/80 dark:bg-[#070b14]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#c5a059] dark:text-[#d4af37]">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#862e9f] dark:text-[#c974e3]">
               How It Works
             </span>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
+            <h2 className="mt-2 text-2xl font-bold font-display tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
               From a WhatsApp message to a listing page in 3 easy steps
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
@@ -132,7 +166,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-5">
-                <span className="text-xs font-bold text-[#c5a059] dark:text-[#d4af37]">STEP 1</span>
+                <span className="text-xs font-bold text-[#00974e] uppercase tracking-wider">STEP 1</span>
                 <h3 className="mt-1 text-base font-bold text-[#0a1128] dark:text-white">
                   Send it on WhatsApp
                 </h3>
@@ -147,10 +181,10 @@ export default function HomePage() {
               <div className="rounded-2xl border border-slate-200/60 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-[#090e1c]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 text-[11px] font-semibold text-slate-500">
                   <span className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-[#c5a059]" />
+                    <Sparkles className="h-3.5 w-3.5 text-[#862e9f]" />
                     Property Snaps AI
                   </span>
-                  <span className="rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2 py-0.5 text-[10px] font-bold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                  <span className="rounded-full bg-[#862e9f]/10 border border-[#862e9f]/30 px-2 py-0.5 text-[10px] font-bold text-[#862e9f] dark:text-[#c974e3]">
                     Step 2
                   </span>
                 </div>
@@ -158,21 +192,21 @@ export default function HomePage() {
                 <div className="mt-3.5 space-y-2 text-left">
                   <div className="mt-1 flex items-center justify-between rounded-xl bg-slate-50 p-2.5 dark:bg-[#0f182e] border border-slate-200/60 dark:border-slate-800">
                     <span className="text-xs font-bold text-[#0a1128] dark:text-white">3 BHK Satellite Flat</span>
-                    <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">₹1.35 Cr</span>
+                    <span className="text-xs font-extrabold text-[#00974e]">₹1.35 Cr</span>
                   </div>
                   <div className="flex gap-1.5">
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">1,750 sqft</span>
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">Furnished</span>
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">Parking</span>
                   </div>
-                  <p className="text-[11px] text-emerald-600 font-semibold pt-1">
+                  <p className="text-[11px] text-[#00974e] font-semibold pt-1">
                     ✓ Full Photo Gallery + Loan EMI Ready
                   </p>
                 </div>
               </div>
 
               <div className="mt-5">
-                <span className="text-xs font-bold text-[#c5a059] dark:text-[#d4af37]">STEP 2</span>
+                <span className="text-xs font-bold text-[#862e9f] dark:text-[#c974e3] uppercase tracking-wider">STEP 2</span>
                 <h3 className="mt-1 text-base font-bold text-[#0a1128] dark:text-white">
                   Property Snaps builds the page
                 </h3>
@@ -190,7 +224,7 @@ export default function HomePage() {
                     <Share2 className="h-3.5 w-3.5 text-[#0a1128] dark:text-slate-300" />
                     Shareable Link
                   </span>
-                  <span className="rounded-full bg-[#0a1128] px-2 py-0.5 text-[10px] font-bold text-white dark:bg-white dark:text-[#0a1128]">
+                  <span className="rounded-full bg-[#00974e] px-2 py-0.5 text-[10px] font-bold text-white">
                     Step 3
                   </span>
                 </div>
@@ -200,10 +234,10 @@ export default function HomePage() {
                     propertysnaps.in/ramesh/3-bhk-satellite
                   </div>
                   <div className="flex items-center gap-2 pt-1">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-[#00974e] dark:bg-emerald-950/60 dark:text-emerald-300">
                       <Check className="h-3 w-3" /> Opens on any phone
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#fbf6ec] border border-[#e8d7b3] px-2.5 py-1 text-[10px] font-semibold text-[#8a6828] dark:bg-[#1a1710] dark:border-[#3d331d] dark:text-[#d4af37]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#862e9f]/10 border border-[#862e9f]/30 px-2.5 py-1 text-[10px] font-semibold text-[#862e9f] dark:text-[#c974e3]">
                       <FileText className="h-3 w-3" /> PDF Brochure
                     </span>
                   </div>
@@ -211,7 +245,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-5">
-                <span className="text-xs font-bold text-[#c5a059] dark:text-[#d4af37]">STEP 3</span>
+                <span className="text-xs font-bold text-[#00974e] uppercase tracking-wider">STEP 3</span>
                 <h3 className="mt-1 text-base font-bold text-[#0a1128] dark:text-white">
                   Share one clean link
                 </h3>
@@ -228,10 +262,10 @@ export default function HomePage() {
       <section className="border-t border-slate-200/80 bg-[#f8f9fa] py-16 transition-colors sm:py-24 dark:border-slate-800/80 dark:bg-[#05080f]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-left md:text-center">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#c5a059] dark:text-[#d4af37]">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#862e9f] dark:text-[#c974e3]">
               Broker Features
             </span>
-            <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
+            <h2 className="mt-2 text-2xl font-bold font-display tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
               Everything you need to close deals faster
             </h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600 dark:text-slate-400">
@@ -241,8 +275,8 @@ export default function HomePage() {
 
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1: Your Own Website */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
                 <Globe2 className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -257,8 +291,8 @@ export default function HomePage() {
             </div>
 
             {/* Feature 2: Fullscreen Gallery */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
                 <Smartphone className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -267,14 +301,14 @@ export default function HomePage() {
               <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 Every photo opens in full HD. Buyers can swipe through photos smoothly like a mobile app without downloading dozens of files.
               </p>
-              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#8a6828] dark:text-[#d4af37]">
-                <Check className="h-3.5 w-3.5 text-emerald-500" /> Full HD Touch Gallery
+              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#00974e] dark:text-emerald-400">
+                <Check className="h-3.5 w-3.5 text-[#00974e]" /> Full HD Touch Gallery
               </div>
             </div>
 
             {/* Feature 3: Printable PDF Brochure */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
                 <FileText className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -283,14 +317,14 @@ export default function HomePage() {
               <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 Whenever a client asks for a brochure, generate a clean printable A4 PDF in one second, complete with a QR code and your contact info.
               </p>
-              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#8a6828] dark:text-[#d4af37]">
-                <Check className="h-3.5 w-3.5 text-emerald-500" /> Print & WhatsApp Ready
+              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#00974e] dark:text-emerald-400">
+                <Check className="h-3.5 w-3.5 text-[#00974e]" /> Print & WhatsApp Ready
               </div>
             </div>
 
             {/* Feature 4: Write the Way You Talk */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
                 <Zap className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -299,14 +333,14 @@ export default function HomePage() {
               <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 Write naturally in Hinglish, Hindi, or English: "3 BHK ready to move, 1.35 Cr final, Satellite". Our AI parses the details automatically.
               </p>
-              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#8a6828] dark:text-[#d4af37]">
-                <Check className="h-3.5 w-3.5 text-emerald-500" /> Smart Multi-lingual AI
+              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#00974e] dark:text-emerald-400">
+                <Check className="h-3.5 w-3.5 text-[#00974e]" /> Smart Multi-lingual AI
               </div>
             </div>
 
             {/* Feature 5: Home Loan & EMI Calculator */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 dark:bg-[#0f182e] dark:text-[#d4af37]">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#862e9f]/10 text-[#862e9f] border border-[#862e9f]/20 dark:bg-[#862e9f]/20 dark:text-[#c974e3]">
                 <Sliders className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -315,14 +349,14 @@ export default function HomePage() {
               <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 Buyers can check their estimated monthly loan EMI directly on the listing page so they can make purchase decisions faster.
               </p>
-              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#8a6828] dark:text-[#d4af37]">
-                <Check className="h-3.5 w-3.5 text-emerald-500" /> Live EMI Calculator
+              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#00974e] dark:text-emerald-400">
+                <Check className="h-3.5 w-3.5 text-[#00974e]" /> Live EMI Calculator
               </div>
             </div>
 
             {/* Feature 6: Direct WhatsApp Inquiries */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]/80">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md hover:border-[#00974e]/40 dark:border-slate-800 dark:bg-[#0c1222]/80">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00974e] text-white shadow-md shadow-[#00974e]/20">
                 <MessageCircle className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-base font-bold text-[#0a1128] dark:text-white">
@@ -331,7 +365,7 @@ export default function HomePage() {
               <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 No portals stealing your leads. Buyers tap one button to send you a pre-filled WhatsApp message or call you directly.
               </p>
-              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <div className="mt-4 flex items-center gap-1.5 text-[11px] font-semibold text-[#00974e] dark:text-emerald-400">
                 <Check className="h-3.5 w-3.5" /> 100% Direct Leads to Broker
               </div>
             </div>
@@ -344,19 +378,19 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[#c5a059] dark:text-[#d4af37]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#862e9f] dark:text-[#c974e3]">
                 Sample Listings
               </span>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
+              <h2 className="mt-1 text-2xl font-bold font-display tracking-tight text-[#0a1128] sm:text-3xl dark:text-white">
                 Live property pages created with Property Snaps
               </h2>
             </div>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#c5a059] dark:text-slate-200 dark:hover:text-[#d4af37]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-slate-200 dark:hover:text-[#c974e3]"
             >
               <span>Open Broker Dashboard</span>
-              <ArrowRight className="h-3.5 w-3.5 text-[#c5a059]" />
+              <ArrowRight className="h-3.5 w-3.5 text-[#862e9f]" />
             </Link>
           </div>
 
@@ -364,7 +398,7 @@ export default function HomePage() {
             {/* Property 1 */}
             <Link
               href="/ramesh/4-bhk-villa-malviya-nagar-jaipur-terrace-garden"
-              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]"
+              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
                 <img
@@ -372,7 +406,7 @@ export default function HomePage() {
                   alt="4 BHK Luxury Villa"
                   className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
                 />
-                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/80 border border-[#c5a059]/40 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/85 border border-[#862e9f]/50 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
                   VILLA · FOR SALE
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
@@ -381,12 +415,12 @@ export default function HomePage() {
               </div>
               <div className="p-5 text-left">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-lg font-black text-[#00974e]">
                     ₹3.80 Cr
                   </span>
                   <span className="text-xs text-slate-500">4,200 sq.ft</span>
                 </div>
-                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#c5a059] dark:text-white dark:group-hover:text-[#d4af37]">
+                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#862e9f] dark:text-white dark:group-hover:text-[#c974e3]">
                   4 BHK Luxury Villa with Sky Terrace
                 </h4>
                 <p className="mt-1 text-xs text-slate-500">
@@ -398,7 +432,7 @@ export default function HomePage() {
             {/* Property 2 */}
             <Link
               href="/ramesh/3-bhk-satellite-ahmedabad"
-              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]"
+              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
                 <img
@@ -406,7 +440,7 @@ export default function HomePage() {
                   alt="3 BHK Furnished Flat"
                   className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
                 />
-                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/80 border border-[#c5a059]/40 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/85 border border-[#862e9f]/50 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
                   APARTMENT · FOR SALE
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
@@ -415,12 +449,12 @@ export default function HomePage() {
               </div>
               <div className="p-5 text-left">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-lg font-black text-[#00974e]">
                     ₹1.35 Cr
                   </span>
                   <span className="text-xs text-slate-500">1,750 sq.ft</span>
                 </div>
-                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#c5a059] dark:text-white dark:group-hover:text-[#d4af37]">
+                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#862e9f] dark:text-white dark:group-hover:text-[#c974e3]">
                   Luxurious 3 BHK Furnished Flat
                 </h4>
                 <p className="mt-1 text-xs text-slate-500">
@@ -432,7 +466,7 @@ export default function HomePage() {
             {/* Property 3 */}
             <Link
               href="/ramesh/200-sq-yd-corner-plot-noida-sector-150"
-              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#c5a059]/50 dark:border-slate-800 dark:bg-[#0c1222]"
+              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
                 <img
@@ -440,7 +474,7 @@ export default function HomePage() {
                   alt="Corner Plot"
                   className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105"
                 />
-                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/80 border border-[#c5a059]/40 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+                <div className="absolute top-3 left-3 rounded-full bg-[#0a1128]/85 border border-[#862e9f]/50 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
                   PLOT · FOR SALE
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
@@ -449,12 +483,12 @@ export default function HomePage() {
               </div>
               <div className="p-5 text-left">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-lg font-black text-[#00974e]">
                     ₹2.10 Cr
                   </span>
                   <span className="text-xs text-slate-500">200 sq.yd</span>
                 </div>
-                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#c5a059] dark:text-white dark:group-hover:text-[#d4af37]">
+                <h4 className="mt-1.5 text-sm font-bold text-[#0a1128] transition group-hover:text-[#862e9f] dark:text-white dark:group-hover:text-[#c974e3]">
                   Prime Corner Residential Plot
                 </h4>
                 <p className="mt-1 text-xs text-slate-500">
@@ -468,13 +502,14 @@ export default function HomePage() {
 
       {/* 5. CALL TO ACTION BANNER */}
       <section className="relative overflow-hidden border-t border-slate-800 bg-[#0a1128] py-16 text-white sm:py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#c5a059]/20 border border-[#c5a059]/40 px-3.5 py-1 text-xs font-semibold text-[#d4af37]">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#862e9f]/20 via-transparent to-transparent" />
+        <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#862e9f]/20 border border-[#862e9f]/40 px-3.5 py-1 text-xs font-semibold text-[#c974e3]">
+            <Sparkles className="h-3.5 w-3.5 text-[#c974e3]" />
             <span>Ready in 60 Seconds</span>
           </div>
 
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight sm:text-5xl">
+          <h2 className="mt-4 text-3xl font-bold font-display tracking-tight sm:text-5xl">
             Your next deal starts with a link.
           </h2>
 
@@ -487,7 +522,7 @@ export default function HomePage() {
               href={waBotLink}
               target="_blank"
               rel="noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-emerald-600/30 transition hover:bg-emerald-700 active:scale-95 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00974e] px-8 py-4 text-sm font-bold text-white shadow-xl shadow-[#00974e]/30 transition hover:bg-[#008042] active:scale-95 sm:w-auto"
             >
               <MessageCircle className="h-4 w-4" />
               <span>Send Property on WhatsApp</span>
@@ -495,10 +530,10 @@ export default function HomePage() {
 
             <Link
               href="/dashboard"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white active:scale-95 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white hover:border-[#862e9f] active:scale-95 sm:w-auto"
             >
               <span>Open Broker Dashboard</span>
-              <ArrowRight className="h-4 w-4 text-[#c5a059]" />
+              <ArrowRight className="h-4 w-4 text-[#862e9f]" />
             </Link>
           </div>
         </div>
@@ -508,17 +543,18 @@ export default function HomePage() {
       <footer className="border-t border-slate-200/80 bg-white py-14 transition-colors dark:border-slate-900 dark:bg-[#05080f]">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
-            
+
             {/* Brand Summary */}
             <div className="space-y-4 md:col-span-5">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0a1128] text-[#c5a059] border border-[#c5a059]/30 shadow-md">
-                  <Building2 className="h-4 w-4" />
-                </div>
-                <span className="text-base font-bold text-[#0a1128] dark:text-white">
-                  Property<span className="text-[#c5a059]"> Snaps</span>
-                </span>
-              </div>
+              <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
+                <Image
+                  src="/brand-logo.png"
+                  alt="PropertySnaps"
+                  width={180}
+                  height={53}
+                  className="h-10 sm:h-11 w-auto object-contain"
+                />
+              </Link>
               <p className="max-w-sm text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 The fastest way for Indian real estate brokers to turn messy WhatsApp chats and property photos into high-converting, branded listing pages and PDF brochures.
               </p>
