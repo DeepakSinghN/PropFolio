@@ -377,7 +377,7 @@ export default function ContactClient() {
                 What payment methods do you support?
               </h3>
               <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                We accept UPI (Google Pay, PhonePe, Paytm), Net Banking, RuPay, Visa, and Mastercard cards. GST tax invoices are generated automatically.
+                We accept UPI (Google Pay, PhonePe, Paytm), Net Banking, RuPay, Visa, and Mastercard cards. Instant payment confirmation receipts are generated automatically.
               </p>
             </div>
           </div>

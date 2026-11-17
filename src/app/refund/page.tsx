@@ -179,7 +179,7 @@ export default function RefundPage() {
                 <strong>Processing Time:</strong> We initiate refunds within 24 hours of approval. Your bank or UPI provider typically takes <strong>5 to 7 business days</strong> to reflect the credited funds in your bank account.
               </li>
               <li>
-                <strong>Tax & GST Credit Note:</strong> If a GST tax invoice was issued for your purchase, an official GST Credit Note will be generated and emailed to you for appropriate accounting reconciliation.
+                <strong>Receipt & Confirmation:</strong> An updated refund confirmation receipt will be emailed to you for your records.
               </li>
             </ul>
           </section>

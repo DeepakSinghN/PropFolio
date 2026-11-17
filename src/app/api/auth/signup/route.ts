@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveUserAccount, createPhoneSession } from "@/lib/auth-store";
+import { saveUserAccount, createPhoneSession, verifyOtp, verifyUserPassword } from "@/lib/auth-store";
 
 export async function POST(req: NextRequest) {
   try {
-    const { full_name, identifier, city, company_name, password } = await req.json();
+    const { full_name, identifier, city, company_name, password, otp_code } = await req.json();
 
     if (!identifier || !password) {
       return NextResponse.json(
-        { error: "Phone number or email, and password are required" },
+        { error: "WhatsApp number and password are required" },
         { status: 400 }
       );
     }
@@ -20,6 +20,31 @@ export async function POST(req: NextRequest) {
     }
 
     const trimmedTarget = identifier.toString().trim();
+
+    // Verify WhatsApp OTP confirmation code
+    if (!otp_code) {
+      return NextResponse.json(
+        { error: "WhatsApp OTP verification code is required" },
+        { status: 400 }
+      );
+    }
+
+    const isOtpValid = verifyOtp(trimmedTarget, otp_code.toString());
+    if (!isOtpValid) {
+      return NextResponse.json(
+        { error: "Invalid or expired WhatsApp OTP code. Please check your code or request a new one." },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists
+    const existingCheck = verifyUserPassword(trimmedTarget, "check_existing");
+    if (existingCheck.error && existingCheck.error.includes("Incorrect password")) {
+      return NextResponse.json(
+        { error: "An account with this WhatsApp number already exists. Please sign in instead." },
+        { status: 400 }
+      );
+    }
     const isEmail = trimmedTarget.includes("@");
 
     const rawUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();

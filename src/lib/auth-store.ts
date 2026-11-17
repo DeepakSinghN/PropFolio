@@ -310,3 +310,10 @@ export function verifyUserPassword(
   return { success: true, profile: user.profile };
 }
 
+export function getUserAccount(identifier: string): UserAccount | null {
+  const cleanKey = normalizeTarget(identifier);
+  const store = ensureStore<Record<string, UserAccount>>(usersFile, {});
+  return store[cleanKey] || null;
+}
+
+
