@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Plus,
   Sparkles,
   LayoutDashboard,
   LogIn,
@@ -78,13 +79,13 @@ export default function Navbar() {
       document.documentElement.classList.remove("light");
       try {
         localStorage.setItem("propfolio-theme", "dark");
-      } catch (err) {}
+      } catch (err) { }
     } else {
       document.documentElement.classList.remove("dark");
       document.documentElement.classList.add("light");
       try {
         localStorage.setItem("propfolio-theme", "light");
-      } catch (err) {}
+      } catch (err) { }
     }
     setIsDark(nextDark);
   };
@@ -113,7 +114,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-[#f8f9fa]/95 backdrop-blur-md dark:border-slate-800/80 dark:bg-[#070b14]/95">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3.5 sm:px-6 lg:px-8">
-        
+
         {/* Brand Logo */}
         <div className="flex items-center gap-6 lg:gap-8 min-w-0">
           <Link href="/" className="flex items-center transition-opacity hover:opacity-90 shrink-0">
@@ -131,17 +132,15 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <Link
               href="/pricing"
-              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${
-                pathname === "/pricing" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
-              }`}
+              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${pathname === "/pricing" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
+                }`}
             >
               Pricing & Plans
             </Link>
             <Link
               href="/contact"
-              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${
-                pathname === "/contact" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
-              }`}
+              className={`transition hover:text-[#862e9f] dark:hover:text-[#a845c4] ${pathname === "/contact" ? "text-[#862e9f] font-bold dark:text-[#a845c4]" : ""
+                }`}
             >
               Contact Support
             </Link>
@@ -150,7 +149,7 @@ export default function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          
+
           {/* Desktop Only: Theme Toggle */}
           <div className="hidden sm:block">
             <ThemeToggle />
@@ -161,9 +160,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               <Link
                 href="/dashboard"
-                className={`flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#0a1128] transition hover:border-[#862e9f] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 ${
-                  pathname === "/dashboard" ? "border-[#862e9f] bg-[#862e9f]/10 text-[#862e9f] dark:bg-[#862e9f]/20" : ""
-                }`}
+                className={`flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#0a1128] transition hover:border-[#862e9f] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 ${pathname === "/dashboard" ? "border-[#862e9f] bg-[#862e9f]/10 text-[#862e9f] dark:bg-[#862e9f]/20" : ""
+                  }`}
               >
                 <LayoutDashboard className="h-4 w-4 text-[#862e9f]" />
                 <span>Dashboard</span>
@@ -195,9 +193,9 @@ export default function Navbar() {
             href="/dashboard/listings/new"
             className="flex items-center gap-1.5 rounded-xl bg-[#00974e] px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#00974e]/20 border border-emerald-400/30 transition hover:bg-[#008042] active:scale-95"
           >
-            <Sparkles className="h-3.5 w-3.5 text-white" />
+            <Plus className="h-4 w-4 text-white" />
             <span className="hidden sm:inline">Create Listing</span>
-            <span className="sm:hidden text-xs font-bold">+ New</span>
+            <span className="sm:hidden text-xs font-bold">New</span>
           </Link>
 
           {/* Mobile Hamburger Toggle Button */}
@@ -218,9 +216,9 @@ export default function Navbar() {
 
       {/* Mobile Slide-Down Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-x-0 top-16 z-50 md:hidden border-b border-slate-200 bg-white/95 backdrop-blur-xl shadow-2xl dark:border-slate-800 dark:bg-[#070b14]/95 animate-in slide-in-from-top-2 duration-200">
+        <div className="fixed inset-x-0 top-16 z-50 md:hidden border-b border-slate-200 bg-white backdrop-blur-xl shadow-2xl dark:border-slate-800 dark:bg-[#070b14]/95 animate-in slide-in-from-top-2 duration-200">
           <div className="max-h-[calc(100vh-4rem)] overflow-y-auto px-4 py-5 space-y-4">
-            
+
             {/* User Profile Card (if logged in) */}
             {currentUser ? (
               <div className="rounded-2xl border border-slate-200/90 bg-[#f8f9fa] p-3.5 dark:border-slate-800 dark:bg-[#0c1222]">
@@ -271,11 +269,10 @@ export default function Navbar() {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                    pathname === "/dashboard"
-                      ? "bg-[#0a1128] text-white dark:bg-[#862e9f] dark:text-white"
-                      : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
-                  }`}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/dashboard"
+                    ? "bg-[#0a1128] text-white dark:bg-[#862e9f] dark:text-white"
+                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <LayoutDashboard className="h-4 w-4 text-[#862e9f]" />
@@ -288,15 +285,14 @@ export default function Navbar() {
               <Link
                 href="/dashboard/listings/new"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                  pathname === "/dashboard/listings/new"
-                    ? "bg-[#00974e] text-white"
-                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
-                }`}
+                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/dashboard/listings/new"
+                  ? "bg-[#00974e] text-white"
+                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                  }`}
               >
                 <div className="flex items-center gap-3">
-                  <Sparkles className="h-4 w-4 text-[#862e9f]" />
-                  <span>Create New Listing (AI)</span>
+                  <Plus className="h-4 w-4 text-[#862e9f]" />
+                  <span>Create New Listing</span>
                 </div>
                 <ChevronRight className="h-4 w-4 opacity-50" />
               </Link>
@@ -304,11 +300,10 @@ export default function Navbar() {
               <Link
                 href="/pricing"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                  pathname === "/pricing"
-                    ? "bg-[#862e9f] text-white"
-                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
-                }`}
+                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/pricing"
+                  ? "bg-[#862e9f] text-white"
+                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-4 w-4 text-[#862e9f]" />
@@ -320,11 +315,10 @@ export default function Navbar() {
               <Link
                 href="/contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
-                  pathname === "/contact"
-                    ? "bg-[#862e9f] text-white"
-                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
-                }`}
+                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/contact"
+                  ? "bg-[#862e9f] text-white"
+                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Headphones className="h-4 w-4 text-[#862e9f]" />

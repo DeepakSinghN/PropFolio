@@ -587,9 +587,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
               </div>
 
               {/* Location Landmark Tag (Matching Red Pin in Reference Mockup) */}
-              <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
-                <MapPin className="h-3.5 w-3.5 shrink-0 fill-rose-600 text-white" />
-                <span className="truncate">
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
+                <MapPin className="h-4 w-4 shrink-0 fill-rose-600 text-white" />
+                <span className="break-words">
                   {listing.location_locality ? `${listing.location_locality}, ` : ""}
                   {listing.location_city}
                 </span>
@@ -653,7 +653,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     <span>PROPERTY HIGHLIGHTS</span>
                   </h3>
                   <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
-                    AI Verified
+                    Verified
                   </span>
                 </div>
 
@@ -679,11 +679,11 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {homeFeatures.length > 0 && (
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <Home className="h-4 w-4 text-[#862e9f]" />
                     <span>Home Details</span>
                   </h3>
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-xs font-medium text-slate-400">
                     {homeFeatures.length} Specifications
                   </span>
                 </div>
@@ -691,19 +691,22 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
                   {homeFeatures.map((item, idx) => {
                     const Icon = getFeatureIcon(item.label);
+                    const isLong = (item.value || "").length > 22;
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
+                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                        }`}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                          <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-tight">
                             {item.label}
                           </span>
-                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                          <p className="mt-0.5 text-sm sm:text-base font-bold text-[#0a1128] dark:text-white leading-snug break-words">
                             {item.value}
                           </p>
                         </div>
@@ -718,11 +721,11 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {buildingFeatures.length > 0 && (
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-[#862e9f]" />
                     <span>Building & Amenities</span>
                   </h3>
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-xs font-medium text-slate-400">
                     {buildingFeatures.length} Features
                   </span>
                 </div>
@@ -730,19 +733,22 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
                   {buildingFeatures.map((item, idx) => {
                     const Icon = getFeatureIcon(item.label);
+                    const isLong = (item.value || "").length > 22;
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
+                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                        }`}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                          <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-tight">
                             {item.label}
                           </span>
-                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                          <p className="mt-0.5 text-sm sm:text-base font-bold text-[#0a1128] dark:text-white leading-snug break-words">
                             {item.value}
                           </p>
                         </div>
@@ -757,11 +763,11 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {ownershipFeatures.length > 0 && (
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <FileCheck className="h-4 w-4 text-[#862e9f]" />
                     <span>Ownership & Costs</span>
                   </h3>
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-xs font-medium text-slate-400">
                     {ownershipFeatures.length} Records
                   </span>
                 </div>
@@ -769,19 +775,22 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
                   {ownershipFeatures.map((item, idx) => {
                     const Icon = getFeatureIcon(item.label);
+                    const isLong = (item.value || "").length > 22;
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
+                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                        }`}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                          <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-tight">
                             {item.label}
                           </span>
-                          <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                          <p className="mt-0.5 text-sm sm:text-base font-bold text-[#0a1128] dark:text-white leading-snug break-words">
                             {item.value}
                           </p>
                         </div>
@@ -796,21 +805,21 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {listing.amenities && listing.amenities.length > 0 && (
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-[#862e9f]" />
                     <span>Amenities & Facilities</span>
                   </h3>
-                  <span className="text-[11px] font-medium text-slate-400">{listing.amenities.length} Verified Facilities</span>
+                  <span className="text-xs font-medium text-slate-400">{listing.amenities.length} Verified Facilities</span>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {listing.amenities.map((am, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 rounded-xl border border-slate-100 bg-[#f8f9fc] p-2.5 text-xs sm:text-sm font-medium text-[#0a1128] transition hover:bg-slate-50 dark:border-slate-800/80 dark:bg-[#090e1c] dark:text-slate-200 min-w-0"
+                      className="flex items-center gap-2 rounded-xl border border-slate-100 bg-[#f8f9fc] p-2.5 text-xs sm:text-sm font-semibold text-[#0a1128] transition hover:bg-slate-50 dark:border-slate-800/80 dark:bg-[#090e1c] dark:text-slate-200 min-w-0"
                     >
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                      <span className="truncate">{am}</span>
+                      <span className="leading-snug break-words">{am}</span>
                     </div>
                   ))}
                 </div>
@@ -821,7 +830,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {((listing.ai_neighborhood_highlights && listing.ai_neighborhood_highlights.length > 0) || nearbyFeatures.length > 0) && (
               <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                     <Compass className="h-4 w-4 text-[#862e9f]" />
                     <span>Location Advantages & Connectivity</span>
                   </h3>
@@ -831,19 +840,22 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
                     {nearbyFeatures.map((item, idx) => {
                       const Icon = getFeatureIcon(item.label);
+                      const isLong = (item.value || "").length > 22;
                       return (
                         <div
                           key={idx}
-                          className="flex items-center gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c]"
+                          className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
+                            isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                          }`}
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d]">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-tight truncate">
+                            <span className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-tight">
                               {item.label}
                             </span>
-                            <p className="text-xs sm:text-sm font-bold text-[#0a1128] dark:text-white truncate" title={item.value}>
+                            <p className="mt-0.5 text-sm sm:text-base font-bold text-[#0a1128] dark:text-white leading-snug break-words">
                               {item.value}
                             </p>
                           </div>
@@ -858,10 +870,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     {listing.ai_neighborhood_highlights.map((nh, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-2.5 rounded-xl bg-[#f8f9fc] p-2.5 sm:p-3 text-xs font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300 break-words"
+                        className="flex items-center gap-2.5 rounded-xl bg-[#f8f9fc] p-2.5 sm:p-3 text-xs sm:text-sm font-medium text-slate-700 dark:bg-[#090e1c] dark:text-slate-300 break-words"
                       >
                         <MapPin className="h-3.5 w-3.5 shrink-0 text-[#862e9f]" />
-                        <span className="break-words">{nh}</span>
+                        <span className="break-words leading-relaxed">{nh}</span>
                       </div>
                     ))}
                   </div>
@@ -872,12 +884,12 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {/* 7. ABOUT THIS PROPERTY */}
             <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
                   <FileText className="h-4 w-4 text-[#862e9f]" />
                   <span>About this Property</span>
                 </h3>
               </div>
-              <div className="mt-3 text-sm sm:text-base leading-relaxed text-slate-600 whitespace-pre-line dark:text-slate-300 break-words">
+              <div className="mt-3 text-base sm:text-lg leading-relaxed text-slate-600 whitespace-pre-line dark:text-slate-300 break-words">
                 {listing.description}
               </div>
             </section>
