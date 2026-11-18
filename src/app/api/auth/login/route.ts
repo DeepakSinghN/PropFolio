@@ -30,15 +30,19 @@ export async function POST(req: NextRequest) {
     const supabaseServiceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
     const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
 
-    // 1. Try Supabase Auth if email is provided
-    if (isEmail && supabaseUrl && (supabaseAnonKey || supabaseServiceKey)) {
+    const cleanDigits = trimmedTarget.replace(/\D/g, "");
+    const safePhone = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+    const authEmail = isEmail ? trimmedTarget.toLowerCase() : `${safePhone}@propertysnaps.in`;
+
+    // 1. Try Supabase Auth
+    if (supabaseUrl && (supabaseAnonKey || supabaseServiceKey)) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
         const clientKey = supabaseAnonKey || supabaseServiceKey!;
         const supabase = createClient(supabaseUrl, clientKey);
 
         const { data: supaAuth, error: supaErr } = await supabase.auth.signInWithPassword({
-          email: trimmedTarget.toLowerCase(),
+          email: authEmail,
           password,
         });
 

@@ -3,7 +3,8 @@ import { saveUserAccount, createPhoneSession, verifyOtp, verifyUserPassword } fr
 
 export async function POST(req: NextRequest) {
   try {
-    const { full_name, identifier, city, company_name, password, otp_code } = await req.json();
+    const body = await req.json();
+    const { full_name, identifier, city, company_name, password, otp_code, otp_token } = body;
 
     if (!identifier || !password) {
       return NextResponse.json(
@@ -29,7 +30,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const isOtpValid = verifyOtp(trimmedTarget, otp_code.toString());
+    const token = otp_token || req.cookies.get("propfolio-otp-token")?.value;
+    const isOtpValid = verifyOtp(trimmedTarget, otp_code.toString(), token);
     if (!isOtpValid) {
       return NextResponse.json(
         { error: "Invalid or expired WhatsApp OTP code. Please check your code or request a new one." },
@@ -83,17 +85,22 @@ export async function POST(req: NextRequest) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
 
-        if (supabaseServiceKey && isEmail) {
+        const authEmail = isEmail
+          ? trimmedTarget.toLowerCase()
+          : `${safePhone.replace(/\D/g, "")}@propertysnaps.in`;
+
+        if (supabaseServiceKey) {
           // Admin API: creates 100% verified active user (no email confirmation block!)
           const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
           const { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser({
-            email: trimmedTarget.toLowerCase(),
+            email: authEmail,
             password,
             email_confirm: true,
             user_metadata: {
               full_name: full_name || "Real Estate Broker",
               city: city || "India",
               company_name: company_name || "Exclusive Advisory",
+              phone_number: safePhone,
             },
           });
 
@@ -102,15 +109,11 @@ export async function POST(req: NextRequest) {
           } else if (adminErr) {
             if (adminErr.message.toLowerCase().includes("already registered") || adminErr.message.toLowerCase().includes("already exists")) {
               return NextResponse.json(
-                { error: "An account with this email already exists. Please log in." },
+                { error: "An account with this WhatsApp number already exists. Please log in." },
                 { status: 400 }
               );
             }
             console.error("Supabase admin.createUser error:", adminErr);
-            return NextResponse.json(
-              { error: `Registration error: ${adminErr.message}` },
-              { status: 400 }
-            );
           }
 
           // Insert into public.profiles

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveOtp } from "@/lib/auth-store";
+import { saveOtp, createSignedOtpToken } from "@/lib/auth-store";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
@@ -22,15 +22,27 @@ export async function POST(req: NextRequest) {
       // Generate or set OTP
       const code = cleanEmail.includes("test") || cleanEmail.includes("demo") ? "123456" : Math.floor(100000 + Math.random() * 900000).toString();
       saveOtp(cleanEmail, code);
+      const otpToken = createSignedOtpToken(cleanEmail, code);
       console.log(`[OTP] Generated verification OTP ${code} for email: ${cleanEmail}`);
 
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         message: "Verification code sent to email",
         identifier: cleanEmail,
+        otp_token: otpToken,
         isEmail: true,
         devOtp: code,
       });
+
+      response.cookies.set("propfolio-otp-token", otpToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 10 * 60,
+        path: "/",
+      });
+
+      return response;
     }
 
     // Handle Phone Number
@@ -46,10 +58,12 @@ export async function POST(req: NextRequest) {
     // Instant bypass for test / demo accounts
     if (cleanPhone === "919876543210" || cleanPhone === "919999999999") {
       saveOtp(cleanPhone, "123456");
+      const devToken = createSignedOtpToken(cleanPhone, "123456");
       return NextResponse.json({
         success: true,
         message: "Test account detected. OTP is 123456",
         phone: cleanPhone,
+        otp_token: devToken,
         devOtp: "123456",
         testAccount: true,
         waSent: true,
@@ -59,6 +73,7 @@ export async function POST(req: NextRequest) {
     // Generate random 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     saveOtp(cleanPhone, code);
+    const otpToken = createSignedOtpToken(cleanPhone, code);
 
     console.log(`[OTP] Generated OTP ${code} for phone: +${cleanPhone}`);
 
@@ -68,15 +83,26 @@ export async function POST(req: NextRequest) {
       text: `🔐 *Property Snaps Login Verification*\n\nAapka login verification code hai: *${code}*\n\nYeh code agle 10 minute ke liye valid hai. Apne dashboard me login karne ke liye isse enter karein.`,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "OTP sent via WhatsApp",
       phone: cleanPhone,
       identifier: cleanPhone,
+      otp_token: otpToken,
       isEmail: false,
       devOtp: code,
       waSent: Boolean(waResult.success),
     });
+
+    response.cookies.set("propfolio-otp-token", otpToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 10 * 60, // 10 minutes
+      path: "/",
+    });
+
+    return response;
   } catch (err: any) {
     console.error("Send OTP Error:", err);
     return NextResponse.json({ error: err.message || "Failed to send OTP" }, { status: 500 });

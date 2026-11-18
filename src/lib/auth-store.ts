@@ -1,7 +1,14 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { DEMO_BROKER } from "./store";
 import { Profile } from "@/types/database";
+
+const OTP_SECRET =
+  process.env.WHATSAPP_ACCESS_TOKEN ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXTAUTH_SECRET ||
+  "propertysnaps_hmac_secret_otp_2026";
 
 interface OtpEntry {
   phone: string;
@@ -70,6 +77,23 @@ function normalizeTarget(target: string): string {
   return digits;
 }
 
+export function createSignedOtpToken(target: string, code: string): string {
+  const cleanKey = normalizeTarget(target);
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const signature = crypto
+    .createHmac("sha256", OTP_SECRET)
+    .update(`${cleanKey}:${code.trim()}:${expiresAt}`)
+    .digest("hex");
+
+  const payload = {
+    target: cleanKey,
+    expiresAt,
+    signature,
+  };
+
+  return Buffer.from(JSON.stringify(payload)).toString("base64url");
+}
+
 export function saveOtp(target: string, code: string): void {
   const cleanKey = normalizeTarget(target);
   const store = ensureStore<Record<string, OtpEntry>>(otpFile, {});
@@ -81,9 +105,9 @@ export function saveOtp(target: string, code: string): void {
   saveStore(otpFile, store);
 }
 
-export function verifyOtp(target: string, code: string): boolean {
+export function verifyOtp(target: string, code: string, token?: string): boolean {
   const cleanKey = normalizeTarget(target);
-  const trimmedCode = code.trim();
+  const trimmedCode = (code || "").trim();
 
   // Test accounts for instant testing / demo
   const isTestAccount =
@@ -94,25 +118,44 @@ export function verifyOtp(target: string, code: string): boolean {
     cleanKey.includes("demo") ||
     cleanKey.includes("test");
 
-  if (isTestAccount && trimmedCode === "123456") {
+  if (isTestAccount && (trimmedCode === "123456" || trimmedCode === "000000")) {
     return true;
   }
 
-  // Allow 123456 in development or preview mode for testing
-  if (trimmedCode === "123456") {
-    return true;
+  // 1. Stateless Signed Token Verification (Resilient across Vercel Serverless Lambdas)
+  if (token) {
+    try {
+      const raw = Buffer.from(token, "base64url").toString("utf8");
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.target === cleanKey) {
+        if (Date.now() <= parsed.expiresAt) {
+          const expectedSignature = crypto
+            .createHmac("sha256", OTP_SECRET)
+            .update(`${cleanKey}:${trimmedCode}:${parsed.expiresAt}`)
+            .digest("hex");
+          if (parsed.signature === expectedSignature) {
+            return true;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Signed OTP token verify parse error:", err);
+    }
   }
 
+  // 2. Fallback to Local/Memory File Store
   const store = ensureStore<Record<string, OtpEntry>>(otpFile, {});
   const entry = store[cleanKey];
-  if (!entry) return false;
-
-  const isValid = entry.code === trimmedCode && Date.now() < entry.expiresAt;
-  if (isValid) {
-    delete store[cleanKey];
-    saveStore(otpFile, store);
+  if (entry) {
+    const isValid = entry.code === trimmedCode && Date.now() < entry.expiresAt;
+    if (isValid) {
+      delete store[cleanKey];
+      saveStore(otpFile, store);
+    }
+    return isValid;
   }
-  return isValid;
+
+  return false;
 }
 
 // ------------------------------------------------------------------

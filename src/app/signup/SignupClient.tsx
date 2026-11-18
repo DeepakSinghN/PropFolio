@@ -43,6 +43,7 @@ export default function SignupClient() {
 
   // OTP Fields
   const [otpCode, setOtpCode] = useState("");
+  const [otpToken, setOtpToken] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
 
   // Clean phone number (10 digits)
@@ -95,6 +96,9 @@ export default function SignupClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send WhatsApp verification code");
 
+      if (data.otp_token) {
+        setOtpToken(data.otp_token);
+      }
       if (data.devOtp) {
         setDevOtp(data.devOtp);
       }
@@ -124,6 +128,9 @@ export default function SignupClient() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to resend code");
 
+      if (data.otp_token) {
+        setOtpToken(data.otp_token);
+      }
       if (data.devOtp) {
         setDevOtp(data.devOtp);
       }
@@ -156,6 +163,7 @@ export default function SignupClient() {
           identifier: cleanPhoneDigits,
           password,
           otp_code: otpCode.trim(),
+          otp_token: otpToken,
           city: city.trim() || "India",
           company_name: companyName.trim() || "Real Estate Advisory",
         }),

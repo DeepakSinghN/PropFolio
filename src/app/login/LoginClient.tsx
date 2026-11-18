@@ -33,6 +33,7 @@ export default function LoginClient() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [otpToken, setOtpToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [devOtp, setDevOtp] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,9 @@ export default function LoginClient() {
       if (!res.ok) throw new Error(data.error || "Failed to send WhatsApp code");
 
       setOtpSent(true);
+      if (data.otp_token) {
+        setOtpToken(data.otp_token);
+      }
       if (data.devOtp) {
         setDevOtp(data.devOtp);
       }
@@ -123,7 +127,7 @@ export default function LoginClient() {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: cleanPhoneDigits, code: otpCode }),
+        body: JSON.stringify({ identifier: cleanPhoneDigits, code: otpCode, otp_token: otpToken }),
       });
 
       const data = await res.json();

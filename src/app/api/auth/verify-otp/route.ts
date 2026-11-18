@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
       cleanTarget = digits;
     }
 
-    const isValid = verifyOtp(cleanTarget, code);
+    const token = body.otp_token || req.cookies.get("propfolio-otp-token")?.value;
+    const isValid = verifyOtp(cleanTarget, code, token);
     if (!isValid) {
       return NextResponse.json({ error: "Invalid or expired verification code. Please try again." }, { status: 401 });
     }
