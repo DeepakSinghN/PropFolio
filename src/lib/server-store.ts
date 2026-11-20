@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { Listing, PropertyCollection } from "@/types/database";
-import { INITIAL_LISTINGS } from "./store";
 
 // Global cache across serverless warm invocations
 const g = globalThis as unknown as {
@@ -41,12 +40,11 @@ function getFilePath(filename: string): string {
 }
 
 function ensureFileStore(): Map<string, Listing> {
-  if (g.__propfolioListingsMap && g.__propfolioListingsMap.size > 0) {
+  if (g.__propfolioListingsMap) {
     return g.__propfolioListingsMap;
   }
 
   const map = new Map<string, Listing>();
-  INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
 
   const dataFilePath = getFilePath("listings.json");
   try {
@@ -55,7 +53,7 @@ function ensureFileStore(): Map<string, Listing> {
       const list: Listing[] = JSON.parse(content);
       list.forEach((l) => map.set(l.slug, l));
     } else {
-      fs.writeFileSync(dataFilePath, JSON.stringify(INITIAL_LISTINGS, null, 2), "utf8");
+      fs.writeFileSync(dataFilePath, JSON.stringify([], null, 2), "utf8");
     }
   } catch (err) {
     console.warn("Server store read notice:", err);
@@ -227,28 +225,11 @@ export function clearUserSession(phone: string) {
 // -------------------------------------------------------------
 
 function ensureCollectionStore(): Map<string, PropertyCollection> {
-  if (g.__propfolioCollectionsMap && g.__propfolioCollectionsMap.size > 0) {
+  if (g.__propfolioCollectionsMap) {
     return g.__propfolioCollectionsMap;
   }
 
   const map = new Map<string, PropertyCollection>();
-
-  // Default sample collection
-  const defaultCollection: PropertyCollection = {
-    id: "col-default-1",
-    broker_id: "demo-broker-1",
-    title: "Ahmedabad Prime Luxury Shortlist",
-    slug: "ahmedabad-prime-luxury",
-    description: "Hand-picked high-end residential apartments in Satellite and Bodakdev. Ready-to-move homes with reserved car parking and premium amenities.",
-    listing_slugs: [
-      "3-bhk-satellite-ahmedabad",
-      "4-bhk-bodakdev-ahmedabad"
-    ],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    views_count: 38
-  };
-  map.set(defaultCollection.slug, defaultCollection);
 
   const collectionsFilePath = getFilePath("collections.json");
   try {
@@ -257,7 +238,7 @@ function ensureCollectionStore(): Map<string, PropertyCollection> {
       const list: PropertyCollection[] = JSON.parse(content);
       list.forEach((c) => map.set(c.slug, c));
     } else {
-      fs.writeFileSync(collectionsFilePath, JSON.stringify([defaultCollection], null, 2), "utf8");
+      fs.writeFileSync(collectionsFilePath, JSON.stringify([], null, 2), "utf8");
     }
   } catch (err) {
     console.warn("Collections store read notice:", err);

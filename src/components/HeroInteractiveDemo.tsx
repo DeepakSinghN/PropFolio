@@ -113,10 +113,10 @@ export default function HeroInteractiveDemo() {
 
             <div className="flex items-center gap-3">
               <Link
-                href="/ramesh/4-bhk-villa-malviya-nagar-jaipur-terrace-garden"
+                href="/signup"
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-[#862e9f]"
               >
-                <span>View Sample Page</span>
+                <span>Get Started Free</span>
                 <ExternalLink className="h-3.5 w-3.5" />
               </Link>
 

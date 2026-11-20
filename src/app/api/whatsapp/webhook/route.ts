@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parsePropertyNotes } from "@/lib/ai";
 import { sendWhatsAppMessage, downloadMetaMedia } from "@/lib/whatsapp";
-import { saveListingToMemory, DEMO_BROKER } from "@/lib/store";
+import { saveListingToMemory } from "@/lib/store";
 import {
   saveListingToDisk,
   appendUserSession,
@@ -147,9 +147,27 @@ async function executeCreateListing(
     }))
     : [];
 
+  const cleanPhone = from.replace(/\D/g, "");
+  const brokerSlug = `broker-${cleanPhone.slice(-4)}`;
+  const senderBroker = {
+    id: `prof_${cleanPhone}`,
+    user_id: `usr_${cleanPhone}`,
+    full_name: "Real Estate Broker",
+    slug: brokerSlug,
+    phone_number: `+${cleanPhone}`,
+    company_name: "Exclusive Advisory",
+    city: "India",
+    avatar_url: "/brand-logo.png",
+    plan_tier: "solo_pro" as const,
+    listing_credits: 30,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
   const fullListing = {
     id: "listing-wa-" + Date.now(),
-    broker_id: DEMO_BROKER.id,
+    broker_id: senderBroker.id,
     title: parsedData.title,
     slug: parsedData.slug,
     description: parsedData.description,
@@ -172,7 +190,7 @@ async function executeCreateListing(
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     photos: photosList,
-    broker: DEMO_BROKER,
+    broker: senderBroker,
   };
 
   saveListingToMemory(fullListing);
@@ -187,7 +205,7 @@ async function executeCreateListing(
     "localhost:3000";
   const proto =
     req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const liveUrl = `${proto}://${host}/${DEMO_BROKER.slug}/${parsedData.slug}`;
+  const liveUrl = `${proto}://${host}/${senderBroker.slug}/${parsedData.slug}`;
   const brochureUrl = `${liveUrl}/brochure`;
 
   const photoNotice = includePhotos

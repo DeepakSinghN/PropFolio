@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { DEMO_BROKER } from "./store";
 import { Profile } from "@/types/database";
 
 const OTP_SECRET =
@@ -109,19 +108,6 @@ export function verifyOtp(target: string, code: string, token?: string): boolean
   const cleanKey = normalizeTarget(target);
   const trimmedCode = (code || "").trim();
 
-  // Test accounts for instant testing / demo
-  const isTestAccount =
-    cleanKey === "9876543210" ||
-    cleanKey === "919876543210" ||
-    cleanKey === "9999999999" ||
-    cleanKey === "919999999999" ||
-    cleanKey.includes("demo") ||
-    cleanKey.includes("test");
-
-  if (isTestAccount && (trimmedCode === "123456" || trimmedCode === "000000")) {
-    return true;
-  }
-
   // 1. Stateless Signed Token Verification (Resilient across Vercel Serverless Lambdas)
   if (token) {
     try {
@@ -188,27 +174,20 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
   const cleanKey = normalizeTarget(target);
   const isEmail = cleanKey.includes("@");
 
-  const isTestAccount =
-    cleanKey === "9876543210" ||
-    cleanKey === "919876543210" ||
-    cleanKey === "9999999999" ||
-    cleanKey === "919999999999" ||
-    cleanKey === "demo@propertysnaps.co";
-
   const fallbackSlug = isEmail
     ? cleanKey.split("@")[0].replace(/[^a-z0-9]/g, "-")
     : "broker-" + cleanKey.slice(-4);
 
   const profile: Profile = {
-    id: isTestAccount ? DEMO_BROKER.id : customProfile?.id || "prof_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
-    user_id: isTestAccount ? DEMO_BROKER.user_id : customProfile?.user_id || "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
-    full_name: customProfile?.full_name || (isTestAccount ? DEMO_BROKER.full_name : "Real Estate Broker"),
-    slug: customProfile?.slug || (isTestAccount ? DEMO_BROKER.slug : fallbackSlug),
-    phone_number: customProfile?.phone_number || (isEmail ? "+91 9876543210" : "+" + cleanKey),
+    id: customProfile?.id || "prof_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    user_id: customProfile?.user_id || "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
+    full_name: customProfile?.full_name || (isEmail ? cleanKey.split("@")[0] : "Real Estate Broker"),
+    slug: customProfile?.slug || fallbackSlug,
+    phone_number: customProfile?.phone_number || (isEmail ? "" : "+" + cleanKey),
     email: isEmail ? cleanKey : customProfile?.email,
-    company_name: customProfile?.company_name || (isTestAccount ? DEMO_BROKER.company_name : "Exclusive Advisory"),
-    city: customProfile?.city || (isTestAccount ? DEMO_BROKER.city : "India"),
-    avatar_url: customProfile?.avatar_url || DEMO_BROKER.avatar_url,
+    company_name: customProfile?.company_name || "Exclusive Advisory",
+    city: customProfile?.city || "India",
+    avatar_url: customProfile?.avatar_url || "/brand-logo.png",
     plan_tier: "solo_pro",
     listing_credits: 30,
     is_active: true,
@@ -292,7 +271,7 @@ export function saveUserAccount(
     email: isEmail ? cleanKey : customProfile?.email,
     company_name: customProfile?.company_name || "Exclusive Advisory",
     city: customProfile?.city || "India",
-    avatar_url: customProfile?.avatar_url || DEMO_BROKER.avatar_url,
+    avatar_url: customProfile?.avatar_url || "/brand-logo.png",
     plan_tier: "solo_pro",
     listing_credits: 30,
     is_active: true,
@@ -317,32 +296,10 @@ export function verifyUserPassword(
 ): { success: boolean; profile?: Profile; error?: string } {
   const cleanKey = normalizeTarget(identifier);
 
-  // Demo / Test accounts
-  const isDemo =
-    cleanKey === "9876543210" ||
-    cleanKey === "919876543210" ||
-    cleanKey === "demo@propertysnaps.co" ||
-    cleanKey === "demo";
-
-  if (isDemo) {
-    if (
-      password === "demo123" ||
-      password === "123456" ||
-      password === "demo" ||
-      password === "password" ||
-      password === "admin"
-    ) {
-      return { success: true, profile: DEMO_BROKER };
-    }
-  }
-
   const store = ensureStore<Record<string, UserAccount>>(usersFile, {});
   const user = store[cleanKey];
 
   if (!user) {
-    if (isDemo) {
-      return { success: true, profile: DEMO_BROKER };
-    }
     return { success: false, error: "No account found with this phone number or email" };
   }
 

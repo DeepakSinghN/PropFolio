@@ -64,11 +64,11 @@ export default function HomePage() {
             </a>
 
             <Link
-              href="/ramesh/4-bhk-villa-malviya-nagar-jaipur-terrace-garden"
+              href="/signup"
               className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
             >
               <Eye className="h-4 w-4 text-[#862e9f]" />
-              <span>View Sample Listing</span>
+              <span>Get Started Free</span>
             </Link>
           </div>
 
@@ -231,7 +231,7 @@ export default function HomePage() {
 
                 <div className="mt-3.5 space-y-2 text-left">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] font-mono text-slate-600 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-400 truncate">
-                    propertysnaps.in/ramesh/3-bhk-satellite
+                    propertysnaps.in/yourname/3-bhk-luxury-apartment
                   </div>
                   <div className="flex items-center gap-2 pt-1">
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-[#00974e] dark:bg-emerald-950/60 dark:text-emerald-300">
@@ -397,7 +397,7 @@ export default function HomePage() {
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Property 1 */}
             <Link
-              href="/ramesh/4-bhk-villa-malviya-nagar-jaipur-terrace-garden"
+              href="/signup"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
@@ -431,7 +431,7 @@ export default function HomePage() {
 
             {/* Property 2 */}
             <Link
-              href="/ramesh/3-bhk-satellite-ahmedabad"
+              href="/signup"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
@@ -465,7 +465,7 @@ export default function HomePage() {
 
             {/* Property 3 */}
             <Link
-              href="/ramesh/200-sq-yd-corner-plot-noida-sector-150"
+              href="/signup"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">

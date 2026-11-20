@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const newCollection: PropertyCollection = {
       id: "col-" + Date.now(),
-      broker_id: broker_id || "demo-broker-1",
+      broker_id: broker_id || "broker-default",
       title: title.trim(),
       slug,
       description: description?.trim() || "",

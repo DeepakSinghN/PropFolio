@@ -35,7 +35,6 @@ export default function LoginClient() {
   const [otpCode, setOtpCode] = useState("");
   const [otpToken, setOtpToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [devOtp, setDevOtp] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -106,9 +105,6 @@ export default function LoginClient() {
       if (data.otp_token) {
         setOtpToken(data.otp_token);
       }
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-      }
       startCountdown();
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to send WhatsApp code");
@@ -142,31 +138,6 @@ export default function LoginClient() {
     }
   };
 
-  // 4. Quick Demo Login Helper
-  const handleDemoLogin = async () => {
-    setErrorMsg("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          identifier: "9876543210",
-          password: "demo",
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Demo login failed");
-
-      router.push(redirectPath);
-      router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err.message || "Could not log into demo account");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-[#f8f9fa] py-12 sm:px-6 lg:px-8 transition-colors dark:bg-[#070b14]">
@@ -385,19 +356,6 @@ export default function LoginClient() {
                     <div className="text-sm font-extrabold text-[#00974e] dark:text-[#00b85f]">
                       +91 {cleanPhoneDigits}
                     </div>
-
-                    {devOtp && (
-                      <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-emerald-100/90 dark:bg-emerald-950/60 px-2.5 py-0.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                        <span>Dev OTP: {devOtp}</span>
-                        <button
-                          type="button"
-                          onClick={() => setOtpCode(devOtp)}
-                          className="ml-1 text-[11px] underline cursor-pointer text-emerald-900 dark:text-white"
-                        >
-                          (Fill)
-                        </button>
-                      </div>
-                    )}
                   </div>
 
                   <div>
@@ -457,18 +415,6 @@ export default function LoginClient() {
             </div>
           )}
 
-          {/* Quick Demo Broker Testing Shortcut */}
-          <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/80">
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#862e9f]/40 bg-[#862e9f]/5 py-2.5 text-xs font-bold text-[#862e9f] hover:bg-[#862e9f]/10 transition cursor-pointer dark:bg-[#862e9f]/10 dark:text-[#a845c4]"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>1-Click Demo Login (Ramesh Shah)</span>
-            </button>
-          </div>
 
           {/* Bottom Switcher */}
           <div className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400">

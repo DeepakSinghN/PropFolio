@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllListingsFromDisk } from "@/lib/server-store";
-import { INITIAL_LISTINGS } from "@/lib/store";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +21,6 @@ export async function GET(req: NextRequest) {
 
     // 2. Identify logged-in broker from session cookie
     let sessionBrokerId: string | null = null;
-    let isDemoAccount = false;
 
     const phoneCookie = req.cookies.get("propfolio-phone-session");
     if (phoneCookie?.value) {
@@ -30,14 +28,6 @@ export async function GET(req: NextRequest) {
         const { getPhoneSession } = await import("@/lib/auth-store");
         const sess = getPhoneSession(phoneCookie.value);
         if (sess?.profile) {
-          if (
-            sess.profile.slug === "demo-a452" ||
-            sess.profile.email === "demo@propertysnaps.co" ||
-            sess.profile.phone_number?.includes("9876543210")
-          ) {
-            isDemoAccount = true;
-          }
-
           if (isValidUUID(sess.profile.id)) {
             sessionBrokerId = sess.profile.id;
           } else if (supabase && (sess.profile.slug || sess.profile.email || sess.profile.phone_number)) {
@@ -110,10 +100,6 @@ export async function GET(req: NextRequest) {
 
     // If an authenticated broker or specific broker requested their portfolio:
     if (filterBrokerId || brokerSlugParam) {
-      // Only demo accounts with 0 listings show the initial sample listings
-      if (map.size === 0 && isDemoAccount) {
-        INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
-      }
       return NextResponse.json({ listings: Array.from(map.values()) });
     }
 
@@ -121,9 +107,6 @@ export async function GET(req: NextRequest) {
     if (map.size === 0) {
       const diskListings = getAllListingsFromDisk();
       diskListings.forEach((l) => map.set(l.slug, l));
-      if (map.size === 0) {
-        INITIAL_LISTINGS.forEach((l) => map.set(l.slug, l));
-      }
     }
 
     return NextResponse.json({ listings: Array.from(map.values()) });

@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { getPhoneSession } from "@/lib/auth-store";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAllCollectionsFromDisk, getAllListingsFromDisk } from "@/lib/server-store";
-import { DEMO_BROKER, INITIAL_LISTINGS } from "@/lib/store";
+import { DEMO_BROKER } from "@/lib/store";
 import DashboardClient from "./DashboardClient";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,6 @@ export default async function DashboardPage() {
 
   let broker = DEMO_BROKER;
   let brokerId: string | null = null;
-  let isDemoAccount = false;
 
   if (phoneCookie?.value) {
     const session = getPhoneSession(phoneCookie.value);
@@ -26,13 +25,6 @@ export default async function DashboardPage() {
       broker = { ...DEMO_BROKER, ...session.profile };
       if (isValidUUID(session.profile.id)) {
         brokerId = session.profile.id;
-      }
-      if (
-        session.profile.slug === "demo-a452" ||
-        session.profile.email === "demo@propertysnaps.co" ||
-        session.profile.phone_number?.includes("9876543210")
-      ) {
-        isDemoAccount = true;
       }
     }
   }
@@ -93,9 +85,6 @@ export default async function DashboardPage() {
             };
           });
         }
-      }
-      if (isDemoAccount) {
-        return INITIAL_LISTINGS;
       }
       return [];
     })(),

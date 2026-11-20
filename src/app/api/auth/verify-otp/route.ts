@@ -29,44 +29,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid or expired verification code. Please try again." }, { status: 401 });
     }
 
-    const isTestAccount =
-      cleanTarget === "919876543210" ||
-      cleanTarget === "9876543210" ||
-      cleanTarget === "919999999999" ||
-      cleanTarget === "9999999999" ||
-      cleanTarget === "demo@propertysnaps.co";
-
     const fallbackSlug = isEmail
       ? cleanTarget.split("@")[0].replace(/[^a-z0-9]/g, "-")
       : "broker-" + cleanTarget.slice(-4);
 
-    // Test account profile
-    let profileData = isTestAccount
-      ? {
-          full_name: "Ramesh Shah",
-          city: "Ahmedabad, Gujarat",
-          company_name: "Shah Realty Group",
-          slug: "ramesh",
-          email: "demo@propertysnaps.co",
-          phone_number: "+91 9876543210",
-        }
-      : {
-          full_name: full_name || (isEmail ? cleanTarget.split("@")[0] : "Real Estate Advisor"),
-          city: city || "India",
-          company_name: company_name || "Exclusive Advisory",
-          slug: (full_name ? full_name.toLowerCase().replace(/[^a-z0-9]/g, "-") : fallbackSlug) + "-" + Math.floor(100 + Math.random() * 900),
-          email: isEmail ? cleanTarget : undefined,
-          phone_number: isEmail ? "+91 9876543210" : "+" + cleanTarget,
-        };
+    let profileData = {
+      full_name: full_name || (isEmail ? cleanTarget.split("@")[0] : "Real Estate Advisor"),
+      city: city || "India",
+      company_name: company_name || "Exclusive Advisory",
+      slug: (full_name ? full_name.toLowerCase().replace(/[^a-z0-9]/g, "-") : fallbackSlug) + "-" + Math.floor(100 + Math.random() * 900),
+      email: isEmail ? cleanTarget : undefined,
+      phone_number: isEmail ? undefined : "+" + cleanTarget,
+    };
 
-    // Only attempt Supabase sync for non-test accounts when valid keys are configured
     const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supaKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY ||
       process.env.SUPABASE_ANON_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (!isTestAccount && supaUrl && supaKey && !supaKey.includes("...")) {
+    if (supaUrl && supaKey && !supaKey.includes("...")) {
       try {
         const supabase = createClient(supaUrl, supaKey);
 

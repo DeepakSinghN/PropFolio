@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyUserPassword, createPhoneSession } from "@/lib/auth-store";
-import { DEMO_BROKER } from "@/lib/store";
 
 export async function POST(req: NextRequest) {
   try {
@@ -104,17 +103,10 @@ export async function POST(req: NextRequest) {
 
         // If Supabase gave an explicit auth error (e.g. invalid credentials)
         if (supaErr) {
-          const isDemoAccount =
-            trimmedTarget === "demo@propertysnaps.co" ||
-            trimmedTarget === "9876543210";
-
-          // If not demo bypass, return the exact error from Supabase
-          if (!isDemoAccount || (password !== "demo123" && password !== "123456" && password !== "demo")) {
-            return NextResponse.json(
-              { error: supaErr.message || "Invalid email or password. Please try again." },
-              { status: 401 }
-            );
-          }
+          return NextResponse.json(
+            { error: supaErr.message || "Invalid email or password. Please try again." },
+            { status: 401 }
+          );
         }
       } catch (err: any) {
         console.warn("Supabase auth check notice:", err);

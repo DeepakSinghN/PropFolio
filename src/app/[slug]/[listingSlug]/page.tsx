@@ -39,8 +39,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!listing) {
     listing =
       getListingFromDisk(listingSlug) ||
-      INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-      INITIAL_LISTINGS[0];
+      INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+  }
+
+  if (!listing) {
+    return {
+      title: "Property Listing | Property Snaps",
+      description: "Verified luxury property listing on Property Snaps.",
+    };
   }
 
   const appBaseUrl =

@@ -134,6 +134,29 @@ function getFeatureIcon(label: string) {
   return CheckCircle2;
 }
 
+const EMPTY_LISTING: Listing = {
+  id: "",
+  broker_id: "",
+  title: "Property Listing",
+  slug: "",
+  description: "",
+  property_type: "Apartment",
+  listing_type: "Sale",
+  price_amount: 0,
+  display_price: "",
+  currency: "INR",
+  location_city: "",
+  location_locality: "",
+  amenities: [],
+  ai_highlights: [],
+  ai_neighborhood_highlights: [],
+  status: "active",
+  views_count: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  photos: [],
+};
+
 export default function PublicListingClient({ slug, listingSlug, initialListing }: ClientProps) {
   const router = useRouter();
   const [listing, setListing] = useState<Listing>(() => {
@@ -141,10 +164,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       initialListing ||
       getListingFromMemory(listingSlug) ||
       INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-      INITIAL_LISTINGS[0]
+      EMPTY_LISTING
     );
   });
-  const broker = listing.broker || DEMO_BROKER;
+  const broker = listing?.broker || DEMO_BROKER;
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -209,6 +232,35 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
   const [photos, setPhotos] = useState<ListingPhoto[]>(initialPhotos);
   const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const [savedOrderToast, setSavedOrderToast] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          const user = data.user;
+          const cleanUserPhone = (user.phone_number || user.phone || "").replace(/\D/g, "");
+          const cleanBrokerPhone = (broker.phone_number || "").replace(/\D/g, "");
+          const matchesPhone = Boolean(
+            cleanUserPhone &&
+            cleanBrokerPhone &&
+            (cleanUserPhone.endsWith(cleanBrokerPhone) || cleanBrokerPhone.endsWith(cleanUserPhone))
+          );
+          const matchesSlug = Boolean(
+            user.slug && broker.slug && user.slug.toLowerCase() === broker.slug.toLowerCase()
+          );
+          const matchesId = Boolean(
+            user.id && (user.id === broker.id || user.id === broker.user_id || user.id === listing.broker_id)
+          );
+          setIsOwner(Boolean(matchesSlug || matchesPhone || matchesId));
+        } else {
+          setIsOwner(false);
+        }
+      })
+      .catch(() => setIsOwner(false));
+  }, [broker.slug, broker.id, broker.phone_number, broker.user_id, listing.broker_id]);
 
   useEffect(() => {
     setPhotos(initialPhotos);
@@ -421,6 +473,21 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
     }
   };
 
+  if (!listing.slug) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#f8f9fa] p-6 text-center dark:bg-[#070b14]">
+        <div className="max-w-md rounded-2xl bg-white p-8 shadow-sm dark:bg-[#0c1222]">
+          <Building2 className="mx-auto h-12 w-12 text-slate-400" />
+          <h1 className="mt-4 text-xl font-bold text-slate-800 dark:text-white">Property Not Found</h1>
+          <p className="mt-2 text-sm text-slate-500">This property listing does not exist or may have been removed.</p>
+          <Link href="/" className="mt-6 inline-block rounded-xl bg-[#00974e] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#008243]">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#862e9f]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
       
@@ -540,51 +607,95 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
             {/* Property Key Details & Pricing - Curved Sheet Overlap Effect on Mobile */}
             <section className="relative z-10 -mt-6 sm:mt-0 rounded-t-[32px] sm:rounded-3xl border-t sm:border border-slate-200/90 bg-white p-5 sm:p-6 shadow-none dark:border-slate-800 dark:bg-[#0c1222] overflow-hidden">
               
-              {/* 4 Action Options */}
-              <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 mb-5">
-                <Link
-                  href={`/dashboard/listings/new?edit=${listing.slug}&step=2`}
-                  onClick={() => {
-                    try {
-                      localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
-                    } catch {}
-                  }}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-[#1c5436] hover:bg-[#15422a] py-2 px-3 text-xs font-semibold text-white shadow-sm transition active:scale-95 whitespace-nowrap cursor-pointer"
-                >
-                  <Pencil className="h-3.5 w-3.5 text-emerald-200" />
-                  <span>Edit Listing</span>
-                </Link>
+              {/* Action Buttons: If Owner -> Show Edit, Reorder, Add Form | If Buyer/Visitor -> Show Download Brochure, Share */}
+              {isOwner ? (
+                <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 mb-5">
+                  <Link
+                    href={`/dashboard/listings/new?edit=${listing.slug}&step=2`}
+                    onClick={() => {
+                      try {
+                        localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
+                      } catch {}
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl bg-[#1c5436] hover:bg-[#15422a] py-2 px-3 text-xs font-semibold text-white shadow-sm transition active:scale-95 whitespace-nowrap cursor-pointer"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-emerald-200" />
+                    <span>Edit Listing</span>
+                  </Link>
 
-                <button
-                  type="button"
-                  onClick={() => setIsReorderModalOpen(true)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 cursor-pointer whitespace-nowrap"
-                >
-                  <Camera className="h-3.5 w-3.5 text-slate-500" />
-                  <span>Reorder Photos</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsReorderModalOpen(true)}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 cursor-pointer whitespace-nowrap"
+                  >
+                    <Camera className="h-3.5 w-3.5 text-slate-500" />
+                    <span>Reorder Photos</span>
+                  </button>
 
-                <Link
-                  href={`/${broker.slug}/${listing.slug}/brochure`}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
-                >
-                  <FileText className="h-3.5 w-3.5 text-purple-600" />
-                  <span>Download PDF</span>
-                </Link>
+                  <Link
+                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-purple-600" />
+                    <span>Download PDF</span>
+                  </Link>
 
-                <Link
-                  href={`/dashboard/listings/new?edit=${listing.slug}&section=enquiry-form#enquiry-form`}
-                  onClick={() => {
-                    try {
-                      localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
-                    } catch {}
-                  }}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
-                >
-                  <ClipboardList className="h-3.5 w-3.5 text-slate-500" />
-                  <span>{listing.enquiry_form_url ? "Edit Form" : "Add form"}</span>
-                </Link>
-              </div>
+                  <Link
+                    href={`/dashboard/listings/new?edit=${listing.slug}&section=enquiry-form#enquiry-form`}
+                    onClick={() => {
+                      try {
+                        localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
+                      } catch {}
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
+                  >
+                    <ClipboardList className="h-3.5 w-3.5 text-slate-500" />
+                    <span>{listing.enquiry_form_url ? "Edit Form" : "Add form"}</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-5">
+                  <Link
+                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200/80 py-2 px-3.5 text-xs font-bold text-purple-700 shadow-xs transition active:scale-95 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-300 whitespace-nowrap"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>Download PDF Brochure</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Property"} in ${listing.location_locality || listing.location_city}`,
+                          url: window.location.href,
+                        }).catch(() => {});
+                      } else {
+                        navigator.clipboard?.writeText(window.location.href);
+                        setShareToast(true);
+                        setTimeout(() => setShareToast(false), 2500);
+                      }
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3.5 text-xs font-semibold text-slate-700 shadow-xs transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 cursor-pointer whitespace-nowrap"
+                  >
+                    <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                    <span>Share Property</span>
+                  </button>
+
+                  {listing.enquiry_form_url && (
+                    <a
+                      href={listing.enquiry_form_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3.5 text-xs font-semibold text-slate-700 shadow-xs transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
+                    >
+                      <ClipboardList className="h-3.5 w-3.5 text-slate-500" />
+                      <span>Online Inquiry Form</span>
+                    </a>
+                  )}
+                </div>
+              )}
 
               {/* Location Landmark Tag (Matching Red Pin in Reference Mockup) */}
               <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
@@ -1225,9 +1336,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       )}
 
       {/* ========================================================= */}
-      {/* 5. REORDER PHOTOS MODAL                                   */}
+      {/* 5. REORDER PHOTOS MODAL (OWNER ONLY)                       */}
       {/* ========================================================= */}
-      {isReorderModalOpen && (
+      {isOwner && isReorderModalOpen && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm pointer-events-auto select-none"
           onClick={() => setIsReorderModalOpen(false)}
@@ -1367,6 +1478,14 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-2xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <CheckCircle2 className="h-4 w-4" />
           <span>Photo sequence updated successfully!</span>
+        </div>
+      )}
+
+      {/* Share Toast */}
+      {shareToast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-2xl bg-[#0a1128] px-5 py-3 text-xs sm:text-sm font-semibold text-white shadow-xl dark:bg-white dark:text-[#0a1128] animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 dark:text-emerald-600" />
+          <span>Property link copied to clipboard!</span>
         </div>
       )}
 

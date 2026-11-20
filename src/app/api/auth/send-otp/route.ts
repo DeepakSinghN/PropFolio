@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
         identifier: cleanEmail,
         otp_token: otpToken,
         isEmail: true,
-        devOtp: code,
       });
 
       response.cookies.set("propfolio-otp-token", otpToken, {
@@ -90,7 +89,6 @@ export async function POST(req: NextRequest) {
       identifier: cleanPhone,
       otp_token: otpToken,
       isEmail: false,
-      devOtp: code,
       waSent: Boolean(waResult.success),
     });
 

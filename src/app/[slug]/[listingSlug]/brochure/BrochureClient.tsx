@@ -28,8 +28,22 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
   const listing =
     initialListing ||
     getListingFromMemory(listingSlug) ||
-    INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
-    INITIAL_LISTINGS[0];
+    INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
+
+  if (!listing) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-6 text-center">
+        <div>
+          <h2 className="text-xl font-bold text-zinc-800">Brochure not found</h2>
+          <p className="mt-2 text-sm text-zinc-500">This property listing does not exist or has been removed.</p>
+          <Link href="/" className="mt-4 inline-block text-sm font-semibold text-emerald-600 hover:underline">
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const broker = listing.broker || DEMO_BROKER;
 
   const photos =

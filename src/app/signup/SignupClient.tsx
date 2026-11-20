@@ -31,7 +31,6 @@ export default function SignupClient() {
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -99,9 +98,6 @@ export default function SignupClient() {
       if (data.otp_token) {
         setOtpToken(data.otp_token);
       }
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
-      }
 
       setStep("otp");
       startCountdown();
@@ -130,9 +126,6 @@ export default function SignupClient() {
 
       if (data.otp_token) {
         setOtpToken(data.otp_token);
-      }
-      if (data.devOtp) {
-        setDevOtp(data.devOtp);
       }
       startCountdown();
     } catch (err: any) {
@@ -368,20 +361,6 @@ export default function SignupClient() {
                 <div className="text-sm font-extrabold text-[#00974e] dark:text-[#00b85f] mt-0.5">
                   +91 {cleanPhoneDigits}
                 </div>
-                
-                {devOtp && (
-                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-100/90 dark:bg-emerald-950/60 px-3 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                    <span>Dev OTP:</span>
-                    <span className="font-mono tracking-wider">{devOtp}</span>
-                    <button
-                      type="button"
-                      onClick={() => setOtpCode(devOtp)}
-                      className="ml-1 text-[11px] underline cursor-pointer text-emerald-900 dark:text-white"
-                    >
-                      (Auto-fill)
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* OTP Input */}
