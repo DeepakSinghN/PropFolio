@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveOtp, createSignedOtpToken } from "@/lib/auth-store";
-import { sendWhatsAppMessage } from "@/lib/whatsapp";
+import { sendWhatsAppMessage, sendWhatsAppOtpTemplate } from "@/lib/whatsapp";
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,10 +76,10 @@ export async function POST(req: NextRequest) {
 
     console.log(`[OTP] Generated OTP ${code} for phone: +${cleanPhone}`);
 
-    // Try sending WhatsApp verification message
-    const waResult = await sendWhatsAppMessage({
+    // Send via approved WhatsApp Authentication Template (propertysnaps_otp) with fallback
+    const waResult = await sendWhatsAppOtpTemplate({
       to: cleanPhone,
-      text: `🔐 *Property Snaps Login Verification*\n\nAapka login verification code hai: *${code}*\n\nYeh code agle 10 minute ke liye valid hai. Apne dashboard me login karne ke liye isse enter karein.`,
+      code,
     });
 
     const response = NextResponse.json({

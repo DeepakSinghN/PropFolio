@@ -57,6 +57,151 @@ export async function sendWhatsAppMessage({ to, text }: SendTextMessageOptions) 
   }
 }
 
+export interface SendOtpTemplateOptions {
+  to: string;
+  code: string;
+  templateName?: string;
+}
+
+/**
+ * Sends approved Meta Authentication OTP template (e.g. propertysnaps_otp)
+ * with automatic button parameter support and fallback to text message.
+ */
+export async function sendWhatsAppOtpTemplate({
+  to,
+  code,
+  templateName = "propertysnaps_otp",
+}: SendOtpTemplateOptions) {
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+
+  if (!phoneNumberId || !accessToken) {
+    console.warn("WhatsApp credentials not configured in environment. Template not sent:", { to, code });
+    return { success: false, reason: "Credentials not set" };
+  }
+
+  const url = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+
+  // Candidate payload structures for Meta Authentication templates (with & without button params, en & en_US)
+  const candidatePayloads = [
+    // 1. English with Copy Code button (URL sub_type index 0)
+    {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: code }],
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [{ type: "text", text: code }],
+          },
+        ],
+      },
+    },
+    // 2. English US with Copy Code button
+    {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en_US" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: code }],
+          },
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: [{ type: "text", text: code }],
+          },
+        ],
+      },
+    },
+    // 3. English body parameter only
+    {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: code }],
+          },
+        ],
+      },
+    },
+    // 4. English US body parameter only
+    {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: "en_US" },
+        components: [
+          {
+            type: "body",
+            parameters: [{ type: "text", text: code }],
+          },
+        ],
+      },
+    },
+  ];
+
+  for (let i = 0; i < candidatePayloads.length; i++) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(candidatePayloads[i]),
+      });
+
+      const data = await response.json();
+      if (response.ok && data?.messages?.length > 0) {
+        console.log(`[WhatsApp Template] Successfully sent template '${templateName}' to ${to}:`, data);
+        return { success: true, data, mode: "template" };
+      }
+
+      console.warn(`[WhatsApp Template] Attempt ${i + 1} rejected by Meta:`, data?.error?.message || data);
+
+      if (data?.error?.code === 190) {
+        console.error("[WhatsApp] Access token has expired or is invalid. Please refresh token in Meta Console / Vercel.");
+        return { success: false, error: data?.error?.message, tokenExpired: true };
+      }
+    } catch (err: any) {
+      console.warn(`[WhatsApp Template] Attempt ${i + 1} network error:`, err.message);
+    }
+  }
+
+  // Fallback to standard text message if template delivery was not accepted
+  console.log(`[WhatsApp Template] Falling back to standard text message for ${to}...`);
+  return sendWhatsAppMessage({
+    to,
+    text: `🔐 *Property Snaps Login Verification*\n\nAapka login verification code hai: *${code}*\n\nYeh code agle 10 minute ke liye valid hai. Apne dashboard me login karne ke liye isse enter karein.`,
+  });
+}
+
 /**
  * Downloads media from Meta WhatsApp Cloud API and stores it in public/uploads/
  * Returns the local URL path (/uploads/${filename})
