@@ -4,6 +4,7 @@ import { getListingFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS } from "@/lib/store";
 import { createAdminClient } from "@/lib/supabase/server";
 import PublicListingClient from "./PublicListingClient";
+import ListingSkeleton from "@/components/ListingSkeleton";
 
 interface PageProps {
   params: Promise<{
@@ -127,7 +128,7 @@ export default async function PublicListingPage({ params }: PageProps) {
   }
 
   return (
-    <Suspense fallback={<div className="p-12 text-center text-sm">Loading listing...</div>}>
+    <Suspense fallback={<ListingSkeleton />}>
       <PublicListingClient slug={slug} listingSlug={listingSlug} initialListing={listing || undefined} />
     </Suspense>
   );
