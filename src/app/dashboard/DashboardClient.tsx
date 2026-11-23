@@ -257,11 +257,70 @@ export default function DashboardClient({
     }
   }
 
+  // ── Plan config derived from broker.plan_tier ───────────────────────────
+  const rawTier: string = broker.plan_tier || "free";
+
+  type PlanInfo = {
+    label: string;
+    limit: number;        // 0 = unlimited
+    isUnlimited: boolean;
+    color: string;        // tailwind text color
+    bgColor: string;      // tailwind bg for badge
+    borderColor: string;
+    upgradeText: string;
+    emoji: string;
+  };
+
+  const PLAN_MAP: Record<string, PlanInfo> = {
+    free: {
+      label: "Starter Free",
+      limit: 1,
+      isUnlimited: false,
+      color: "text-slate-600 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800",
+      borderColor: "border-slate-200/90 dark:border-slate-800",
+      upgradeText: "Upgrade to Pro",
+      emoji: "🆓",
+    },
+    pay_per_listing: {
+      label: "Pay Per Listing",
+      limit: 1,
+      isUnlimited: false,
+      color: "text-emerald-700 dark:text-emerald-300",
+      bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+      borderColor: "border-emerald-200/80 dark:border-emerald-900/40",
+      upgradeText: "Pay ₹79 for more",
+      emoji: "📋",
+    },
+    solo_pro: {
+      label: "Solo Broker Pro",
+      limit: 25,
+      isUnlimited: false,
+      color: "text-violet-700 dark:text-violet-300",
+      bgColor: "bg-violet-50 dark:bg-violet-950/30",
+      borderColor: "border-violet-200/80 dark:border-violet-900/40",
+      upgradeText: "Upgrade to Agency",
+      emoji: "⭐",
+    },
+    agency_starter: {
+      label: "Agency & Builder",
+      limit: 0,
+      isUnlimited: true,
+      color: "text-amber-700 dark:text-amber-300",
+      bgColor: "bg-amber-50 dark:bg-amber-950/20",
+      borderColor: "border-amber-200/80 dark:border-amber-900/40",
+      upgradeText: "",
+      emoji: "🏢",
+    },
+  };
+
+  const planInfo: PlanInfo = PLAN_MAP[rawTier] ?? PLAN_MAP["free"];
+  const planLimit = planInfo.isUnlimited ? 999 : (broker.listing_credits ?? planInfo.limit);
+
   // Broker metrics
-  const planLimit = broker.plan_limit || 30;
   const activeCount = listings.filter((l) => l.status !== "sold").length;
   const soldCount = listings.filter((l) => l.status === "sold").length;
-  const remainingListings = Math.max(0, planLimit - activeCount);
+  const remainingListings = planInfo.isUnlimited ? 999 : Math.max(0, planLimit - activeCount);
   const totalViews = listings.reduce((sum, l) => sum + (l.views_count || 0), 0);
   const totalPortfolioValue = listings.reduce((sum, l) => sum + (l.price_amount || 0), 0);
 
@@ -307,29 +366,78 @@ export default function DashboardClient({
           </Link>
         </div>
 
-        {/* ── PLAN / LISTINGS REMAINING ALERT BAR (Compact on Mobile) ── */}
-        <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border border-amber-200/90 bg-[#fffbeb] px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs dark:border-amber-900/40 dark:bg-amber-950/20">
-          <div className="flex items-center gap-1.5 sm:gap-2 font-medium text-amber-900 dark:text-amber-200 min-w-0">
-            <NotebookPen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 shrink-0" />
-            <span className="truncate">
-              {remainingListings > 0 ? (
-                <>
-                  <strong className="font-bold">{remainingListings} listings left</strong>
-                  <span className="hidden sm:inline"> in your current plan</span>
-                </>
-              ) : (
-                "No listings left"
-              )}
+        {/* ── PLAN / LISTINGS REMAINING ALERT BAR (Plan-Aware) ── */}
+        {planInfo.isUnlimited ? (
+          // Agency — Unlimited, show success bar
+          <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs dark:border-emerald-900/40 dark:bg-emerald-950/20">
+            <div className="flex items-center gap-1.5 sm:gap-2 font-medium text-emerald-900 dark:text-emerald-200 min-w-0">
+              <span className="text-sm">🏢</span>
+              <span className="truncate">
+                <strong className="font-bold">{planInfo.label}</strong>
+                <span className="hidden sm:inline"> · Unlimited listings</span>
+              </span>
+            </div>
+            <span className="shrink-0 rounded-lg bg-emerald-600 px-2.5 py-1 text-[10px] font-bold text-white">
+              UNLIMITED
             </span>
           </div>
-          <Link
-            href="/pricing"
-            className="group flex items-center gap-1.5 shrink-0 rounded-lg sm:rounded-xl bg-slate-900 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-white shadow-xs hover:bg-slate-800 transition dark:bg-white dark:text-slate-900 whitespace-nowrap"
-          >
-            <span>Get more listings</span>
-            <MoveRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
+        ) : remainingListings === 0 ? (
+          // Limit reached — red warning
+          <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border border-rose-200/90 bg-rose-50 px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs dark:border-rose-900/40 dark:bg-rose-950/20">
+            <div className="flex items-center gap-1.5 sm:gap-2 font-medium text-rose-900 dark:text-rose-200 min-w-0">
+              <NotebookPen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-600 shrink-0" />
+              <span className="truncate">
+                <strong className="font-bold">Listing limit reached</strong>
+                <span className="hidden sm:inline"> · {planInfo.label} plan ({planLimit} max)</span>
+              </span>
+            </div>
+            <Link
+              href="/pricing"
+              className="group flex items-center gap-1.5 shrink-0 rounded-lg sm:rounded-xl bg-rose-600 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-white shadow-xs hover:bg-rose-700 transition whitespace-nowrap"
+            >
+              <span>Upgrade Now</span>
+              <MoveRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        ) : remainingListings <= 3 ? (
+          // Low — amber warning
+          <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border border-amber-200/90 bg-[#fffbeb] px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs dark:border-amber-900/40 dark:bg-amber-950/20">
+            <div className="flex items-center gap-1.5 sm:gap-2 font-medium text-amber-900 dark:text-amber-200 min-w-0">
+              <NotebookPen className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600 shrink-0" />
+              <span className="truncate">
+                <strong className="font-bold">{remainingListings} listing{remainingListings !== 1 ? "s" : ""} left</strong>
+                <span className="hidden sm:inline"> · {planInfo.label} ({activeCount}/{planLimit} used)</span>
+              </span>
+            </div>
+            <Link
+              href="/pricing"
+              className="group flex items-center gap-1.5 shrink-0 rounded-lg sm:rounded-xl bg-slate-900 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-bold text-white shadow-xs hover:bg-slate-800 transition dark:bg-white dark:text-slate-900 whitespace-nowrap"
+            >
+              <span>{planInfo.upgradeText || "Upgrade"}</span>
+              <MoveRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        ) : (
+          // Healthy — compact info bar matching plan color
+          <div className={`mb-4 sm:mb-5 flex items-center justify-between gap-2 rounded-xl sm:rounded-2xl border ${planInfo.borderColor} ${planInfo.bgColor} px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-xs`}>
+            <div className={`flex items-center gap-1.5 sm:gap-2 font-medium min-w-0 ${planInfo.color}`}>
+              <span className="text-sm shrink-0">{planInfo.emoji}</span>
+              <span className="truncate">
+                <strong className="font-bold">{planInfo.label}</strong>
+                <span className="hidden sm:inline"> · {activeCount}/{planLimit} listings used</span>
+              </span>
+            </div>
+            {planInfo.upgradeText && (
+              <Link
+                href="/pricing"
+                className="group flex items-center gap-1.5 shrink-0 rounded-lg sm:rounded-xl border border-slate-200 bg-white px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] font-semibold text-slate-700 hover:border-slate-300 transition dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 whitespace-nowrap"
+              >
+                <span>{planInfo.upgradeText}</span>
+                <MoveRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* ── GREEN HERO CARD: "YOUR WEBSITE IS LIVE!" (Matching Images 1 & 2) ── */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0d2a23] via-[#1a3c34] to-[#124237] p-5 sm:p-7 text-white shadow-xl mb-5">

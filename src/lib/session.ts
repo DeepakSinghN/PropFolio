@@ -37,3 +37,4 @@ export async function getUserFromSession(
 
   return null;
 }
+
