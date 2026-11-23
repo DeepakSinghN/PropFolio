@@ -30,10 +30,32 @@ export async function GET(req: NextRequest) {
     if (phoneCookie?.value) {
       const session = getPhoneSession(phoneCookie.value);
       if (session) {
+        let profile = session.profile;
+
+        // Try to fetch latest profile from Supabase if configured
+        try {
+          const supabase = await createClient();
+          const cleanPhone = (profile.phone_number || session.phone || "").replace(/\D/g, "");
+          const phone10 = cleanPhone.slice(-10);
+
+          const { data: latest } = await supabase
+            .from("profiles")
+            .select("*")
+            .or(`id.eq.${profile.id},phone_number.ilike.%${phone10}%,slug.eq.${profile.slug}`)
+            .maybeSingle();
+
+          if (latest) {
+            profile = {
+              ...profile,
+              ...latest,
+            };
+          }
+        } catch {}
+
         return NextResponse.json({
           authenticated: true,
           type: "phone",
-          user: session.profile,
+          user: profile,
         });
       }
     }

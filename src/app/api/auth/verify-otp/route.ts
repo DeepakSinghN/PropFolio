@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyOtp, createPhoneSession } from "@/lib/auth-store";
+import { verifyOtp, createPhoneSession, slugifyName, isGenericBrokerName, isGenericSlug } from "@/lib/auth-store";
 import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
@@ -29,15 +29,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid or expired verification code. Please try again." }, { status: 401 });
     }
 
+    const rawName = (full_name || "").toString().trim();
     const fallbackSlug = isEmail
       ? cleanTarget.split("@")[0].replace(/[^a-z0-9]/g, "-")
       : "broker-" + cleanTarget.slice(-4);
 
+    const generatedSlug = rawName ? slugifyName(rawName) : fallbackSlug;
+
     let profileData = {
-      full_name: full_name || (isEmail ? cleanTarget.split("@")[0] : "Real Estate Advisor"),
+      full_name: rawName || (isEmail ? cleanTarget.split("@")[0] : "Real Estate Broker"),
       city: city || "India",
       company_name: company_name || "Exclusive Advisory",
-      slug: (full_name ? full_name.toLowerCase().replace(/[^a-z0-9]/g, "-") : fallbackSlug) + "-" + Math.floor(100 + Math.random() * 900),
+      slug: generatedSlug,
       email: isEmail ? cleanTarget : undefined,
       phone_number: isEmail ? undefined : "+" + cleanTarget,
     };
@@ -58,14 +61,41 @@ export async function POST(req: NextRequest) {
           : await query.eq("phone_number", "+" + cleanTarget).maybeSingle();
 
         if (existingProfile) {
+          // If existing profile has a generic name/slug and user provided real name now, upgrade it!
+          const hasNewName = Boolean(rawName && !isGenericBrokerName(rawName));
+          const existingIsGenericName = isGenericBrokerName(existingProfile.full_name);
+          const existingIsGenericSlug = isGenericSlug(existingProfile.slug);
+
+          const finalName = hasNewName
+            ? rawName
+            : (!existingIsGenericName ? existingProfile.full_name : profileData.full_name);
+
+          const finalSlug = (hasNewName || existingIsGenericSlug)
+            ? slugifyName(finalName)
+            : existingProfile.slug;
+
           profileData = {
-            full_name: existingProfile.full_name || profileData.full_name,
-            city: existingProfile.city || profileData.city,
-            company_name: existingProfile.company_name || profileData.company_name,
-            slug: existingProfile.slug || profileData.slug,
+            full_name: finalName,
+            city: city || existingProfile.city || profileData.city,
+            company_name: company_name || existingProfile.company_name || profileData.company_name,
+            slug: finalSlug,
             email: existingProfile.email || profileData.email,
             phone_number: existingProfile.phone_number || profileData.phone_number,
           };
+
+          // Persist upgrade to Supabase immediately
+          if (finalName !== existingProfile.full_name || finalSlug !== existingProfile.slug) {
+            await supabase
+              .from("profiles")
+              .update({
+                full_name: finalName,
+                slug: finalSlug,
+                city: profileData.city,
+                company_name: profileData.company_name,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", existingProfile.id);
+          }
         } else {
           await supabase.from("profiles").insert({
             full_name: profileData.full_name,

@@ -130,6 +130,7 @@ export function updateListingStatusOnDisk(slug: string, status: "active" | "sold
 
 export interface UserSession {
   phone: string;
+  contactName?: string;
   notes: string[];
   photos: string[];
   askedForPhotos: boolean;
@@ -166,15 +167,20 @@ function saveSessions(map: Map<string, UserSession>) {
   }
 }
 
-export function appendUserSession(phone: string, text?: string, photo?: string): UserSession {
+export function appendUserSession(phone: string, text?: string, photo?: string, contactName?: string): UserSession {
   const map = loadSessions();
   const session = map.get(phone) || {
     phone,
+    contactName: contactName?.trim() || undefined,
     notes: [],
     photos: [],
     askedForPhotos: false,
     updatedAt: Date.now(),
   };
+
+  if (contactName && contactName.trim() && !session.contactName) {
+    session.contactName = contactName.trim();
+  }
 
   if (text && text.trim()) {
     session.notes.push(text.trim());

@@ -381,4 +381,257 @@ export async function updateUserPlan(
   );
 }
 
+// ------------------------------------------------------------------
+// Slug & Name Utilities
+// ------------------------------------------------------------------
+export function slugifyName(name: string): string {
+  const cleaned = (name || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-+|-+$)/g, "");
+  return cleaned || "broker";
+}
+
+export function isGenericBrokerName(name?: string | null): boolean {
+  if (!name) return true;
+  const n = name.trim().toLowerCase();
+  return (
+    n === "" ||
+    n === "real estate broker" ||
+    n === "real estate advisor" ||
+    n === "broker" ||
+    n === "advisor" ||
+    n === "default broker" ||
+    n.startsWith("broker-")
+  );
+}
+
+export function isGenericSlug(slug?: string | null): boolean {
+  if (!slug) return true;
+  const s = slug.trim().toLowerCase();
+  return (
+    s === "" ||
+    s === "broker" ||
+    s === "broker-default" ||
+    s.startsWith("broker-") ||
+    s === "real-estate-broker" ||
+    s === "real-estate-advisor"
+  );
+}
+
+// ------------------------------------------------------------------
+// Resolve or Auto-Create Broker Profile by Phone Number
+// (Ensures Real Contact Name & Clean Personal Slug are always used)
+// ------------------------------------------------------------------
+export async function resolveOrCreateBrokerProfile(
+  rawPhone: string,
+  contactName?: string
+): Promise<Profile> {
+  const cleanPhone = rawPhone.replace(/\D/g, "");
+  const phone10 = cleanPhone.slice(-10);
+  const formattedPhone = `+91${phone10}`;
+
+  // 1. Check Supabase profiles table
+  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supaUrl && supaKey && !supaKey.includes("...")) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(supaUrl, supaKey);
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .or(
+          `phone_number.ilike.%${phone10}%,phone_number.eq.+91${phone10},phone_number.eq.91${phone10},phone_number.eq.${phone10},phone_number.eq.+${cleanPhone}`
+        )
+        .limit(1);
+
+      const existing = profiles?.[0];
+
+      if (existing) {
+        // If profile has generic name/slug but we now have contactName from WhatsApp, upgrade it!
+        const needsNameUpgrade = isGenericBrokerName(existing.full_name) && Boolean(contactName?.trim());
+        const needsSlugUpgrade = isGenericSlug(existing.slug) && Boolean(contactName?.trim() || existing.full_name);
+
+        if (needsNameUpgrade || needsSlugUpgrade) {
+          const newName = needsNameUpgrade ? contactName!.trim() : existing.full_name;
+          const newSlug = slugifyName(newName);
+
+          await supabase
+            .from("profiles")
+            .update({
+              full_name: newName,
+              slug: newSlug,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existing.id);
+
+          existing.full_name = newName;
+          existing.slug = newSlug;
+        }
+
+        return existing as Profile;
+      }
+
+      // If no profile exists in Supabase, create one with the real name!
+      const initialName = contactName && contactName.trim() ? contactName.trim() : "Real Estate Broker";
+      const initialSlug = isGenericBrokerName(initialName)
+        ? `broker-${phone10.slice(-4)}`
+        : slugifyName(initialName);
+
+      const newProfile: Partial<Profile> = {
+        full_name: initialName,
+        slug: initialSlug,
+        phone_number: formattedPhone,
+        company_name: "Exclusive Advisory",
+        city: "India",
+        avatar_url: "/brand-logo.png",
+        plan_tier: "solo_pro",
+        listing_credits: 30,
+        is_active: true,
+      };
+
+      const { data: created } = await supabase
+        .from("profiles")
+        .insert(newProfile)
+        .select()
+        .single();
+
+      if (created) {
+        return created as Profile;
+      }
+    } catch (dbErr) {
+      console.warn("[resolveOrCreateBrokerProfile] Supabase query notice:", dbErr);
+    }
+  }
+
+  // 2. Check local users / sessions store
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    for (const key of Object.keys(store)) {
+      const sess = store[key];
+      const p = sess?.profile;
+      if (p) {
+        const sessPhone = (p.phone_number || sess.phone || "").replace(/\D/g, "");
+        if (sessPhone.endsWith(phone10)) {
+          if (isGenericBrokerName(p.full_name) && contactName && contactName.trim()) {
+            p.full_name = contactName.trim();
+            p.slug = slugifyName(contactName.trim());
+            saveStore(sessionsFile, store);
+          }
+          return p;
+        }
+      }
+    }
+  } catch {}
+
+  // 3. Fallback: generate local profile
+  const resolvedName = contactName && contactName.trim() ? contactName.trim() : "Real Estate Broker";
+  const resolvedSlug = isGenericBrokerName(resolvedName)
+    ? `broker-${phone10.slice(-4)}`
+    : slugifyName(resolvedName);
+
+  const fallbackProfile: Profile = {
+    id: `prof_${cleanPhone}`,
+    user_id: `usr_${cleanPhone}`,
+    full_name: resolvedName,
+    slug: resolvedSlug,
+    phone_number: formattedPhone,
+    company_name: "Exclusive Advisory",
+    city: "India",
+    avatar_url: "/brand-logo.png",
+    plan_tier: "solo_pro",
+    listing_credits: 30,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  createPhoneSession(cleanPhone, fallbackProfile);
+  return fallbackProfile;
+}
+
+// ------------------------------------------------------------------
+// Update Broker Profile (Name, Slug, Agency, etc.)
+// ------------------------------------------------------------------
+export async function updateBrokerProfile(
+  userId: string,
+  updates: {
+    full_name?: string;
+    company_name?: string;
+    city?: string;
+    slug?: string;
+    phone_number?: string;
+    avatar_url?: string;
+  }
+): Promise<{ success: boolean; profile?: Profile; error?: string }> {
+  let updatedProfile: Profile | null = null;
+
+  // 1. Update Supabase if configured
+  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supaUrl && supaKey && !supaKey.includes("...")) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(supaUrl, supaKey);
+
+      const cleanUpdates: any = {
+        updated_at: new Date().toISOString(),
+      };
+      if (updates.full_name?.trim()) cleanUpdates.full_name = updates.full_name.trim();
+      if (updates.company_name?.trim()) cleanUpdates.company_name = updates.company_name.trim();
+      if (updates.city?.trim()) cleanUpdates.city = updates.city.trim();
+      if (updates.slug?.trim()) cleanUpdates.slug = slugifyName(updates.slug);
+      if (updates.phone_number?.trim()) cleanUpdates.phone_number = updates.phone_number.trim();
+      if (updates.avatar_url?.trim()) cleanUpdates.avatar_url = updates.avatar_url.trim();
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(cleanUpdates)
+        .or(`id.eq.${userId},user_id.eq.${userId}`)
+        .select()
+        .maybeSingle();
+
+      if (data) {
+        updatedProfile = data as Profile;
+      } else if (error) {
+        console.warn("[updateBrokerProfile] Supabase update warning:", error);
+      }
+    } catch (e) {
+      console.warn("[updateBrokerProfile] Supabase update exception:", e);
+    }
+  }
+
+  // 2. Update local sessions file
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    for (const key of Object.keys(store)) {
+      const session = store[key];
+      if (session?.profile?.user_id === userId || session?.profile?.id === userId) {
+        if (updates.full_name?.trim()) session.profile.full_name = updates.full_name.trim();
+        if (updates.company_name?.trim()) session.profile.company_name = updates.company_name.trim();
+        if (updates.city?.trim()) session.profile.city = updates.city.trim();
+        if (updates.slug?.trim()) session.profile.slug = slugifyName(updates.slug);
+        if (updates.phone_number?.trim()) session.profile.phone_number = updates.phone_number.trim();
+        if (updates.avatar_url?.trim()) session.profile.avatar_url = updates.avatar_url.trim();
+        session.profile.updated_at = new Date().toISOString();
+        updatedProfile = session.profile;
+      }
+    }
+    saveStore(sessionsFile, store);
+  } catch {}
+
+  return { success: true, profile: updatedProfile || undefined };
+}
+
 

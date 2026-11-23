@@ -29,7 +29,8 @@ import {
   Pencil,
   QrCode,
   Plus,
-  Globe
+  Globe,
+  User
 } from "lucide-react";
 import { DEMO_BROKER } from "@/lib/store";
 import { useState, useEffect } from "react";
@@ -65,6 +66,63 @@ export default function DashboardClient({
   const [newColDesc, setNewColDesc] = useState("");
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [isSubmittingCol, setIsSubmittingCol] = useState(false);
+
+  // Profile Edit Modal State
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editSlug, setEditSlug] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState("");
+
+  function openEditProfile() {
+    setEditName(broker.full_name || "");
+    setEditSlug(broker.slug || "");
+    setEditCompany(broker.company_name || "");
+    setEditCity(broker.city || "");
+    setProfileSuccessMsg("");
+    setIsProfileModalOpen(true);
+  }
+
+  async function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editName.trim()) {
+      alert("Name cannot be empty");
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      const res = await fetch("/api/auth/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: editName.trim(),
+          slug: editSlug.trim(),
+          company_name: editCompany.trim(),
+          city: editCity.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.profile) {
+        setBroker((prev: any) => ({
+          ...prev,
+          ...data.profile,
+        }));
+        setProfileSuccessMsg("Profile updated successfully!");
+        setTimeout(() => {
+          setIsProfileModalOpen(false);
+          setProfileSuccessMsg("");
+        }, 1200);
+      } else {
+        alert(data.error || "Failed to update profile");
+      }
+    } catch {
+      alert("Error saving profile");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  }
 
   // SWR: Instant load with server fallbackData + background revalidation
   const brokerId = broker?.id || broker?.user_id;
@@ -348,11 +406,22 @@ export default function DashboardClient({
         {/* ── HEADER (Matching Competitor Img 1 & 2) ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0a1128] dark:text-white">
-              Welcome, {broker.full_name?.split(" ")[0] || "Deepak"}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0a1128] dark:text-white">
+                Welcome, {broker.full_name?.split(" ")[0] || "Advisor"}
+              </h1>
+              <button
+                type="button"
+                onClick={openEditProfile}
+                title="Edit Your Profile & Public Link"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#00974e] hover:text-[#00974e] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 transition"
+              >
+                <Pencil className="h-3 w-3" />
+                <span>Edit Profile</span>
+              </button>
+            </div>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Ready to close some deals?
+              {broker.company_name ? `${broker.company_name} · ` : ""}Ready to close some deals?
             </p>
           </div>
           <Link
@@ -514,6 +583,15 @@ export default function DashboardClient({
               <QrCode className="h-3.5 w-3.5 text-emerald-200" />
               <span>QR code & Profile</span>
             </Link>
+
+            <button
+              type="button"
+              onClick={openEditProfile}
+              className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 transition cursor-pointer"
+            >
+              <Pencil className="h-3.5 w-3.5 text-emerald-200" />
+              <span>Edit Name & Link</span>
+            </button>
           </div>
         </div>
 
@@ -1220,6 +1298,146 @@ export default function DashboardClient({
                     className="rounded-xl bg-[#0a1128] px-5 py-2 text-xs font-bold text-white shadow-md border border-[#862e9f]/40 hover:bg-[#16234b] disabled:opacity-50 dark:bg-[#862e9f] dark:text-[#0a1128]"
                   >
                     {isSubmittingCol ? "Creating..." : "Create & Get Link"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ── PROFILE EDIT MODAL ── */}
+        {isProfileModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+            <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-[#0c1222] dark:border dark:border-slate-800">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#00974e]/10 text-[#00974e]">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0a1128] dark:text-white">
+                      Edit Broker Profile & Link
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Customize how your name and public website link appear
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(false)}
+                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {profileSuccessMsg && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>{profileSuccessMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveProfile} className="mt-4 space-y-3.5">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Your Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => {
+                      setEditName(e.target.value);
+                      if (!editSlug || editSlug.startsWith("broker-")) {
+                        setEditSlug(
+                          e.target.value
+                            .toLowerCase()
+                            .trim()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/(^-+|-+$)/g, "")
+                        );
+                      }
+                    }}
+                    placeholder="e.g. Deepak Singh"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium outline-none focus:border-[#00974e] focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Public Link / Slug */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Your Website Link (Subdomain Slug) *
+                  </label>
+                  <div className="mt-1 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 focus-within:border-[#00974e] focus-within:bg-white dark:border-slate-700 dark:bg-slate-900">
+                    <span className="text-xs font-mono text-slate-400 select-none">
+                      propertysnaps.in/
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={editSlug}
+                      onChange={(e) =>
+                        setEditSlug(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9-]+/g, "")
+                        )
+                      }
+                      placeholder="deepak-singh"
+                      className="ml-0.5 w-full bg-transparent text-xs font-mono font-bold text-[#0a1128] outline-none dark:text-white"
+                    />
+                  </div>
+                  <p className="mt-1 text-[10px] text-slate-400">
+                    All your property links will look like: propertysnaps.in/{editSlug || "your-name"}/property-name
+                  </p>
+                </div>
+
+                {/* Company / Agency */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Agency / Firm Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editCompany}
+                    onChange={(e) => setEditCompany(e.target.value)}
+                    placeholder="e.g. Exclusive Advisory / PropTech Realty"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium outline-none focus:border-[#00974e] focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+
+                {/* City */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    City / Primary Market
+                  </label>
+                  <input
+                    type="text"
+                    value={editCity}
+                    onChange={(e) => setEditCity(e.target.value)}
+                    placeholder="e.g. Ahmedabad, Mumbai, Bangalore"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium outline-none focus:border-[#00974e] focus:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="mt-5 flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileModalOpen(false)}
+                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingProfile || !editName.trim()}
+                    className="rounded-xl bg-[#00974e] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#008042] disabled:opacity-50 transition"
+                  >
+                    {isSavingProfile ? "Saving..." : "Save Profile & Link"}
                   </button>
                 </div>
               </form>

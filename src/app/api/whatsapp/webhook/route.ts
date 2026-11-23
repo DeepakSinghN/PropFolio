@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parsePropertyNotes } from "@/lib/ai";
 import { sendWhatsAppMessage, downloadMetaMedia } from "@/lib/whatsapp";
 import { saveListingToMemory } from "@/lib/store";
+import { resolveOrCreateBrokerProfile } from "@/lib/auth-store";
 import {
   saveListingToDisk,
   appendUserSession,
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
 
     const from = message.from;
     const messageType = message.type;
+    const contactName = value?.contacts?.[0]?.profile?.name?.trim() || "";
     const session = getUserSession(from);
 
     let incomingText = "";
@@ -81,18 +83,19 @@ export async function POST(req: NextRequest) {
       }
 
       // Generate preview directly with all collected info & photos
-      const hasPhotos = session.photos && session.photos.length > 0;
-      return await executeCreateListing(req, from, session, hasPhotos);
+      const hasPhotos = Boolean(session.photos && session.photos.length > 0);
+      return await executeCreateListing(req, from, session, hasPhotos, contactName);
     }
 
     // CASE 2: User is sending info/photos
     const wasAcknowledged = Boolean(session?.hasAcknowledged);
 
-    // Append incoming data quietly to session
+    // Append incoming data quietly to session (preserving contact name)
     appendUserSession(
       from,
       incomingText.trim() ? incomingText.trim() : undefined,
-      incomingPhotoUrl || undefined
+      incomingPhotoUrl || undefined,
+      contactName || undefined
     );
 
     // If this is the user's FIRST data in the session -> Send ONLY 1 friendly guide message!
@@ -123,7 +126,8 @@ async function executeCreateListing(
   req: NextRequest,
   from: string,
   session: any,
-  includePhotos: boolean
+  includePhotos: boolean,
+  contactName?: string
 ) {
   const combinedNotes = session.notes.join("\n\n");
   console.log(`Executing listing for ${from} (includePhotos: ${includePhotos}):`, combinedNotes);
@@ -147,23 +151,8 @@ async function executeCreateListing(
     }))
     : [];
 
-  const cleanPhone = from.replace(/\D/g, "");
-  const brokerSlug = `broker-${cleanPhone.slice(-4)}`;
-  const senderBroker = {
-    id: `prof_${cleanPhone}`,
-    user_id: `usr_${cleanPhone}`,
-    full_name: "Real Estate Broker",
-    slug: brokerSlug,
-    phone_number: `+${cleanPhone}`,
-    company_name: "Exclusive Advisory",
-    city: "India",
-    avatar_url: "/brand-logo.png",
-    plan_tier: "solo_pro" as const,
-    listing_credits: 30,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  // Resolve broker profile using real contact name & clean slug
+  const senderBroker = await resolveOrCreateBrokerProfile(from, session?.contactName || contactName);
 
   const fullListing = {
     id: "listing-wa-" + Date.now(),
@@ -195,6 +184,59 @@ async function executeCreateListing(
 
   saveListingToMemory(fullListing);
   saveListingToDisk(fullListing);
+
+  // Sync listing to Supabase if configured
+  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supaUrl && supaKey && !supaKey.includes("...")) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(supaUrl, supaKey);
+
+      await supabase.from("listings").upsert({
+        id: fullListing.id,
+        broker_id: senderBroker.id,
+        title: fullListing.title,
+        slug: fullListing.slug,
+        description: fullListing.description,
+        property_type: fullListing.property_type,
+        listing_type: fullListing.listing_type,
+        bhk: fullListing.bhk,
+        bedrooms: fullListing.bedrooms,
+        bathrooms: fullListing.bathrooms,
+        carpet_area_sqft: fullListing.carpet_area_sqft,
+        price_amount: fullListing.price_amount,
+        display_price: fullListing.display_price,
+        currency: fullListing.currency,
+        location_city: fullListing.location_city,
+        location_locality: fullListing.location_locality,
+        amenities: fullListing.amenities,
+        ai_highlights: fullListing.ai_highlights,
+        ai_neighborhood_highlights: fullListing.ai_neighborhood_highlights,
+        status: "active",
+        views_count: 1,
+        created_at: fullListing.created_at,
+        updated_at: fullListing.updated_at,
+      });
+
+      if (photosList.length > 0) {
+        await supabase.from("listing_photos").insert(
+          photosList.map((p: any) => ({
+            listing_id: fullListing.id,
+            photo_url: p.photo_url,
+            display_order: p.display_order,
+            is_cover: p.is_cover,
+          }))
+        );
+      }
+    } catch (dbErr) {
+      console.warn("[webhook] Supabase listing sync notice:", dbErr);
+    }
+  }
 
   clearUserSession(from);
 

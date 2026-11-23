@@ -270,5 +270,42 @@ Token cookie + JSON body dono mein bheja jata hai. Verify ke waqt token se signa
 
 ---
 
-*Last updated: November 2026 — PropertySnaps v1.0 Payment Integration*
+## 9. Broker Name & Link Resolution Fix (Eliminated generic `broker-XXXX`)
+
+### Problem
+Previously, when a user created a listing via WhatsApp, the bot replied with a link containing a generic slug:
+`https://www.propertysnaps.in/broker-8269/4-bhk-apartment-bodakdev-ahmedabad`
+And on the public listing page, the broker card said `"Real Estate Broker"` instead of the broker's real name.
+
+**Root Causes:**
+1. In `src/app/api/whatsapp/webhook/route.ts`:
+   - It hardcoded `const brokerSlug = \`broker-${cleanPhone.slice(-4)}\`` and `full_name: "Real Estate Broker"`.
+   - It never captured the contact's name from Meta Cloud API webhook (`value.contacts[0].profile.name`).
+   - It never checked Supabase `profiles` table to see if the user was already registered with their real name.
+2. In `src/app/api/auth/verify-otp/route.ts`:
+   - If `existingProfile` had `slug: "broker-8269"`, it refused to upgrade the slug even when the user signed up with their real name.
+   - It added an unnecessary random 3-digit number to the slug (e.g. `deepak-singh-482`).
+3. In `src/app/[slug]/[listingSlug]/page.tsx` and `brochure/page.tsx`:
+   - Supabase listing query didn't join or fetch the broker's profile, falling back to `DEMO_BROKER`.
+
+### Solution & Changes Made
+1. **`resolveOrCreateBrokerProfile(phone, contactName)` in `src/lib/auth-store.ts`:**
+   - Checks Supabase `profiles` for the sender's phone number.
+   - If registered, uses their real name and personal slug.
+   - If generic ("Real Estate Broker" / "broker-8269") and WhatsApp contact name is present, upgrades their name and slug.
+   - If new, creates profile using the WhatsApp contact name (e.g. "Deepak Singh" → `deepak-singh`).
+2. **Meta Cloud API Webhook (`src/app/api/whatsapp/webhook/route.ts`):**
+   - Extracts `value.contacts[0].profile.name`.
+   - Resolves broker using `resolveOrCreateBrokerProfile()`.
+   - Generates live listing link using the broker's real slug: `https://www.propertysnaps.in/{broker.slug}/{listing.slug}`.
+   - Syncs the listing to Supabase `listings` + `listing_photos` tables.
+3. **`verify-otp` upgrade (`src/app/api/auth/verify-otp/route.ts`):**
+   - Automatically cleans generic `broker-XXXX` slugs to the user's real name slug.
+4. **Dashboard Profile Editor:**
+   - Added `POST /api/auth/profile` endpoint.
+   - Added "Edit Profile & Link" modal directly on the dashboard where brokers can customize their display name, agency name, city, and custom slug (`propertysnaps.in/[custom-slug]`) in 1 click!
+
+---
+
+*Last updated: November 2026 — PropertySnaps v1.1 Broker Identity & Payment Integration*
 
