@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
                 user_metadata: {
                   full_name: full_name || "Real Estate Broker",
                   city: city || "India",
-                  company_name: company_name || "Exclusive Advisory",
+                  company_name: company_name ? company_name.trim() : "",
                 },
               }
             : {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
                 user_metadata: {
                   full_name: full_name || "Real Estate Broker",
                   city: city || "India",
-                  company_name: company_name || "Exclusive Advisory",
+                  company_name: company_name ? company_name.trim() : "",
                   phone_number: safePhone,
                 },
               };
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
               slug: brokerSlug,
               phone_number: isEmail ? undefined : safePhone,
               email: isEmail ? trimmedTarget.toLowerCase() : undefined,
-              company_name: company_name || "Exclusive Advisory",
+              company_name: company_name ? company_name.trim() : "",
               city: city || "India",
               plan_tier: "solo_pro",
               listing_credits: 30,

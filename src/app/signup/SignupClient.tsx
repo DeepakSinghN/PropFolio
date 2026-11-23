@@ -158,7 +158,7 @@ export default function SignupClient() {
           otp_code: otpCode.trim(),
           otp_token: otpToken,
           city: city.trim() || "India",
-          company_name: companyName.trim() || "Real Estate Advisory",
+          company_name: companyName.trim(),
         }),
       });
 

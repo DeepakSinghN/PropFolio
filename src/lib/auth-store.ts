@@ -185,7 +185,7 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     slug: customProfile?.slug || fallbackSlug,
     phone_number: customProfile?.phone_number || (isEmail ? "" : "+" + cleanKey),
     email: isEmail ? cleanKey : customProfile?.email,
-    company_name: customProfile?.company_name || "Exclusive Advisory",
+    company_name: customProfile?.company_name || "",
     city: customProfile?.city || "India",
     avatar_url: customProfile?.avatar_url || "/brand-logo.png",
     plan_tier: "solo_pro",
@@ -267,9 +267,9 @@ export function saveUserAccount(
     user_id: "usr_" + cleanKey.replace(/[^a-zA-Z0-9]/g, "_"),
     full_name: customProfile?.full_name || (isEmail ? cleanKey.split("@")[0] : "Real Estate Broker"),
     slug: customProfile?.slug || fallbackSlug,
-    phone_number: customProfile?.phone_number || (isEmail ? "+91 9876543210" : "+" + cleanKey),
+    phone_number: customProfile?.phone_number || (isEmail ? "" : "+" + cleanKey),
     email: isEmail ? cleanKey : customProfile?.email,
-    company_name: customProfile?.company_name || "Exclusive Advisory",
+    company_name: customProfile?.company_name || "",
     city: customProfile?.city || "India",
     avatar_url: customProfile?.avatar_url || "/brand-logo.png",
     plan_tier: "solo_pro",
@@ -489,7 +489,7 @@ export async function resolveOrCreateBrokerProfile(
         full_name: initialName,
         slug: initialSlug,
         phone_number: formattedPhone,
-        company_name: "Exclusive Advisory",
+        company_name: "",
         city: "India",
         avatar_url: "/brand-logo.png",
         plan_tier: "solo_pro",
@@ -543,7 +543,7 @@ export async function resolveOrCreateBrokerProfile(
     full_name: resolvedName,
     slug: resolvedSlug,
     phone_number: formattedPhone,
-    company_name: "Exclusive Advisory",
+    company_name: "",
     city: "India",
     avatar_url: "/brand-logo.png",
     plan_tier: "solo_pro",
@@ -589,7 +589,7 @@ export async function updateBrokerProfile(
         updated_at: new Date().toISOString(),
       };
       if (updates.full_name?.trim()) cleanUpdates.full_name = updates.full_name.trim();
-      if (updates.company_name?.trim()) cleanUpdates.company_name = updates.company_name.trim();
+      if (updates.company_name !== undefined) cleanUpdates.company_name = updates.company_name.trim();
       if (updates.city?.trim()) cleanUpdates.city = updates.city.trim();
       if (updates.slug?.trim()) cleanUpdates.slug = slugifyName(updates.slug);
       if (updates.phone_number?.trim()) cleanUpdates.phone_number = updates.phone_number.trim();
@@ -619,7 +619,7 @@ export async function updateBrokerProfile(
       const session = store[key];
       if (session?.profile?.user_id === userId || session?.profile?.id === userId) {
         if (updates.full_name?.trim()) session.profile.full_name = updates.full_name.trim();
-        if (updates.company_name?.trim()) session.profile.company_name = updates.company_name.trim();
+        if (updates.company_name !== undefined) session.profile.company_name = updates.company_name.trim();
         if (updates.city?.trim()) session.profile.city = updates.city.trim();
         if (updates.slug?.trim()) session.profile.slug = slugifyName(updates.slug);
         if (updates.phone_number?.trim()) session.profile.phone_number = updates.phone_number.trim();

@@ -222,9 +222,13 @@ export default function BrokerProfileClient({
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0a1128] dark:text-white">
                   {broker.full_name}
                 </h1>
-                <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  {broker.company_name} {broker.city ? `· ${broker.city}` : ""}
-                </p>
+                {(broker.company_name || broker.city) && (
+                  <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                    {broker.company_name}
+                    {broker.company_name && broker.city ? ` · ` : ""}
+                    {broker.city || ""}
+                  </p>
+                )}
 
                 {/* Edit profile button */}
                 <div className="mt-4 flex justify-center">

@@ -1205,9 +1205,13 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       {broker.full_name}
                       <ShieldCheck className="h-4 w-4 text-[#862e9f]" />
                     </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {broker.company_name} · {broker.city}
-                    </p>
+                    {(broker.company_name || broker.city) && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {broker.company_name}
+                        {broker.company_name && broker.city ? " · " : ""}
+                        {broker.city || ""}
+                      </p>
+                    )}
                     <p className="mt-1 text-[11px] font-semibold text-[#862e9f]">
                       Verified Property Representative
                     </p>

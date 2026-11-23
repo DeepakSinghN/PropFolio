@@ -113,7 +113,9 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
                 <h2 className="text-xl font-extrabold tracking-tight text-white">{broker.full_name}</h2>
                 <ShieldCheck className="h-4 w-4 text-[#862e9f]" />
               </div>
-              <p className="text-xs text-slate-300">{broker.company_name} · Exclusive Real Estate Advisory</p>
+              {broker.company_name ? (
+                <p className="text-xs text-slate-300">{broker.company_name}</p>
+              ) : null}
               <p className="mt-1 font-mono text-xs text-[#862e9f] font-bold">{broker.phone_number}</p>
             </div>
           </div>

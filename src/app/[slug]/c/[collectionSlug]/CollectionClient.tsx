@@ -112,9 +112,13 @@ export default function CollectionClient({ collection, listings, broker }: Props
                 </span>
                 <BadgeCheck className="h-3.5 w-3.5 sm:hidden text-[#862e9f] shrink-0" />
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                {broker.company_name || "Exclusive Advisory"} · {broker.city || "Representative"}
-              </p>
+              {(broker.company_name || broker.city) && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                  {broker.company_name}
+                  {broker.company_name && broker.city ? " · " : ""}
+                  {broker.city || ""}
+                </p>
+              )}
             </div>
           </div>
 

@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     let profileData = {
       full_name: rawName || (isEmail ? cleanTarget.split("@")[0] : "Real Estate Broker"),
       city: city || "India",
-      company_name: company_name || "Exclusive Advisory",
+      company_name: company_name ? company_name.trim() : "",
       slug: generatedSlug,
       email: isEmail ? cleanTarget : undefined,
       phone_number: isEmail ? undefined : "+" + cleanTarget,
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           profileData = {
             full_name: finalName,
             city: city || existingProfile.city || profileData.city,
-            company_name: company_name || existingProfile.company_name || profileData.company_name,
+            company_name: company_name !== undefined ? company_name.trim() : (existingProfile.company_name || ""),
             slug: finalSlug,
             email: existingProfile.email || profileData.email,
             phone_number: existingProfile.phone_number || profileData.phone_number,

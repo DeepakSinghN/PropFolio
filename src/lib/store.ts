@@ -6,7 +6,7 @@ export const DEFAULT_BROKER: Profile = {
   full_name: "Real Estate Broker",
   slug: "broker",
   phone_number: "",
-  company_name: "Real Estate Advisory",
+  company_name: "",
   city: "India",
   avatar_url: "/brand-logo.png",
   plan_tier: "solo_pro",
