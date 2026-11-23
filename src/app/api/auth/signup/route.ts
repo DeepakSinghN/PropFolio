@@ -85,24 +85,34 @@ export async function POST(req: NextRequest) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
 
-        const authEmail = isEmail
-          ? trimmedTarget.toLowerCase()
-          : `${safePhone.replace(/\D/g, "")}@propertysnaps.in`;
-
         if (supabaseServiceKey) {
           // Admin API: creates 100% verified active user (no email confirmation block!)
           const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
-          const { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser({
-            email: authEmail,
-            password,
-            email_confirm: true,
-            user_metadata: {
-              full_name: full_name || "Real Estate Broker",
-              city: city || "India",
-              company_name: company_name || "Exclusive Advisory",
-              phone_number: safePhone,
-            },
-          });
+
+          const userCreatePayload: any = isEmail
+            ? {
+                email: trimmedTarget.toLowerCase(),
+                password,
+                email_confirm: true,
+                user_metadata: {
+                  full_name: full_name || "Real Estate Broker",
+                  city: city || "India",
+                  company_name: company_name || "Exclusive Advisory",
+                },
+              }
+            : {
+                phone: safePhone,
+                password,
+                phone_confirm: true,
+                user_metadata: {
+                  full_name: full_name || "Real Estate Broker",
+                  city: city || "India",
+                  company_name: company_name || "Exclusive Advisory",
+                  phone_number: safePhone,
+                },
+              };
+
+          const { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser(userCreatePayload);
 
           if (adminUser?.user) {
             supaUserId = adminUser.user.id;
@@ -123,7 +133,8 @@ export async function POST(req: NextRequest) {
               user_id: supaUserId,
               full_name: full_name || "Real Estate Broker",
               slug: brokerSlug,
-              phone_number: safePhone,
+              phone_number: isEmail ? undefined : safePhone,
+              email: isEmail ? trimmedTarget.toLowerCase() : undefined,
               company_name: company_name || "Exclusive Advisory",
               city: city || "India",
               plan_tier: "solo_pro",

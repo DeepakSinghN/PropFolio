@@ -30,8 +30,7 @@ export async function POST(req: NextRequest) {
     const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
 
     const cleanDigits = trimmedTarget.replace(/\D/g, "");
-    const safePhone = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
-    const authEmail = isEmail ? trimmedTarget.toLowerCase() : `${safePhone}@propertysnaps.in`;
+    const safePhone = cleanDigits.length === 10 ? `+91${cleanDigits}` : trimmedTarget.startsWith("+") ? trimmedTarget : `+${cleanDigits}`;
 
     // 1. Try Supabase Auth
     if (supabaseUrl && (supabaseAnonKey || supabaseServiceKey)) {
@@ -40,10 +39,38 @@ export async function POST(req: NextRequest) {
         const clientKey = supabaseAnonKey || supabaseServiceKey!;
         const supabase = createClient(supabaseUrl, clientKey);
 
-        const { data: supaAuth, error: supaErr } = await supabase.auth.signInWithPassword({
-          email: authEmail,
-          password,
-        });
+        let supaAuth: any = null;
+        let supaErr: any = null;
+
+        if (isEmail) {
+          const res = await supabase.auth.signInWithPassword({
+            email: trimmedTarget.toLowerCase(),
+            password,
+          });
+          supaAuth = res.data;
+          supaErr = res.error;
+        } else {
+          // A. Try official Phone authentication
+          const phoneRes = await supabase.auth.signInWithPassword({
+            phone: safePhone,
+            password,
+          });
+          if (phoneRes.data?.user) {
+            supaAuth = phoneRes.data;
+          } else {
+            // B. Fallback to legacy dummy email for accounts created earlier
+            const legacyPhoneDigits = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+            const legacyRes = await supabase.auth.signInWithPassword({
+              email: `${legacyPhoneDigits}@propertysnaps.in`,
+              password,
+            });
+            if (legacyRes.data?.user) {
+              supaAuth = legacyRes.data;
+            } else {
+              supaErr = phoneRes.error || legacyRes.error;
+            }
+          }
+        }
 
         if (supaAuth?.user) {
           // Admin or client to query public.profiles
