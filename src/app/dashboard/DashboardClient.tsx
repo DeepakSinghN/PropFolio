@@ -41,6 +41,33 @@ const FALLBACK_PHOTO = "https://images.unsplash.com/photo-1600585154340-be6161a5
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+function getBrokerSubdomainUrl(slug?: string, path = ""): string {
+  const cleanSlug = slug || "broker";
+  const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
+  if (typeof window === "undefined") {
+    return `https://${cleanSlug}.propertysnaps.in${cleanPath}`;
+  }
+  const host = window.location.host;
+  const protocol = window.location.protocol;
+  if (host.includes("localhost")) {
+    return `${protocol}//${cleanSlug}.localhost:3000${cleanPath}`;
+  }
+  return `https://${cleanSlug}.propertysnaps.in${cleanPath}`;
+}
+
+function getBrokerDisplayUrl(slug?: string, path = ""): string {
+  const cleanSlug = slug || "broker";
+  const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
+  if (typeof window === "undefined") {
+    return `${cleanSlug}.propertysnaps.in${cleanPath}`;
+  }
+  const host = window.location.host;
+  if (host.includes("localhost")) {
+    return `${cleanSlug}.localhost:3000${cleanPath}`;
+  }
+  return `${cleanSlug}.propertysnaps.in${cleanPath}`;
+}
+
 interface DashboardClientProps {
   initialBroker: any;
   initialListings: Listing[];
@@ -189,7 +216,7 @@ export default function DashboardClient({
 
   function copyLink(slug: string) {
     if (typeof window === "undefined") return;
-    const fullUrl = `${window.location.origin}/${broker.slug}/${slug}`;
+    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/l/${slug}`);
     navigator.clipboard.writeText(fullUrl);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
@@ -197,7 +224,7 @@ export default function DashboardClient({
 
   function copyCollectionLink(slug: string) {
     if (typeof window === "undefined") return;
-    const fullUrl = `${window.location.origin}/${broker.slug}/c/${slug}`;
+    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/c/${slug}`);
     navigator.clipboard.writeText(fullUrl);
     setCopiedCollectionSlug(slug);
     setTimeout(() => setCopiedCollectionSlug(null), 2000);
@@ -424,15 +451,16 @@ export default function DashboardClient({
               {broker.company_name ? `${broker.company_name} · ` : ""}Ready to close some deals?
             </p>
           </div>
-          <Link
-            href={`/${broker.slug}`}
+          <a
+            href={getBrokerSubdomainUrl(broker.slug)}
             target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:border-[#1c5436] hover:text-[#1c5436] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 transition"
           >
             <Globe className="h-3.5 w-3.5 text-emerald-600" />
             <span>View site</span>
             <ExternalLink className="h-3 w-3 text-slate-400" />
-          </Link>
+          </a>
         </div>
 
         {/* ── PLAN / LISTINGS REMAINING ALERT BAR (Plan-Aware) ── */}
@@ -534,19 +562,18 @@ export default function DashboardClient({
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-slate-400 text-xs">🔒</span>
                 <span className="font-mono text-xs sm:text-sm font-semibold truncate text-[#0a1128] dark:text-white">
-                  {typeof window !== "undefined"
-                    ? `${window.location.host}/${broker.slug}`
-                    : `propertysnaps.co/${broker.slug}`}
+                  {getBrokerDisplayUrl(broker.slug)}
                 </span>
               </div>
-              <Link
-                href={`/${broker.slug}`}
+              <a
+                href={getBrokerSubdomainUrl(broker.slug)}
                 target="_blank"
+                rel="noreferrer"
                 className="shrink-0 p-1 text-slate-400 hover:text-[#1c5436] dark:hover:text-emerald-400 transition"
                 title="Open Website"
               >
                 <ExternalLink className="h-4 w-4" />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -555,11 +582,9 @@ export default function DashboardClient({
             <button
               type="button"
               onClick={() => {
-                if (typeof window !== "undefined") {
-                  navigator.clipboard.writeText(`${window.location.origin}/${broker.slug}`);
-                  setCopiedProfileLink(true);
-                  setTimeout(() => setCopiedProfileLink(false), 2200);
-                }
+                navigator.clipboard.writeText(getBrokerSubdomainUrl(broker.slug));
+                setCopiedProfileLink(true);
+                setTimeout(() => setCopiedProfileLink(false), 2200);
               }}
               className="flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-bold text-slate-800 shadow-xs hover:bg-slate-100 transition cursor-pointer active:scale-95"
             >
@@ -576,13 +601,15 @@ export default function DashboardClient({
               )}
             </button>
 
-            <Link
-              href={`/${broker.slug}`}
+            <a
+              href={getBrokerSubdomainUrl(broker.slug)}
+              target="_blank"
+              rel="noreferrer"
               className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm hover:bg-white/20 transition cursor-pointer"
             >
               <QrCode className="h-3.5 w-3.5 text-emerald-200" />
               <span>QR code & Profile</span>
-            </Link>
+            </a>
 
             <button
               type="button"
@@ -736,7 +763,7 @@ export default function DashboardClient({
             ) : (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
                 {collections.map((col) => {
-                  const targetUrl = `/${broker.slug || DEMO_BROKER.slug}/c/${col.slug}`;
+                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/c/${col.slug}`);
                   const isCopied = copiedCollectionSlug === col.slug;
                   const samplePhotos = col.sample_photos && col.sample_photos.length > 0 
                     ? col.sample_photos 
@@ -809,7 +836,7 @@ export default function DashboardClient({
                         <div className="flex items-center gap-1.5">
                           <a
                             href={`https://wa.me/?text=${encodeURIComponent(
-                              `*${col.title}*\nI have put together a custom property shortlist for you.\n\nView Curated Collection:\n${typeof window !== "undefined" ? window.location.origin : ""}${targetUrl}`
+                              `*${col.title}*\nI have put together a custom property shortlist for you.\n\nView Curated Collection:\n${targetUrl}`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
@@ -819,14 +846,15 @@ export default function DashboardClient({
                             <MessageCircle className="h-4 w-4 fill-white" />
                           </a>
 
-                          <Link
+                          <a
                             href={targetUrl}
                             target="_blank"
+                            rel="noreferrer"
                             className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#862e9f]/40 transition hover:bg-[#16234b] dark:bg-[#862e9f] dark:text-[#0a1128]"
                           >
                             <span>View Live</span>
                             <ArrowUpRight className="h-3.5 w-3.5" />
-                          </Link>
+                          </a>
 
                           <button
                             type="button"
@@ -931,7 +959,7 @@ export default function DashboardClient({
                 {filteredListings.map((item) => {
                   const rawCover = item.photos?.[0]?.photo_url;
                   const coverPhoto = (rawCover && !rawCover.startsWith("blob:")) ? rawCover : FALLBACK_PHOTO;
-                  const targetUrl = `/${broker.slug || DEMO_BROKER.slug}/${item.slug}`;
+                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/l/${item.slug}`);
                   const isSold = item.status === "sold";
 
                   return (
@@ -1029,14 +1057,15 @@ export default function DashboardClient({
                           )}
                         </button>
 
-                        <Link
+                        <a
                           href={targetUrl}
                           target="_blank"
+                          rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-xl bg-[#0a1128] px-3 py-1.5 text-xs font-semibold text-white shadow-sm border border-[#862e9f]/40 transition hover:bg-[#16234b] active:scale-95 dark:bg-[#862e9f] dark:text-[#0a1128]"
                         >
                           <span>Open Live</span>
                           <ArrowUpRight className="h-3.5 w-3.5" />
-                        </Link>
+                        </a>
 
                         {/* Dropdown Options Button */}
                         <button
@@ -1369,12 +1398,9 @@ export default function DashboardClient({
                 {/* Public Link / Slug */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Your Website Link (Subdomain Slug) *
+                    Your Subdomain Link *
                   </label>
                   <div className="mt-1 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 focus-within:border-[#00974e] focus-within:bg-white dark:border-slate-700 dark:bg-slate-900">
-                    <span className="text-xs font-mono text-slate-400 select-none">
-                      propertysnaps.in/
-                    </span>
                     <input
                       type="text"
                       required
@@ -1387,11 +1413,14 @@ export default function DashboardClient({
                         )
                       }
                       placeholder="deepak-singh"
-                      className="ml-0.5 w-full bg-transparent text-xs font-mono font-bold text-[#0a1128] outline-none dark:text-white"
+                      className="w-full bg-transparent text-xs font-mono font-bold text-[#0a1128] outline-none dark:text-white"
                     />
+                    <span className="text-xs font-mono text-slate-400 select-none ml-1">
+                      .propertysnaps.in
+                    </span>
                   </div>
                   <p className="mt-1 text-[10px] text-slate-400">
-                    All your property links will look like: propertysnaps.in/{editSlug || "your-name"}/property-name
+                    Your live link: <strong>{editSlug || "your-name"}.propertysnaps.in</strong>
                   </p>
                 </div>
 

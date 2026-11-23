@@ -247,14 +247,19 @@ async function executeCreateListing(
     "localhost:3000";
   const proto =
     req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const liveUrl = `${proto}://${host}/${senderBroker.slug}/${parsedData.slug}`;
+  const isLocal = host.includes("localhost");
+  const liveUrl = isLocal
+    ? `http://${senderBroker.slug}.localhost:3000/l/${parsedData.slug}`
+    : `https://${senderBroker.slug}.propertysnaps.in/l/${parsedData.slug}`;
   const brochureUrl = `${liveUrl}/brochure`;
 
   const photoNotice = includePhotos
     ? `📸 ${photosList.length} photos included`
     : `ℹ️ Listing created without photos`;
 
-  const dashboardUrl = `${proto}://${host}/dashboard`;
+  const dashboardUrl = isLocal
+    ? `http://localhost:3000/dashboard`
+    : `https://www.propertysnaps.in/dashboard`;
 
   const replyText = `🎉 *Aapki Property Website Taiyar Hai!*\n\n📍 *${parsedData.title}*\n💰 *Keemat:* ${parsedData.display_price}\n${photoNotice}\n\n👉 *Live Listing Link:* ${liveUrl}\n📄 *PDF Brochure Link:* ${brochureUrl}\n\n📊 *Apna Broker Dashboard:* ${dashboardUrl}\n\nIs link ko apne buyers aur WhatsApp groups me share karein!`;
 

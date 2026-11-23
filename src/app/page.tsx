@@ -231,7 +231,7 @@ export default function HomePage() {
 
                 <div className="mt-3.5 space-y-2 text-left">
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-[11px] font-mono text-slate-600 dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-400 truncate">
-                    propertysnaps.in/yourname/3-bhk-luxury-apartment
+                    yourname.propertysnaps.in/l/3-bhk-luxury-apartment
                   </div>
                   <div className="flex items-center gap-2 pt-1">
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-[#00974e] dark:bg-emerald-950/60 dark:text-emerald-300">

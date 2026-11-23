@@ -117,7 +117,7 @@ export default function PricingClient() {
       planKey: billingCycle === "yearly" ? "pro_yearly" : "pro_monthly",
       features: [
         "25 Active Property Listings",
-        "Custom broker subdomain (propertysnaps.in/yourname)",
+        "Custom broker subdomain (yourname.propertysnaps.in)",
         "1-Click Branded PDF Brochure Generator",
         "Remove Property Snaps watermark",
         "Instant WhatsApp lead notification alerts",
@@ -164,7 +164,7 @@ export default function PricingClient() {
     { name: "Listing Validity", free: "Unlimited", payg: "60 Days / listing", pro: "Unlimited (Active)", agency: "Unlimited (Active)" },
     { name: "WhatsApp AI Bot Generation", free: "Standard", payg: "Standard (~45s)", pro: "Priority (~30s)", agency: "Instant Priority" },
     { name: "Downloadable PDF Brochures", free: "—", payg: "✓ 1-Click Printable", pro: "✓ 1-Click Printable", agency: "✓ Custom Agency PDF" },
-    { name: "Custom Broker Subdomain", free: "—", payg: "—", pro: "✓ propertysnaps.in/you", agency: "✓ Custom Domain" },
+    { name: "Custom Broker Subdomain", free: "—", payg: "—", pro: "✓ you.propertysnaps.in", agency: "✓ Custom Domain" },
     { name: "Remove Property Snaps Watermark", free: "—", payg: "—", pro: "✓ Included", agency: "✓ Fully White-labeled" },
     { name: "Team WhatsApp Numbers", free: "1 Number", payg: "1 Number", pro: "1 Number", agency: "Up to 5 Agents" },
     { name: "Lead Inquiry Alerts", free: "Direct WhatsApp", payg: "Direct WhatsApp", pro: "Direct WhatsApp + Counter", agency: "Centralized Lead CRM" },

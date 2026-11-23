@@ -63,8 +63,10 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
 
   const liveUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/${broker.slug}/${listing.slug}`
-      : `https://${broker.slug}.propertysnaps.in/${listing.slug}`;
+      ? (window.location.host.includes("localhost")
+          ? `http://${broker.slug}.localhost:3000/l/${listing.slug}`
+          : `https://${broker.slug}.propertysnaps.in/l/${listing.slug}`)
+      : `https://${broker.slug}.propertysnaps.in/l/${listing.slug}`;
 
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
     liveUrl

@@ -801,15 +801,16 @@ export function ListingEditorContent() {
     }
 
     confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-    const url = `/${currentBroker.slug || DEMO_BROKER.slug}/${slug}`;
-    setPublishedUrl(url);
+    const liveSubdomainUrl = (typeof window !== "undefined" && window.location.host.includes("localhost"))
+      ? `http://${currentBroker.slug || "broker"}.localhost:3000/l/${slug}`
+      : `https://${currentBroker.slug || "broker"}.propertysnaps.in/l/${slug}`;
+    setPublishedUrl(liveSubdomainUrl);
     setStep(3);
   }
 
   function handleCopy() {
     if (!publishedUrl) return;
-    const fullUrl = `${window.location.origin}${publishedUrl}`;
-    navigator.clipboard.writeText(fullUrl);
+    navigator.clipboard.writeText(publishedUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -2348,7 +2349,7 @@ export function ListingEditorContent() {
 
   /* ─────────────────────────────── STEP 3: DONE ──────────────────────────── */
   const renderStep3Done = () => {
-    const fullUrl = publishedUrl ? `${typeof window !== "undefined" ? window.location.origin : ""}${publishedUrl}` : "";
+    const fullUrl = publishedUrl || "";
     const waText = `*${headline || "New Property Listing"}*\nPrice: ${displayPrice || "On Request"}\nLocation: ${locationLocality}, ${locationCity}\n\nView Property Details:\n${fullUrl}`;
     const waLink = `https://wa.me/?text=${encodeURIComponent(waText)}`;
 
@@ -2406,14 +2407,15 @@ export function ListingEditorContent() {
               <MessageCircle className="h-4 w-4" />
               <span>Share on WhatsApp</span>
             </a>
-            <Link
+            <a
               href={publishedUrl || "/dashboard"}
               target="_blank"
+              rel="noreferrer"
               className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-[#0a1128] shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
             >
               <Eye className="h-4 w-4" />
               <span>View Live Listing</span>
-            </Link>
+            </a>
           </div>
         </div>
 

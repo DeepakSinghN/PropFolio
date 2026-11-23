@@ -47,7 +47,11 @@ export default function BrokerProfileClient({
   // Set current URL and fetch fresh user / listings
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setCurrentUrl(`${window.location.origin}/${slug}`);
+      const isLocal = window.location.host.includes("localhost");
+      const subUrl = isLocal
+        ? `http://${slug}.localhost:3000`
+        : `https://${slug}.propertysnaps.in`;
+      setCurrentUrl(subUrl);
 
       // Try reading local storage listings if present
       try {

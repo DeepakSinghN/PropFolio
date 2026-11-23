@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
                 <strong>WhatsApp Information:</strong> When you message our WhatsApp bot, we receive your phone number (e.g., +91...), message timestamp, text descriptions of properties, and any photos you upload.
               </li>
               <li>
-                <strong>Broker Account Information:</strong> If you sign in to our web portal, we associate your phone number with your profile, full name, agency name, city, and preferred subdomain slug (e.g. <code>propertysnaps.in/ramesh</code>).
+                <strong>Broker Account Information:</strong> If you sign in to our web portal, we associate your phone number with your profile, full name, agency name, city, and preferred subdomain slug (e.g. <code>ramesh.propertysnaps.in</code>).
               </li>
               <li>
                 <strong>Property Listing Data:</strong> Asking prices, carpet area, property type, amenities, location highlights, and photographs that you explicitly submit to generate public listing links.
