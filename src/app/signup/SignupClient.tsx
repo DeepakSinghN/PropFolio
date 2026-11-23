@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,8 @@ import {
   MessageCircle,
   KeyRound,
   Check,
+  X,
+  Globe,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -34,11 +36,64 @@ export default function SignupClient() {
 
   // Form Fields
   const [fullName, setFullName] = useState("");
+  const [subdomain, setSubdomain] = useState("");
+  const [isManualSlug, setIsManualSlug] = useState(false);
+  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [slugReason, setSlugReason] = useState("");
+  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState("");
   const [companyName, setCompanyName] = useState("");
+
+  const handleFullNameChange = (val: string) => {
+    setFullName(val);
+    if (!isManualSlug) {
+      const autoSlug = val
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-+|-+$)/g, "");
+      setSubdomain(autoSlug);
+    }
+  };
+
+  useEffect(() => {
+    const clean = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "");
+    if (!clean) {
+      setSlugStatus("idle");
+      setSlugReason("");
+      setSlugSuggestions([]);
+      return;
+    }
+    if (clean.length < 3) {
+      setSlugStatus("invalid");
+      setSlugReason("Subdomain must be at least 3 characters");
+      setSlugSuggestions([]);
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-slug?slug=${encodeURIComponent(clean)}`);
+        const data = await res.json();
+        if (data.available) {
+          setSlugStatus("available");
+          setSlugReason("Available!");
+          setSlugSuggestions([]);
+        } else {
+          setSlugStatus("taken");
+          setSlugReason(data.reason || `'${clean}' is already taken`);
+          setSlugSuggestions(data.suggestions || []);
+        }
+      } catch {
+        setSlugStatus("idle");
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [subdomain]);
 
   // OTP Fields
   const [otpCode, setOtpCode] = useState("");
@@ -70,6 +125,11 @@ export default function SignupClient() {
 
     if (!fullName.trim()) {
       setErrorMsg("Please enter your full name");
+      return;
+    }
+
+    if (!subdomain.trim() || slugStatus === "taken" || slugStatus === "invalid" || slugStatus === "checking") {
+      setErrorMsg("Please choose an available subdomain before proceeding");
       return;
     }
 
@@ -153,6 +213,7 @@ export default function SignupClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           full_name: fullName.trim(),
+          slug: subdomain.trim().toLowerCase(),
           identifier: cleanPhoneDigits,
           password,
           otp_code: otpCode.trim(),
@@ -227,7 +288,7 @@ export default function SignupClient() {
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Full Name / Contact Person
+                  Full Name / Contact Person <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative mt-1.5 flex items-center">
                   <User className="absolute left-3.5 h-4 w-4 text-slate-400" />
@@ -235,12 +296,106 @@ export default function SignupClient() {
                     type="text"
                     required
                     autoFocus
-                    placeholder="e.g. Ramesh Shah"
+                    placeholder="e.g. Deepak Sharma"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => handleFullNameChange(e.target.value)}
                     className="w-full rounded-xl border border-slate-200/90 bg-slate-50/60 py-2.5 sm:py-3 pl-10 pr-4 text-sm font-semibold text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-[#862e9f] focus:bg-white focus:ring-2 focus:ring-[#862e9f]/15 dark:border-slate-800 dark:bg-slate-900/70 dark:text-white"
                   />
                 </div>
+              </div>
+
+              {/* Subdomain / Website Link with Realtime Availability Checker */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Your Personal Website Subdomain <span className="text-rose-500">*</span>
+                  </label>
+                  {slugStatus === "checking" && (
+                    <span className="text-[11px] text-amber-500 flex items-center gap-1 font-medium">
+                      <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Checking...
+                    </span>
+                  )}
+                  {slugStatus === "available" && (
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Available
+                    </span>
+                  )}
+                  {slugStatus === "taken" && (
+                    <span className="text-[11px] font-bold text-rose-500 flex items-center gap-1">
+                      <X className="h-3 w-3" /> Taken
+                    </span>
+                  )}
+                </div>
+
+                <div className={`relative mt-1.5 flex items-center rounded-xl border transition ${
+                  slugStatus === "available"
+                    ? "border-emerald-500/80 bg-emerald-50/30 dark:bg-emerald-950/20"
+                    : slugStatus === "taken" || slugStatus === "invalid"
+                    ? "border-rose-500/80 bg-rose-50/30 dark:bg-rose-950/20"
+                    : "border-slate-200/90 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/70"
+                }`}>
+                  <Globe className="absolute left-3.5 h-4 w-4 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="deepak-sharma"
+                    value={subdomain}
+                    onChange={(e) => {
+                      setIsManualSlug(true);
+                      setSubdomain(
+                        e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]+/g, "")
+                      );
+                    }}
+                    className="w-full bg-transparent py-2.5 sm:py-3 pl-10 pr-2 font-mono text-sm font-bold text-slate-900 placeholder:text-slate-400 outline-none dark:text-white"
+                  />
+                  <span className="pr-3 text-xs font-mono font-medium text-slate-400 select-none shrink-0">
+                    .propertysnaps.in
+                  </span>
+                </div>
+
+                {/* Subdomain Helper & Suggestions */}
+                {slugStatus === "available" && (
+                  <p className="mt-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    ✓ Your link will be: <strong>{subdomain}.propertysnaps.in</strong>
+                  </p>
+                )}
+                {slugStatus === "taken" && (
+                  <div className="mt-1.5 space-y-1">
+                    <p className="text-[11px] font-medium text-rose-500">
+                      ✕ {slugReason}
+                    </p>
+                    {slugSuggestions.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                        <span className="text-[10px] text-slate-400">Suggestions:</span>
+                        {slugSuggestions.map((sug) => (
+                          <button
+                            key={sug}
+                            type="button"
+                            onClick={() => {
+                              setIsManualSlug(true);
+                              setSubdomain(sug);
+                            }}
+                            className="rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer"
+                          >
+                            +{sug}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {slugStatus === "invalid" && (
+                  <p className="mt-1 text-[11px] text-rose-500 font-medium">
+                    ✕ {slugReason}
+                  </p>
+                )}
+                {slugStatus === "idle" && (
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Your link: <strong>{subdomain || "yourname"}.propertysnaps.in</strong>
+                  </p>
+                )}
               </div>
 
               {/* WhatsApp Mobile Number */}
@@ -333,7 +488,7 @@ export default function SignupClient() {
               {/* CTA Button */}
               <button
                 type="submit"
-                disabled={loading || !fullName.trim() || !isValidPhone || password.length < 6}
+                disabled={loading || !fullName.trim() || !subdomain.trim() || slugStatus === "taken" || slugStatus === "invalid" || slugStatus === "checking" || !isValidPhone || password.length < 6}
                 className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#00974e]/25 transition-all hover:bg-[#008042] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

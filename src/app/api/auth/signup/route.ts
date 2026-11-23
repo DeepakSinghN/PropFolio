@@ -4,7 +4,7 @@ import { saveUserAccount, createPhoneSession, verifyOtp, verifyUserPassword } fr
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { full_name, identifier, city, company_name, password, otp_code, otp_token } = body;
+    const { full_name, identifier, city, company_name, password, otp_code, otp_token, slug } = body;
 
     if (!identifier || !password) {
       return NextResponse.json(
@@ -66,11 +66,12 @@ export async function POST(req: NextRequest) {
     let supaUserId: string | undefined;
     let supaProfileId: string | undefined;
 
-    const baseName = full_name
+    const userChosenSlug = slug ? slug.toString().toLowerCase().trim().replace(/[^a-z0-9-]+/g, "") : "";
+    const baseName = userChosenSlug || (full_name
       ? full_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       : isEmail
         ? trimmedTarget.split("@")[0].replace(/[^a-z0-9]+/g, "-")
-        : "broker";
+        : "broker");
 
     const rawBase = baseName.replace(/^-|-$/g, "") || "broker";
     let brokerSlug = rawBase;
