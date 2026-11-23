@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -14,11 +14,37 @@ import {
   HelpCircle,
   CreditCard,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
+
+// ─── Razorpay window type ──────────────────────────────────────────────────
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}
+
+// ─── Load Razorpay script once ────────────────────────────────────────────
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
 
 export default function PricingClient() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [activeTab, setActiveTab] = useState<string>("pro");
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
 
   const plans = [
     {
@@ -32,6 +58,7 @@ export default function PricingClient() {
       ctaText: "Start Free on WhatsApp",
       ctaHref: "https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Team%2C%20I%20want%20to%20try%20the%20free%20listing%20creator.",
       highlight: false,
+      payable: false,
       features: [
         "1 Active Property Listing",
         "Instant WhatsApp Bot generator",
@@ -56,9 +83,11 @@ export default function PricingClient() {
       monthlyPrice: 79,
       yearlyPrice: 79,
       period: "/ listing",
-      ctaText: "Create Listing (₹79)",
-      ctaHref: "/dashboard/listings/new",
+      ctaText: "Pay ₹79 & Publish",
+      ctaHref: null,
       highlight: false,
+      payable: true,
+      planKey: "pay_per_listing",
       features: [
         "₹79 per single live listing",
         "Active online for full 60 days",
@@ -79,11 +108,13 @@ export default function PricingClient() {
       badge: "Most Popular for Brokers",
       description: "Designed for active property consultants who want to close deals faster and look 10x more professional.",
       monthlyPrice: 499,
-      yearlyPrice: 3999, // ~333/mo
+      yearlyPrice: 3999,
       period: billingCycle === "yearly" ? "/year" : "/month",
-      ctaText: "Get Solo Pro",
-      ctaHref: "/dashboard",
+      ctaText: billingCycle === "yearly" ? "Get Solo Pro (₹3,999/yr)" : "Get Solo Pro (₹499/mo)",
+      ctaHref: null,
       highlight: true,
+      payable: true,
+      planKey: billingCycle === "yearly" ? "pro_yearly" : "pro_monthly",
       features: [
         "25 Active Property Listings",
         "Custom broker subdomain (propertysnaps.in/yourname)",
@@ -106,11 +137,12 @@ export default function PricingClient() {
       badge: "For Real Estate Firms",
       description: "For agencies and developer sales teams managing high listing volumes with multiple agents.",
       monthlyPrice: 1499,
-      yearlyPrice: 11999, // ~999/mo
+      yearlyPrice: 11999,
       period: billingCycle === "yearly" ? "/year" : "/month",
-      ctaText: "Upgrade to Agency",
+      ctaText: "Contact for Agency Plan",
       ctaHref: "/contact",
       highlight: false,
+      payable: false,
       features: [
         "Unlimited Property Listings",
         "Up to 5 Broker WhatsApp phone numbers",
@@ -139,6 +171,129 @@ export default function PricingClient() {
     { name: "HD Photos Per Listing", free: "Up to 10 Photos", payg: "Up to 15 Photos", pro: "Up to 25 Photos", agency: "Unlimited Photos" },
     { name: "Support Channel", free: "Community WhatsApp", payg: "WhatsApp Support", pro: "Priority WhatsApp Support", agency: "Dedicated Account Manager" },
   ];
+
+  // ─── Payment handler ──────────────────────────────────────────────────────
+  const handlePayment = useCallback(async (planKey: string, planName: string) => {
+    setLoadingPlan(planKey);
+
+    try {
+      // 1. Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        alert("Razorpay load nahi hua. Internet check karo aur dobara try karo.");
+        setLoadingPlan(null);
+        return;
+      }
+
+      // 2. Create order server-side
+      const orderRes = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        if (orderRes.status === 401) {
+          // Not logged in — redirect to login
+          window.location.href = `/login?redirect=/pricing`;
+          return;
+        }
+        alert(orderData.error || "Order create nahi hua. Dobara try karo.");
+        setLoadingPlan(null);
+        return;
+      }
+
+      // 3. Open Razorpay checkout popup
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Property Snaps",
+        description: planName,
+        order_id: orderData.orderId,
+        prefill: {
+          contact: orderData.userPhone,
+          name: orderData.userName,
+        },
+        theme: {
+          color: "#862e9f",
+        },
+        modal: {
+          ondismiss: () => {
+            setLoadingPlan(null);
+          },
+        },
+        // ── Payment success handler ───────────────────────────────────────
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            // 4. Verify signature server-side — plan upgrades ONLY here
+            const verifyRes = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                planKey,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyRes.ok && verifyData.success) {
+              setPaymentSuccess(planName);
+              setLoadingPlan(null);
+              // Redirect to dashboard after 2s
+              setTimeout(() => {
+                window.location.href = "/dashboard";
+              }, 2000);
+            } else {
+              alert(verifyData.error || "Payment verify nahi hua. Support se contact karo.");
+              setLoadingPlan(null);
+            }
+          } catch {
+            alert("Verification mein error aaya. Support ko payment ID bhaijo.");
+            setLoadingPlan(null);
+          }
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("Payment shuru karne mein error aaya. Dobara try karo.");
+      setLoadingPlan(null);
+    }
+  }, []);
+
+  // ─── Payment success banner ───────────────────────────────────────────────
+  if (paymentSuccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa] dark:bg-[#070b14]">
+        <div className="text-center px-6">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#00974e]/10 mb-6">
+            <CheckCircle2 className="h-10 w-10 text-[#00974e]" />
+          </div>
+          <h1 className="text-2xl font-extrabold text-[#0a1128] dark:text-white mb-2">
+            Payment Successful! 🎉
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 text-sm mb-1">
+            <strong>{paymentSuccess}</strong> plan activate ho gaya.
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            Dashboard pe redirect ho raha hai...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-[#0a1128] transition-colors dark:bg-[#070b14] dark:text-slate-100">
@@ -214,7 +369,7 @@ export default function PricingClient() {
                 >
                   {p.highlight && (
                     <span className="absolute -top-2.5 rounded-full bg-[#862e9f] px-2 py-0.5 text-[9px] font-extrabold uppercase text-white shadow-xs">
-                      ★ Popular
+                      ☆ Popular
                     </span>
                   )}
                   <span className={`text-xs font-bold leading-tight ${isActive ? "text-[#862e9f] dark:text-[#a845c4]" : ""}`}>
@@ -257,6 +412,7 @@ export default function PricingClient() {
                   : "Billed monthly, cancel anytime";
 
             const isSelectedMobile = activeTab === plan.id;
+            const isLoading = loadingPlan === (plan as any).planKey;
 
             return (
               <div
@@ -269,7 +425,7 @@ export default function PricingClient() {
               >
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-[#862e9f] bg-[#0a1128] px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-md">
-                    ★ {plan.badge}
+                    ☆ {plan.badge}
                   </div>
                 )}
 
@@ -304,18 +460,39 @@ export default function PricingClient() {
 
                   {/* CTA Button */}
                   <div className="mt-5">
-                    <Link
-                      href={plan.ctaHref}
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-95 ${plan.highlight
-                        ? "bg-[#00974e] text-white shadow-lg shadow-[#00974e]/25 hover:bg-[#008042]"
-                        : isPayPerListing
-                          ? "bg-[#862e9f] text-white shadow-md shadow-[#862e9f]/20 hover:bg-[#722687]"
-                          : "border border-slate-200 bg-slate-50 text-[#0a1128] hover:bg-slate-100 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
-                        }`}
-                    >
-                      <span>{plan.ctaText}</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
+                    {plan.payable && (plan as any).planKey ? (
+                      <button
+                        type="button"
+                        disabled={!!loadingPlan}
+                        onClick={() => handlePayment((plan as any).planKey, plan.name)}
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed ${plan.highlight
+                          ? "bg-[#00974e] text-white shadow-lg shadow-[#00974e]/25 hover:bg-[#008042]"
+                          : "bg-[#862e9f] text-white shadow-md shadow-[#862e9f]/20 hover:bg-[#722687]"
+                          }`}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span>Processing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="h-3.5 w-3.5" />
+                            <span>{plan.ctaText}</span>
+                          </>
+                        )}
+                      </button>
+                    ) : plan.ctaHref ? (
+                      <Link
+                        href={plan.ctaHref}
+                        target={plan.ctaHref.startsWith("http") ? "_blank" : undefined}
+                        rel={plan.ctaHref.startsWith("http") ? "noopener noreferrer" : undefined}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold transition-all active:scale-95 border border-slate-200 bg-slate-50 text-[#0a1128] hover:bg-slate-100 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+                      >
+                        <span>{plan.ctaText}</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    ) : null}
                   </div>
 
                   {/* Features List */}
@@ -350,11 +527,29 @@ export default function PricingClient() {
                     ? "No credit card required"
                     : plan.id === "pay_per_listing"
                       ? "Instant access upon payment"
-                      : "7-day money-back guarantee"}
+                      : plan.id === "agency"
+                        ? "Custom pricing available"
+                        : "7-day money-back guarantee"}
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Security Trust Badge */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="h-4 w-4 text-[#00974e]" />
+            Razorpay Secured Checkout
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Zap className="h-4 w-4 text-[#862e9f]" />
+            UPI · Cards · Net Banking · Wallets
+          </span>
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-[#00974e]" />
+            7-day money-back guarantee
+          </span>
         </div>
 
         {/* Feature Comparison Table */}
@@ -423,7 +618,7 @@ export default function PricingClient() {
                 How does the Pay Per Listing (₹79) plan work?
               </h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                If you only have 1 or 2 occasional listings to close, you don’t need an ongoing monthly subscription. Pay ₹79 once per listing to get your dedicated web page, 1-click printable PDF brochure, and direct WhatsApp buyer inquiries active for a full 60 days.
+                If you only have 1 or 2 occasional listings to close, you don&apos;t need an ongoing monthly subscription. Pay ₹79 once per listing to get your dedicated web page, 1-click printable PDF brochure, and direct WhatsApp buyer inquiries active for a full 60 days.
               </p>
             </div>
 
@@ -441,7 +636,7 @@ export default function PricingClient() {
                 What happens when a property is sold?
               </h3>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                You can mark the listing as "Sold" or "Archived" from your dashboard. Once archived, that slot frees up immediately so you can create a new property listing without hitting your plan limit.
+                You can mark the listing as &quot;Sold&quot; or &quot;Archived&quot; from your dashboard. Once archived, that slot frees up immediately so you can create a new property listing without hitting your plan limit.
               </p>
             </div>
 
@@ -491,7 +686,7 @@ export default function PricingClient() {
               href="/dashboard"
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-6 py-3.5 text-xs font-bold text-slate-200 transition hover:bg-slate-800 hover:text-white sm:w-auto"
             >
-              <span>Explore Dashboard Demo</span>
+              <span>Explore Dashboard</span>
               <ArrowRight className="h-4 w-4 text-[#862e9f]" />
             </Link>
           </div>
@@ -515,4 +710,3 @@ export default function PricingClient() {
     </div>
   );
 }
-

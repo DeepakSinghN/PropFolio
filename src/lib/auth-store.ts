@@ -316,4 +316,69 @@ export function getUserAccount(identifier: string): UserAccount | null {
   return store[cleanKey] || null;
 }
 
+// ------------------------------------------------------------------
+// Plan Upgrade (called ONLY after Razorpay signature verified)
+// ------------------------------------------------------------------
+export async function updateUserPlan(
+  userId: string,
+  planTier: "free" | "pay_per_listing" | "pro" | "agency",
+  paymentMeta: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    planKey: string;
+  }
+): Promise<void> {
+  // 1. Try Supabase if configured
+  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (supaUrl && supaKey && !supaKey.includes("...")) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(supaUrl, supaKey);
+
+      // Map plan tier to listing credits
+      const creditMap: Record<string, number> = {
+        free: 1,
+        pay_per_listing: 1,
+        pro: 25,
+        agency: 999,
+      };
+
+      await supabase
+        .from("profiles")
+        .update({
+          plan_tier: planTier === "pro" ? "solo_pro" : planTier,
+          listing_credits: creditMap[planTier] ?? 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
+
+      console.log(`[updateUserPlan] Supabase updated — userId: ${userId}, plan: ${planTier}`);
+    } catch (dbErr) {
+      console.error("[updateUserPlan] Supabase error:", dbErr);
+    }
+  }
+
+  // 2. Update local sessions file (fallback for local/file-based auth)
+  try {
+    const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+    for (const key of Object.keys(store)) {
+      const session = store[key];
+      if (session?.profile?.user_id === userId || session?.profile?.id === userId) {
+        session.profile.plan_tier = planTier === "pro" ? "solo_pro" : planTier === "agency" ? "agency_starter" : "free";
+        session.profile.listing_credits = planTier === "pro" ? 25 : planTier === "agency" ? 999 : 1;
+        session.profile.updated_at = new Date().toISOString();
+      }
+    }
+    saveStore(sessionsFile, store);
+  } catch (err) {
+    console.warn("[updateUserPlan] local session update skipped:", err);
+  }
+
+  console.log(
+    `[updateUserPlan] ✅ done — userId: ${userId}, plan: ${planTier}, orderId: ${paymentMeta.razorpay_order_id}`
+  );
+}
+
 
