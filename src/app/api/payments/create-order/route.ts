@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       orderId,
       amount,
       currency,
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // public key only
+      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID, // public key only
       planKey,
       planName: PLAN_CONFIG[planKey as PlanKey].name,
       userPhone: user.phone,
