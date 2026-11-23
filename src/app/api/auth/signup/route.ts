@@ -72,7 +72,38 @@ export async function POST(req: NextRequest) {
         ? trimmedTarget.split("@")[0].replace(/[^a-z0-9]+/g, "-")
         : "broker";
 
-    const brokerSlug = (baseName.replace(/^-|-$/g, "") || "broker") + "-" + Math.floor(100 + Math.random() * 900);
+    const rawBase = baseName.replace(/^-|-$/g, "") || "broker";
+    let brokerSlug = rawBase;
+
+    // Check if base slug is already taken, if so append sequential number (-2, -3)
+    if (supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
+      try {
+        const { createClient } = await import("@supabase/supabase-js");
+        const queryClient = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey!);
+        const { data: existing } = await queryClient
+          .from("profiles")
+          .select("slug")
+          .eq("slug", rawBase)
+          .maybeSingle();
+
+        if (existing) {
+          let counter = 2;
+          while (counter < 20) {
+            const candidate = `${rawBase}-${counter}`;
+            const { data: check } = await queryClient
+              .from("profiles")
+              .select("slug")
+              .eq("slug", candidate)
+              .maybeSingle();
+            if (!check) {
+              brokerSlug = candidate;
+              break;
+            }
+            counter++;
+          }
+        }
+      } catch {}
+    }
 
     const safePhone = isEmail
       ? `+91${Math.floor(6000000000 + Math.random() * 3999999999)}`

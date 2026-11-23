@@ -102,6 +102,9 @@ export default function DashboardClient({
   const [editCity, setEditCity] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState("");
+  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [slugReason, setSlugReason] = useState("");
+  const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
 
   function openEditProfile() {
     setEditName(broker.full_name || "");
@@ -109,13 +112,64 @@ export default function DashboardClient({
     setEditCompany(broker.company_name || "");
     setEditCity(broker.city || "");
     setProfileSuccessMsg("");
+    setSlugStatus("available");
+    setSlugReason("");
+    setSlugSuggestions([]);
     setIsProfileModalOpen(true);
   }
+
+  useEffect(() => {
+    if (!isProfileModalOpen) return;
+    const clean = editSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "");
+    if (!clean) {
+      setSlugStatus("invalid");
+      setSlugReason("Subdomain cannot be empty");
+      setSlugSuggestions([]);
+      return;
+    }
+    if (clean.length < 3) {
+      setSlugStatus("invalid");
+      setSlugReason("Must be at least 3 characters");
+      setSlugSuggestions([]);
+      return;
+    }
+    if (clean === broker.slug?.toLowerCase()) {
+      setSlugStatus("available");
+      setSlugReason("This is your current subdomain");
+      setSlugSuggestions([]);
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/auth/check-slug?slug=${encodeURIComponent(clean)}`);
+        const data = await res.json();
+        if (data.available) {
+          setSlugStatus("available");
+          setSlugReason(data.isCurrent ? "This is your current subdomain" : "Available!");
+          setSlugSuggestions([]);
+        } else {
+          setSlugStatus("taken");
+          setSlugReason(data.reason || `'${clean}' is already taken`);
+          setSlugSuggestions(data.suggestions || []);
+        }
+      } catch {
+        setSlugStatus("idle");
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [editSlug, isProfileModalOpen, broker.slug]);
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!editName.trim()) {
       alert("Name cannot be empty");
+      return;
+    }
+    if (slugStatus === "taken" || slugStatus === "invalid") {
+      alert("Please choose an available subdomain before saving.");
       return;
     }
     setIsSavingProfile(true);
@@ -1397,10 +1451,34 @@ export default function DashboardClient({
 
                 {/* Public Link / Slug */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Your Subdomain Link *
-                  </label>
-                  <div className="mt-1 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 focus-within:border-[#00974e] focus-within:bg-white dark:border-slate-700 dark:bg-slate-900">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Your Subdomain Link *
+                    </label>
+                    {slugStatus === "checking" && (
+                      <span className="text-[10px] text-amber-500 flex items-center gap-1 font-medium">
+                        <RefreshCw className="h-2.5 w-2.5 animate-spin" /> Checking...
+                      </span>
+                    )}
+                    {slugStatus === "available" && (
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <Check className="h-3 w-3" /> Available
+                      </span>
+                    )}
+                    {slugStatus === "taken" && (
+                      <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1">
+                        <X className="h-3 w-3" /> Taken
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={`mt-1 flex items-center rounded-xl border px-2.5 py-1.5 transition ${
+                    slugStatus === "available"
+                      ? "border-emerald-500/80 bg-emerald-50/20 dark:bg-emerald-950/20"
+                      : slugStatus === "taken" || slugStatus === "invalid"
+                      ? "border-rose-500/80 bg-rose-50/20 dark:bg-rose-950/20"
+                      : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900"
+                  }`}>
                     <input
                       type="text"
                       required
@@ -1415,13 +1493,44 @@ export default function DashboardClient({
                       placeholder="deepak-singh"
                       className="w-full bg-transparent text-xs font-mono font-bold text-[#0a1128] outline-none dark:text-white"
                     />
-                    <span className="text-xs font-mono text-slate-400 select-none ml-1">
+                    <span className="text-xs font-mono text-slate-400 select-none ml-1 shrink-0">
                       .propertysnaps.in
                     </span>
                   </div>
-                  <p className="mt-1 text-[10px] text-slate-400">
-                    Your live link: <strong>{editSlug || "your-name"}.propertysnaps.in</strong>
-                  </p>
+
+                  {/* Feedback & Suggestions */}
+                  {slugStatus === "available" && (
+                    <p className="mt-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                      <span>✓</span> <strong>{editSlug}.propertysnaps.in</strong> is ready for your site!
+                    </p>
+                  )}
+                  {slugStatus === "taken" && (
+                    <div className="mt-1.5 space-y-1">
+                      <p className="text-[10px] text-rose-500 font-medium">
+                        ✕ {slugReason}
+                      </p>
+                      {slugSuggestions.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                          <span className="text-[10px] text-slate-400">Suggestions:</span>
+                          {slugSuggestions.map((sug) => (
+                            <button
+                              key={sug}
+                              type="button"
+                              onClick={() => setEditSlug(sug)}
+                              className="rounded-md bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-slate-800 dark:hover:bg-emerald-950/60 dark:hover:text-emerald-400 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                            >
+                              +{sug}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {slugStatus === "invalid" && (
+                    <p className="mt-1 text-[10px] text-rose-500">
+                      ✕ {slugReason}
+                    </p>
+                  )}
                 </div>
 
                 {/* Company / Agency */}
@@ -1463,8 +1572,8 @@ export default function DashboardClient({
                   </button>
                   <button
                     type="submit"
-                    disabled={isSavingProfile || !editName.trim()}
-                    className="rounded-xl bg-[#00974e] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#008042] disabled:opacity-50 transition"
+                    disabled={isSavingProfile || !editName.trim() || slugStatus === "taken" || slugStatus === "checking" || slugStatus === "invalid"}
+                    className="rounded-xl bg-[#00974e] px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-[#008042] disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
                     {isSavingProfile ? "Saving..." : "Save Profile & Link"}
                   </button>

@@ -50,8 +50,9 @@ export async function middleware(request: NextRequest) {
 
     // 1. Root of subdomain -> rewrite to /[slug]
     if (pathname === "/" || pathname === "") {
-      const rewriteUrl = new URL(`/${subdomain}`, request.url);
-      return NextResponse.rewrite(rewriteUrl, {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${subdomain}`;
+      return NextResponse.rewrite(url, {
         headers: sessionResponse.headers,
       });
     }
@@ -59,24 +60,27 @@ export async function middleware(request: NextRequest) {
     // 2. /l/[listingSlug] -> rewrite to /[slug]/[listingSlug]
     if (pathname.startsWith("/l/")) {
       const listingPath = pathname.replace(/^\/l/, "");
-      const rewriteUrl = new URL(`/${subdomain}${listingPath}`, request.url);
-      return NextResponse.rewrite(rewriteUrl, {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${subdomain}${listingPath}`;
+      return NextResponse.rewrite(url, {
         headers: sessionResponse.headers,
       });
     }
 
     // 3. /c/[collectionSlug] -> rewrite to /[slug]/c/[collectionSlug]
     if (pathname.startsWith("/c/")) {
-      const rewriteUrl = new URL(`/${subdomain}${pathname}`, request.url);
-      return NextResponse.rewrite(rewriteUrl, {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${subdomain}${pathname}`;
+      return NextResponse.rewrite(url, {
         headers: sessionResponse.headers,
       });
     }
 
     // 4. Any direct listing slug (e.g. deepak.propertysnaps.in/4-bhk-bodakdev-401664)
     if (!pathname.startsWith(`/${subdomain}`)) {
-      const rewriteUrl = new URL(`/${subdomain}${pathname}`, request.url);
-      return NextResponse.rewrite(rewriteUrl, {
+      const url = request.nextUrl.clone();
+      url.pathname = `/${subdomain}${pathname}`;
+      return NextResponse.rewrite(url, {
         headers: sessionResponse.headers,
       });
     }

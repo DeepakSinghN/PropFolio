@@ -11,6 +11,7 @@ export interface SessionUser {
   phone: string;
   name: string;
   email?: string;
+  slug?: string;
 }
 
 /**
@@ -31,6 +32,7 @@ export async function getUserFromSession(
         phone: p.phone_number || session.phone || "",
         name: p.full_name || "Property Snaps User",
         email: p.email,
+        slug: p.slug,
       };
     }
   }
