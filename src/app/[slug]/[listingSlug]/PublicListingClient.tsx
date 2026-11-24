@@ -199,7 +199,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           }
         }
       }
-    } catch {}
+    } catch { }
 
     fetch(`/api/listings/${listingSlug}`)
       .then((res) => res.json())
@@ -208,7 +208,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           setListing(data.listing);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [listingSlug]);
 
   useEffect(() => {
@@ -465,7 +465,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           text: `${listing.title} for ${listing.display_price}`,
           url,
         })
-        .catch(() => {});
+        .catch(() => { });
     } else {
       navigator.clipboard.writeText(url);
       setCopiedShare(true);
@@ -490,16 +490,16 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-32 sm:pb-36 text-[#0a1128] antialiased selection:bg-[#862e9f]/20 selection:text-[#0a1128] dark:bg-[#070b14] dark:text-slate-100">
-      
+
       {/* MAIN CONTAINER WITH RESPONSIVE DESKTOP & MOBILE GRID */}
       <main className="mx-auto max-w-6xl px-0 sm:px-6 pt-0 sm:pt-6">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          
+
           {/* ========================================================= */}
           {/* LEFT COLUMN: HERO GALLERY & PROPERTY SPECS (8 Cols Desktop) */}
           {/* ========================================================= */}
           <div className="space-y-0 sm:space-y-6 lg:col-span-8">
-            
+
             {/* Gallery Section - Full bleed edge-to-edge on mobile */}
             <section className="space-y-0 sm:space-y-3">
               <div
@@ -523,7 +523,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                   <span className="rounded-full bg-[#0a1128]/85 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-white backdrop-blur-md shadow-sm">
                     {listing.listing_type === "Sale" ? "FOR SALE" : "FOR RENT"}
                   </span>
-                  <span className="rounded-full bg-[#0a1128]/90 border border-[#862e9f]/40 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-semibold text-[#a845c4] backdrop-blur-md shadow-sm">
+                  <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs font-bold text-white backdrop-blur-md shadow-sm">
                     {listing.property_type.toUpperCase()}
                   </span>
                 </div>
@@ -584,11 +584,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       key={idx}
                       type="button"
                       onClick={() => setActivePhotoIdx(idx)}
-                      className={`relative aspect-[4/3] w-18 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border-2 transition-all pointer-events-auto ${
-                        activePhotoIdx === idx
-                          ? "border-[#862e9f] scale-[0.98] shadow-md shadow-[#862e9f]/25 ring-2 ring-[#862e9f]/30"
-                          : "border-transparent opacity-65 hover:opacity-100"
-                      }`}
+                      className={`relative aspect-[4/3] w-18 sm:w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border-2 transition-all pointer-events-auto ${activePhotoIdx === idx
+                        ? "border-[#862e9f] scale-[0.98] shadow-md shadow-[#862e9f]/25 ring-2 ring-[#862e9f]/30"
+                        : "border-transparent opacity-65 hover:opacity-100"
+                        }`}
                     >
                       <img
                         src={p.photo_url}
@@ -606,7 +605,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
             {/* Property Key Details & Pricing - Curved Sheet Overlap Effect on Mobile */}
             <section className="relative z-10 -mt-6 sm:mt-0 rounded-t-[32px] sm:rounded-3xl border-t sm:border border-slate-200/90 bg-white p-5 sm:p-6 shadow-none dark:border-slate-800 dark:bg-[#0c1222] overflow-hidden">
-              
+
               {/* Action Buttons: If Owner -> Show Edit, Reorder, Add Form | If Buyer/Visitor -> Show Download Brochure, Share */}
               {isOwner ? (
                 <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 mb-5">
@@ -615,7 +614,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     onClick={() => {
                       try {
                         localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
-                      } catch {}
+                      } catch { }
                     }}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-[#1c5436] hover:bg-[#15422a] py-2 px-3 text-xs font-semibold text-white shadow-sm transition active:scale-95 whitespace-nowrap cursor-pointer"
                   >
@@ -645,7 +644,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     onClick={() => {
                       try {
                         localStorage.setItem("propfolio_active_edit_listing", JSON.stringify(listing));
-                      } catch {}
+                      } catch { }
                     }}
                     className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
                   >
@@ -670,7 +669,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                         navigator.share({
                           title: `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Property"} in ${listing.location_locality || listing.location_city}`,
                           url: window.location.href,
-                        }).catch(() => {});
+                        }).catch(() => { });
                       } else {
                         navigator.clipboard?.writeText(window.location.href);
                         setShareToast(true);
@@ -697,9 +696,9 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 </div>
               )}
 
-              {/* Location Landmark Tag (Matching Red Pin in Reference Mockup) */}
-              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider text-rose-600 dark:text-rose-400 uppercase">
-                <MapPin className="h-4 w-4 shrink-0 fill-rose-600 text-white" />
+              {/* Location Landmark Tag (Clean & Elegant Modern Styling) */}
+              <div className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold tracking-wider text-slate-600 dark:text-slate-300 uppercase">
+                <MapPin className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                 <span className="break-words">
                   {listing.location_locality ? `${listing.location_locality}, ` : ""}
                   {listing.location_city}
@@ -774,7 +773,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       key={idx}
                       className="flex items-start gap-2.5 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 sm:p-3.5 transition-all hover:border-[#862e9f]/30 dark:border-slate-800/80 dark:bg-[#090e1c]"
                     >
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0a1128] text-xs font-bold text-[#862e9f] border border-[#862e9f]/30 dark:bg-[#16234b]">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0a1128] text-xs font-bold text-white border border-[#862e9f]/30 dark:bg-[#16234b]">
                         {idx + 1}
                       </span>
                       <p className="text-xs sm:text-sm font-normal leading-relaxed text-slate-700 dark:text-slate-300 break-words">
@@ -806,9 +805,8 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     return (
                       <div
                         key={idx}
-                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
-                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
-                        }`}
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                          }`}
                       >
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
@@ -848,9 +846,8 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     return (
                       <div
                         key={idx}
-                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
-                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
-                        }`}
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                          }`}
                       >
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
@@ -890,9 +887,8 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                     return (
                       <div
                         key={idx}
-                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
-                          isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
-                        }`}
+                        className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                          }`}
                       >
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                           <Icon className="h-4 w-4" />
@@ -955,9 +951,8 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                       return (
                         <div
                           key={idx}
-                          className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${
-                            isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
-                          }`}
+                          className={`flex items-start gap-2.5 sm:gap-3 rounded-2xl border border-slate-100 bg-[#f8f9fc] p-3 min-w-0 dark:border-slate-800 dark:bg-[#090e1c] ${isLong ? "col-span-2 sm:col-span-2 md:col-span-1" : "col-span-1"
+                            }`}
                         >
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm border border-slate-200/70 dark:bg-[#17130a] dark:text-[#a845c4] dark:border-[#3d331d] mt-0.5">
                             <Icon className="h-4 w-4" />
@@ -1123,13 +1118,13 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           {/* ========================================================= */}
           <div className="space-y-6 lg:col-span-4">
             <div className="sticky top-24 space-y-5">
-              
+
               {/* Main Desktop Action Card */}
               <div id="inquiry-form" className="rounded-3xl border-2 border-[#862e9f]/40 bg-white p-6 shadow-xl shadow-slate-200/40 dark:border-[#862e9f]/30 dark:bg-[#0c1222] dark:shadow-none">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Offering Price
                 </span>
-                
+
                 <div className="mt-1 flex items-baseline justify-between">
                   <span className="text-2xl sm:text-3xl font-bold tracking-tight text-emerald-700 dark:text-emerald-400">
                     {listing.display_price}
@@ -1239,7 +1234,7 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       {/* 3. MOBILE FLOATING STICKY ACTION BAR (Screens < 1024px) */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/90 bg-white/95 px-4 py-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-xl lg:hidden dark:border-slate-800 dark:bg-[#070b14]/95 pointer-events-auto">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
-          
+
           {/* Price Preview */}
           <div className="min-w-0 flex-1">
             <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -1381,11 +1376,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 {photos.map((p, idx) => (
                   <div
                     key={p.id || idx}
-                    className={`relative rounded-2xl border overflow-hidden p-2 transition bg-white dark:bg-slate-900 ${
-                      idx === 0
-                        ? "border-[#1c5436] ring-2 ring-[#1c5436]/20 shadow-md"
-                        : "border-slate-200 dark:border-slate-800"
-                    }`}
+                    className={`relative rounded-2xl border overflow-hidden p-2 transition bg-white dark:bg-slate-900 ${idx === 0
+                      ? "border-[#1c5436] ring-2 ring-[#1c5436]/20 shadow-md"
+                      : "border-slate-200 dark:border-slate-800"
+                      }`}
                   >
                     {/* Thumbnail Image */}
                     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
