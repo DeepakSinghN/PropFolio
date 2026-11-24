@@ -183,59 +183,13 @@ export default function PublicListingClient({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
 
-  // Sync latest listing from localStorage or API (handles Vercel multi-instance fallback)
+  // Keep listing synced if server props update
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const singleKey = `propfolio_listing_${listingSlug}`;
-      const singleCached = localStorage.getItem(singleKey);
-      if (singleCached) {
-        const parsed = JSON.parse(singleCached);
-        if (parsed && (parsed.slug === listingSlug || parsed.id === listingSlug)) {
-          setListing((prev) => ({
-            ...parsed,
-            broker: parsed.broker || prev.broker || initialBroker || initialListing?.broker,
-          }));
-          return;
-        }
-      }
-
-      const allStored = localStorage.getItem("propfolio_listings");
-      if (allStored) {
-        const parsedAll = JSON.parse(allStored);
-        if (Array.isArray(parsedAll)) {
-          const match = parsedAll.find((l: any) => l.slug === listingSlug || l.id === listingSlug);
-          if (match) {
-            setListing((prev) => ({
-              ...match,
-              broker: match.broker || prev.broker || initialBroker || initialListing?.broker,
-            }));
-            return;
-          }
-        }
-      }
-    } catch { }
-
-    fetch(`/api/listings/${listingSlug}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.listing && (data.listing.slug === listingSlug || data.listing.id === listingSlug)) {
-          setListing((prev) => ({
-            ...data.listing,
-            broker: data.listing.broker || prev.broker || initialBroker || initialListing?.broker,
-          }));
-        }
-      })
-      .catch(() => { });
-  }, [listingSlug, initialBroker]);
-
-  useEffect(() => {
-    if (initialListing && initialListing.slug === listingSlug) {
-      setListing((prev) => ({
+    if (initialListing && (initialListing.slug === listingSlug || initialListing.id === listingSlug)) {
+      setListing({
         ...initialListing,
-        broker: initialListing.broker || initialBroker || prev.broker,
-      }));
+        broker: initialListing.broker || initialBroker || DEMO_BROKER,
+      });
     }
   }, [initialListing, initialBroker, listingSlug]);
 
@@ -593,6 +547,8 @@ export default function PublicListingClient({
                 <img
                   src={currentPhoto.photo_url}
                   alt={listing.title}
+                  loading="eager"
+                  decoding="async"
                   onError={(e) => {
                     e.currentTarget.src = DEFAULT_GALLERY_PHOTOS[0].photo_url;
                   }}
@@ -674,6 +630,8 @@ export default function PublicListingClient({
                       <img
                         src={p.photo_url}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.src = DEFAULT_GALLERY_PHOTOS[0].photo_url;
                         }}
