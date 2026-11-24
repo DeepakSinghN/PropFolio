@@ -119,10 +119,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PublicListingPage({ params }: PageProps) {
   const { slug, listingSlug } = await params;
   let listing: any = null;
+  let brokerProfile: any = null;
 
   const supabase = createAdminClient();
   if (supabase) {
     try {
+      // 1. Resolve broker profile first from URL subdomain/slug
+      if (slug && slug !== "broker") {
+        const { data: profBySlug } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (profBySlug) brokerProfile = profBySlug;
+      }
+
+      // 2. Fetch listing
       const { data } = await supabase
         .from("listings")
         .select("*, listing_photos(*)")
@@ -134,28 +146,19 @@ export default async function PublicListingPage({ params }: PageProps) {
           (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
         );
 
-        let brokerData = data.broker;
-        if (!brokerData && data.broker_id) {
-          const { data: prof } = await supabase
+        if (!brokerProfile && data.broker_id) {
+          const { data: profById } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", data.broker_id)
             .maybeSingle();
-          if (prof) brokerData = prof;
-        }
-        if (!brokerData && slug) {
-          const { data: prof } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("slug", slug)
-            .maybeSingle();
-          if (prof) brokerData = prof;
+          if (profById) brokerProfile = profById;
         }
 
         listing = {
           ...data,
           photos: photos.length > 0 ? photos : data.photos || [],
-          broker: brokerData || data.broker,
+          broker: brokerProfile || data.broker,
         };
       }
     } catch {}
@@ -167,9 +170,18 @@ export default async function PublicListingPage({ params }: PageProps) {
       INITIAL_LISTINGS.find((l) => l.slug === listingSlug);
   }
 
+  if (listing && brokerProfile) {
+    listing.broker = brokerProfile;
+  }
+
   return (
     <Suspense fallback={<ListingSkeleton />}>
-      <PublicListingClient slug={slug} listingSlug={listingSlug} initialListing={listing || undefined} />
+      <PublicListingClient
+        slug={slug}
+        listingSlug={listingSlug}
+        initialListing={listing || undefined}
+        initialBroker={brokerProfile || listing?.broker || undefined}
+      />
     </Suspense>
   );
 }

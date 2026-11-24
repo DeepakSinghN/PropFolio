@@ -55,12 +55,13 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { getListingFromMemory, saveListingToMemory, INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
-import { Listing, ListingPhoto } from "@/types/database";
+import { Listing, ListingPhoto, Profile } from "@/types/database";
 
 interface ClientProps {
   slug: string;
   listingSlug: string;
   initialListing?: Listing;
+  initialBroker?: Profile;
 }
 
 const DEFAULT_GALLERY_PHOTOS = [
@@ -157,17 +158,26 @@ const EMPTY_LISTING: Listing = {
   photos: [],
 };
 
-export default function PublicListingClient({ slug, listingSlug, initialListing }: ClientProps) {
+export default function PublicListingClient({
+  slug,
+  listingSlug,
+  initialListing,
+  initialBroker,
+}: ClientProps) {
   const router = useRouter();
   const [listing, setListing] = useState<Listing>(() => {
-    return (
+    const base = (
       initialListing ||
       getListingFromMemory(listingSlug) ||
       INITIAL_LISTINGS.find((l) => l.slug === listingSlug) ||
       EMPTY_LISTING
     );
+    return {
+      ...base,
+      broker: base.broker || initialBroker || DEMO_BROKER,
+    };
   });
-  const broker = listing?.broker || DEMO_BROKER;
+  const broker = listing?.broker || initialBroker || DEMO_BROKER;
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -183,7 +193,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       if (singleCached) {
         const parsed = JSON.parse(singleCached);
         if (parsed && (parsed.slug === listingSlug || parsed.id === listingSlug)) {
-          setListing(parsed);
+          setListing((prev) => ({
+            ...parsed,
+            broker: parsed.broker || prev.broker || initialBroker || initialListing?.broker,
+          }));
           return;
         }
       }
@@ -194,7 +207,10 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
         if (Array.isArray(parsedAll)) {
           const match = parsedAll.find((l: any) => l.slug === listingSlug || l.id === listingSlug);
           if (match) {
-            setListing(match);
+            setListing((prev) => ({
+              ...match,
+              broker: match.broker || prev.broker || initialBroker || initialListing?.broker,
+            }));
             return;
           }
         }
@@ -205,17 +221,23 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
       .then((res) => res.json())
       .then((data) => {
         if (data && data.listing && (data.listing.slug === listingSlug || data.listing.id === listingSlug)) {
-          setListing(data.listing);
+          setListing((prev) => ({
+            ...data.listing,
+            broker: data.listing.broker || prev.broker || initialBroker || initialListing?.broker,
+          }));
         }
       })
       .catch(() => { });
-  }, [listingSlug]);
+  }, [listingSlug, initialBroker]);
 
   useEffect(() => {
     if (initialListing && initialListing.slug === listingSlug) {
-      setListing(initialListing);
+      setListing((prev) => ({
+        ...initialListing,
+        broker: initialListing.broker || initialBroker || prev.broker,
+      }));
     }
-  }, [initialListing, listingSlug]);
+  }, [initialListing, initialBroker, listingSlug]);
 
   // Touch Swipe State for Mobile
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -449,11 +471,57 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
     return `₹${amount.toLocaleString("en-IN")}`;
   }
 
-  // Pre-filled WhatsApp message
-  const waText = encodeURIComponent(
-    `Hi ${broker.full_name}, I saw your listing "${listing.title}" for ${listing.display_price}. Is it available? Can we schedule a site visit?`
-  );
-  const waLink = `https://wa.me/${broker.phone_number.replace(/\D/g, "")}?text=${waText}`;
+  // Resolve broker phone number reliably
+  const rawBrokerPhone = broker?.phone_number || initialBroker?.phone_number || initialListing?.broker?.phone_number || "";
+  const cleanPhoneDigits = rawBrokerPhone.replace(/\D/g, "");
+
+  // Derive human broker name
+  let brokerName = (broker?.full_name || initialBroker?.full_name || "").trim();
+  if (!brokerName || brokerName.toLowerCase() === "real estate broker") {
+    // If generic fallback, extract clean display name from broker's slug (e.g. "deepak-202" -> "Deepak")
+    if (slug && slug !== "broker") {
+      const cleanSlugPart = slug.split("-")[0];
+      if (cleanSlugPart && cleanSlugPart.length > 1) {
+        brokerName = cleanSlugPart.charAt(0).toUpperCase() + cleanSlugPart.slice(1);
+      }
+    }
+  }
+
+  // Format phone number for tel: link (+91... for Indian mobile numbers)
+  const telNumber = cleanPhoneDigits.length === 10
+    ? `+91${cleanPhoneDigits}`
+    : cleanPhoneDigits.length > 10
+      ? `+${cleanPhoneDigits}`
+      : rawBrokerPhone.trim();
+  const telLink = telNumber ? `tel:${telNumber}` : "#";
+
+  // Pre-filled WhatsApp message with property link
+  const waPhone = cleanPhoneDigits.length === 10
+    ? `91${cleanPhoneDigits}`
+    : cleanPhoneDigits.startsWith("91")
+      ? cleanPhoneDigits
+      : cleanPhoneDigits.length > 0
+        ? `91${cleanPhoneDigits}`
+        : "917252058269";
+
+  const listingUrl = typeof window !== "undefined" && window.location.href
+    ? window.location.href
+    : `https://${slug}.propertysnaps.in/${listingSlug}`;
+
+  const propertyHeading = listing.title || `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Property"} in ${listing.location_locality || listing.location_city}`;
+
+  const waGreeting = brokerName && brokerName.toLowerCase() !== "real estate broker"
+    ? `Hi ${brokerName},`
+    : "Hello,";
+
+  const waMessage = [
+    waGreeting,
+    `I am interested in your property listing: *${propertyHeading}* (${listing.display_price}).`,
+    `🔗 Property Link: ${listingUrl}`,
+    `Is this property still available? Can we schedule a site visit?`,
+  ].join("\n\n");
+
+  const waLink = `https://wa.me/${waPhone}?text=${encodeURIComponent(waMessage)}`;
 
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -1150,11 +1218,11 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
 
                   {/* Secondary Call */}
                   <a
-                    href={`tel:${broker.phone_number}`}
+                    href={telLink}
                     className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-[#f8f9fa] py-3 text-xs font-semibold text-[#0a1128] transition hover:bg-white hover:border-[#862e9f] active:scale-95 dark:border-slate-800 dark:bg-[#090e1c] dark:text-white pointer-events-auto"
                   >
-                    <Phone className="h-3.5 w-3.5" />
-                    <span>Call Broker ({broker.phone_number})</span>
+                    <Phone className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Call Broker {rawBrokerPhone ? `(${rawBrokerPhone})` : ""}</span>
                   </a>
 
                   {/* PDF Download */}
@@ -1192,12 +1260,12 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
                 <div className="flex items-center gap-4">
                   <img
                     src={broker.avatar_url}
-                    alt={broker.full_name}
+                    alt={brokerName || broker.full_name}
                     className="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-md dark:border-slate-800"
                   />
                   <div>
                     <h4 className="text-base font-bold text-[#0a1128] dark:text-white flex items-center gap-1.5">
-                      {broker.full_name}
+                      {brokerName || broker.full_name}
                       <ShieldCheck className="h-4 w-4 text-[#862e9f]" />
                     </h4>
                     {(broker.company_name || broker.city) && (
@@ -1248,11 +1316,11 @@ export default function PublicListingClient({ slug, listingSlug, initialListing 
           {/* Quick Buttons: Call + WhatsApp */}
           <div className="flex items-center gap-2 shrink-0">
             <a
-              href={`tel:${broker.phone_number}`}
+              href={telLink}
               aria-label="Call Broker"
               className="flex h-10 w-10 sm:h-11 sm:w-11 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-[#f8f9fa] text-slate-700 shadow-sm transition hover:border-[#862e9f] active:scale-95 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-200"
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-4 w-4 text-emerald-600" />
             </a>
 
             <a

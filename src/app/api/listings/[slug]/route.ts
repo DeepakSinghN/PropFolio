@@ -27,9 +27,21 @@ export async function GET(
           const photos = (data.listing_photos || []).sort(
             (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
           );
+
+          let brokerData = data.broker;
+          if (!brokerData && data.broker_id) {
+            const { data: prof } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", data.broker_id)
+              .maybeSingle();
+            if (prof) brokerData = prof;
+          }
+
           listing = {
             ...data,
             photos: photos.length > 0 ? photos : data.photos || [],
+            broker: brokerData || data.broker,
           };
         }
       } catch (e) {
