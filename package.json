@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "^3.2.0",
+    "@react-pdf/renderer": "^4.9.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
     "canvas-confetti": "^1.9.4",
@@ -34,5 +35,8 @@
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@react-pdf/hyphenate": "0.1.0"
   }
 }

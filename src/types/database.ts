@@ -55,6 +55,37 @@ export interface Listing {
   views_count: number;
   created_at: string;
   updated_at: string;
+  // Extended brochure fields (driven by spec)
+  details?: Record<string, any>;
+  super_built_up_sqft?: number;
+  floor?: string;
+  total_floors?: string | number;
+  facing?: string;
+  furnishing?: string;
+  possession?: string;
+  balcony?: string;
+  kitchen?: string;
+  wardrobes?: string;
+  ac_count?: string | number;
+  natural_light?: string;
+  ventilation?: string;
+  view?: string;
+  property_age?: string;
+  building_type?: string;
+  society_description?: string;
+  parking_covered?: string | number;
+  parking_visitor?: string | number;
+  lifts?: string;
+  water_supply?: string;
+  power_backup?: string;
+  security?: string;
+  maintenance_monthly?: string | number;
+  is_negotiable?: boolean;
+  rera_status?: string;
+  rera_number?: string;
+  title_status?: string;
+  bank_loans?: string[];
+  nearby?: Array<{ label: string; distance: string }>;
   // Joined fields
   photos?: ListingPhoto[];
   broker?: Profile;

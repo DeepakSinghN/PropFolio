@@ -713,13 +713,15 @@ export default function PublicListingClient({
                     <span>Reorder Photos</span>
                   </button>
 
-                  <Link
-                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                  <a
+                    href={`/${broker.slug}/${listing.slug}/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 shadow-sm transition active:scale-95 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-200 whitespace-nowrap"
                   >
                     <FileText className="h-3.5 w-3.5 text-purple-600" />
                     <span>Download PDF</span>
-                  </Link>
+                  </a>
 
                   <Link
                     href={`/dashboard/listings/new?edit=${listing.slug}&section=enquiry-form#enquiry-form`}
@@ -736,13 +738,15 @@ export default function PublicListingClient({
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-5">
-                  <Link
-                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                  <a
+                    href={`/${broker.slug}/${listing.slug}/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200/80 py-2 px-3.5 text-xs font-bold text-purple-700 shadow-xs transition active:scale-95 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-300 whitespace-nowrap"
                   >
                     <FileText className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                     <span>Download PDF Brochure</span>
-                  </Link>
+                  </a>
 
                   <button
                     type="button"
@@ -1240,13 +1244,15 @@ export default function PublicListingClient({
                   </a>
 
                   {/* PDF Download */}
-                  <Link
-                    href={`/${broker.slug}/${listing.slug}/brochure`}
+                  <a
+                    href={`/${broker.slug}/${listing.slug}/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-700 transition hover:border-[#862e9f] hover:bg-slate-50 dark:border-slate-800 dark:bg-[#0c1222] dark:text-slate-300"
                   >
                     <FileText className="h-3.5 w-3.5 text-[#862e9f]" />
                     <span>Download PDF Brochure</span>
-                  </Link>
+                  </a>
 
                   {listing.enquiry_form_url && (
                     <a

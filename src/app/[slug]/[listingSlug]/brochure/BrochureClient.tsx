@@ -13,7 +13,8 @@ import {
   Sparkles,
   ShieldCheck,
   Building2,
-  Share2
+  Share2,
+  Download,
 } from "lucide-react";
 import { getListingFromMemory, INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
 import { Listing } from "@/types/database";
@@ -86,13 +87,22 @@ export default function BrochureClient({ slug, listingSlug, initialListing }: Cl
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
+          <a
+            href={`/${slug}/${listing.slug}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-md transition hover:bg-emerald-800 active:scale-95 pointer-events-auto"
+          >
+            <Download className="h-4 w-4 text-emerald-200" />
+            <span>Download Official PDF</span>
+          </a>
           <button
             type="button"
             onClick={() => window.print()}
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 pointer-events-auto"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-bold text-white shadow-md transition hover:bg-zinc-800 active:scale-95 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 pointer-events-auto"
           >
             <Printer className="h-4 w-4 text-amber-400" />
-            <span>Print or Save as PDF</span>
+            <span>Print HTML</span>
           </button>
         </div>
       </div>
