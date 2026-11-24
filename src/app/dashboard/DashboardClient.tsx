@@ -42,7 +42,7 @@ const FALLBACK_PHOTO = "https://images.unsplash.com/photo-1600585154340-be6161a5
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function getBrokerSubdomainUrl(slug?: string, path = ""): string {
-  const cleanSlug = slug || "broker";
+  const cleanSlug = (slug && slug !== "broker" && slug !== "l" ? slug : null) || "deepak-202";
   const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
   if (typeof window === "undefined") {
     return `https://${cleanSlug}.propertysnaps.in${cleanPath}`;
@@ -56,7 +56,7 @@ function getBrokerSubdomainUrl(slug?: string, path = ""): string {
 }
 
 function getBrokerDisplayUrl(slug?: string, path = ""): string {
-  const cleanSlug = slug || "broker";
+  const cleanSlug = (slug && slug !== "broker" && slug !== "l" ? slug : null) || "deepak-202";
   const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
   if (typeof window === "undefined") {
     return `${cleanSlug}.propertysnaps.in${cleanPath}`;
@@ -270,7 +270,7 @@ export default function DashboardClient({
 
   function copyLink(slug: string) {
     if (typeof window === "undefined") return;
-    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/l/${slug}`);
+    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/${slug}`);
     navigator.clipboard.writeText(fullUrl);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
@@ -1013,7 +1013,7 @@ export default function DashboardClient({
                 {filteredListings.map((item) => {
                   const rawCover = item.photos?.[0]?.photo_url;
                   const coverPhoto = (rawCover && !rawCover.startsWith("blob:")) ? rawCover : FALLBACK_PHOTO;
-                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/l/${item.slug}`);
+                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/${item.slug}`);
                   const isSold = item.status === "sold";
 
                   return (

@@ -249,8 +249,8 @@ async function executeCreateListing(
     req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const isLocal = host.includes("localhost");
   const liveUrl = isLocal
-    ? `http://${senderBroker.slug}.localhost:3000/l/${parsedData.slug}`
-    : `https://${senderBroker.slug}.propertysnaps.in/l/${parsedData.slug}`;
+    ? `http://${senderBroker.slug}.localhost:3000/${parsedData.slug}`
+    : `https://${senderBroker.slug}.propertysnaps.in/${parsedData.slug}`;
   const brochureUrl = `${liveUrl}/brochure`;
 
   const photoNotice = includePhotos

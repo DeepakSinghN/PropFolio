@@ -29,6 +29,14 @@ export async function middleware(request: NextRequest) {
     subdomain = cleanHost.replace(".localhost", "");
   }
 
+  // If someone requests the single-letter 'l' subdomain, redirect to main domain
+  if (subdomain === "l") {
+    const cleanPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+    const redirectPath = cleanPath.startsWith("/l/") ? cleanPath : `/l${cleanPath}`;
+    const targetUrl = new URL(redirectPath, `https://www.propertysnaps.in`);
+    return NextResponse.redirect(targetUrl, 301);
+  }
+
   // Handle broker wildcard subdomains (e.g. deepak-thakur.propertysnaps.in)
   if (subdomain && subdomain !== "www") {
     // If accessing main app pages on a subdomain, redirect to apex/www domain

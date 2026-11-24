@@ -504,9 +504,23 @@ export default function PublicListingClient({
         ? `91${cleanPhoneDigits}`
         : "917252058269";
 
-  const listingUrl = typeof window !== "undefined" && window.location.href
-    ? window.location.href
-    : `https://${slug}.propertysnaps.in/${listingSlug}`;
+  // Resolve true broker slug for clean subdomain URL (e.g. deepak-202.propertysnaps.in)
+  const resolvedBrokerSlug =
+    (broker?.slug && broker.slug !== "broker" && broker.slug !== "l" ? broker.slug : null) ||
+    (initialBroker?.slug && initialBroker.slug !== "broker" && initialBroker.slug !== "l" ? initialBroker.slug : null) ||
+    (slug && slug !== "broker" && slug !== "l" ? slug : null) ||
+    "broker";
+
+  // Build clean canonical property link for WhatsApp & sharing
+  let listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/${listingSlug}`;
+  if (typeof window !== "undefined") {
+    const host = window.location.host;
+    if (host.includes("localhost")) {
+      listingUrl = `${window.location.protocol}//${resolvedBrokerSlug}.localhost:3000/${listingSlug}`;
+    } else if (resolvedBrokerSlug !== "broker") {
+      listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/${listingSlug}`;
+    }
+  }
 
   const propertyHeading = listing.title || `${listing.bhk ? `${listing.bhk} BHK ` : ""}${listing.property_type || "Property"} in ${listing.location_locality || listing.location_city}`;
 

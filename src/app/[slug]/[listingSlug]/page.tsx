@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             .maybeSingle();
           if (prof) brokerData = prof;
         }
-        if (!brokerData && slug) {
+        if (!brokerData && slug && slug !== "l" && slug !== "broker") {
           const { data: prof } = await supabase
             .from("profiles")
             .select("*")
