@@ -326,14 +326,19 @@ export default function DashboardClient({
     );
 
     try {
-      await fetch("/api/listings/manage", {
+      const res = await fetch("/api/listings/manage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, action: "delete" }),
       });
-      mutateListings();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        alert(data.error || "Failed to delete listing.");
+      }
+      await mutateListings();
     } catch (err) {
       console.warn("Failed to delete listing:", err);
+      await mutateListings();
     }
   }
 
