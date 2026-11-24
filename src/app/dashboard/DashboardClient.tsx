@@ -270,7 +270,7 @@ export default function DashboardClient({
 
   function copyLink(slug: string) {
     if (typeof window === "undefined") return;
-    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/${slug}`);
+    const fullUrl = getBrokerSubdomainUrl(broker.slug, `/l/${slug}`);
     navigator.clipboard.writeText(fullUrl);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);
@@ -1013,7 +1013,7 @@ export default function DashboardClient({
                 {filteredListings.map((item) => {
                   const rawCover = item.photos?.[0]?.photo_url;
                   const coverPhoto = (rawCover && !rawCover.startsWith("blob:")) ? rawCover : FALLBACK_PHOTO;
-                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/${item.slug}`);
+                  const targetUrl = getBrokerSubdomainUrl(broker.slug || DEMO_BROKER.slug, `/l/${item.slug}`);
                   const isSold = item.status === "sold";
 
                   return (
@@ -1203,7 +1203,7 @@ export default function DashboardClient({
                             {/* 3. Share to WhatsApp */}
                             <a
                               href={`https://wa.me/?text=${encodeURIComponent(
-                                `*${item.title}*\nPrice: ${item.display_price}\nLocation: ${item.location_locality}, ${item.location_city}\n\nView Property Details:\n${typeof window !== "undefined" ? window.location.origin : ""}${targetUrl}`
+                                `*${item.title}*\nPrice: ${item.display_price}\nLocation: ${item.location_locality}, ${item.location_city}\n\nView Property Details:\n${targetUrl}`
                               )}`}
                               target="_blank"
                               rel="noreferrer"

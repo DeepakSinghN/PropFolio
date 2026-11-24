@@ -512,13 +512,13 @@ export default function PublicListingClient({
     "broker";
 
   // Build clean canonical property link for WhatsApp & sharing
-  let listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/${listingSlug}`;
+  let listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/l/${listingSlug}`;
   if (typeof window !== "undefined") {
     const host = window.location.host;
     if (host.includes("localhost")) {
-      listingUrl = `${window.location.protocol}//${resolvedBrokerSlug}.localhost:3000/${listingSlug}`;
+      listingUrl = `${window.location.protocol}//${resolvedBrokerSlug}.localhost:3000/l/${listingSlug}`;
     } else if (resolvedBrokerSlug !== "broker") {
-      listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/${listingSlug}`;
+      listingUrl = `https://${resolvedBrokerSlug}.propertysnaps.in/l/${listingSlug}`;
     }
   }
 
