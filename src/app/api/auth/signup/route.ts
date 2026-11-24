@@ -106,11 +106,11 @@ export async function POST(req: NextRequest) {
       } catch {}
     }
 
-    const safePhone = isEmail
-      ? `+91${Math.floor(6000000000 + Math.random() * 3999999999)}`
-      : trimmedTarget.startsWith("+")
-        ? trimmedTarget
-        : "+91" + trimmedTarget.replace(/\D/g, "");
+    const cleanDigits = trimmedTarget.replace(/\D/g, "");
+    const phone10 = cleanDigits.slice(-10);
+    const full12 = `91${phone10}`;
+    const safePhone = `+91${phone10}`;
+    const internalEmail = isEmail ? trimmedTarget.toLowerCase() : `${full12}@propertysnaps.in`;
 
     // 1. Supabase User & Profile Registration
     if (supabaseUrl && (supabaseServiceKey || supabaseAnonKey)) {
@@ -133,8 +133,10 @@ export async function POST(req: NextRequest) {
                 },
               }
             : {
+                email: internalEmail,
                 phone: safePhone,
                 password,
+                email_confirm: true,
                 phone_confirm: true,
                 user_metadata: {
                   full_name: full_name || "Real Estate Broker",
@@ -144,7 +146,25 @@ export async function POST(req: NextRequest) {
                 },
               };
 
-          const { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser(userCreatePayload);
+          let { data: adminUser, error: adminErr } = await adminSupabase.auth.admin.createUser(userCreatePayload);
+
+          // If phone provider is disabled in Supabase, retry creating with internal email only
+          if (adminErr && !isEmail && (adminErr.message?.toLowerCase().includes("phone") || adminErr.message?.toLowerCase().includes("provider"))) {
+            const fallbackPayload = {
+              email: internalEmail,
+              password,
+              email_confirm: true,
+              user_metadata: {
+                full_name: full_name || "Real Estate Broker",
+                city: city || "India",
+                company_name: company_name ? company_name.trim() : "",
+                phone_number: safePhone,
+              },
+            };
+            const retryRes = await adminSupabase.auth.admin.createUser(fallbackPayload);
+            adminUser = retryRes.data;
+            adminErr = retryRes.error;
+          }
 
           if (adminUser?.user) {
             supaUserId = adminUser.user.id;
@@ -165,8 +185,7 @@ export async function POST(req: NextRequest) {
               user_id: supaUserId,
               full_name: full_name || "Real Estate Broker",
               slug: brokerSlug,
-              phone_number: isEmail ? undefined : safePhone,
-              email: isEmail ? trimmedTarget.toLowerCase() : undefined,
+              phone_number: safePhone,
               company_name: company_name ? company_name.trim() : "",
               city: city || "India",
               plan_tier: "solo_pro",

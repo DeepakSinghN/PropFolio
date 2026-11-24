@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
     const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
 
     const cleanDigits = trimmedTarget.replace(/\D/g, "");
-    const safePhone = cleanDigits.length === 10 ? `+91${cleanDigits}` : trimmedTarget.startsWith("+") ? trimmedTarget : `+${cleanDigits}`;
+    const phone10 = cleanDigits.slice(-10);
+    const full12 = `91${phone10}`;
+    const safePhone = `+91${phone10}`;
 
     // 1. Try Supabase Auth
     if (supabaseUrl && (supabaseAnonKey || supabaseServiceKey)) {
@@ -50,24 +52,49 @@ export async function POST(req: NextRequest) {
           supaAuth = res.data;
           supaErr = res.error;
         } else {
-          // A. Try official Phone authentication
-          const phoneRes = await supabase.auth.signInWithPassword({
-            phone: safePhone,
+          const internalEmail = `${full12}@propertysnaps.in`;
+
+          // Ensure existing phone accounts created without an email alias get synced via Admin
+          if (supabaseServiceKey) {
+            try {
+              const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
+              const { data: listData } = await adminSupabase.auth.admin.listUsers({ perPage: 1000 });
+              const existingUser = listData?.users?.find((u) => {
+                const uPhone = (u.phone || "").replace(/\D/g, "");
+                const uMetaPhone = ((u.user_metadata?.phone_number || "") as string).replace(/\D/g, "");
+                return uPhone.endsWith(phone10) || uMetaPhone.endsWith(phone10) || u.email === internalEmail;
+              });
+
+              if (existingUser && (!existingUser.email || existingUser.email !== internalEmail)) {
+                // Attach internal email alias so password verification is 100% free & Twilio-free
+                await adminSupabase.auth.admin.updateUserById(existingUser.id, {
+                  email: internalEmail,
+                  email_confirm: true,
+                });
+              }
+            } catch (syncErr) {
+              console.warn("[login] Admin user sync notice:", syncErr);
+            }
+          }
+
+          // Authenticate with internal email alias
+          const emailRes = await supabase.auth.signInWithPassword({
+            email: internalEmail,
             password,
           });
-          if (phoneRes.data?.user) {
-            supaAuth = phoneRes.data;
+
+          if (emailRes.data?.user) {
+            supaAuth = emailRes.data;
           } else {
-            // B. Fallback to legacy dummy email for accounts created earlier
-            const legacyPhoneDigits = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
-            const legacyRes = await supabase.auth.signInWithPassword({
-              email: `${legacyPhoneDigits}@propertysnaps.in`,
+            // Fallback: try raw phone auth if enabled
+            const phoneRes = await supabase.auth.signInWithPassword({
+              phone: safePhone,
               password,
             });
-            if (legacyRes.data?.user) {
-              supaAuth = legacyRes.data;
+            if (phoneRes.data?.user) {
+              supaAuth = phoneRes.data;
             } else {
-              supaErr = phoneRes.error || legacyRes.error;
+              supaErr = emailRes.error || phoneRes.error;
             }
           }
         }
@@ -130,8 +157,13 @@ export async function POST(req: NextRequest) {
 
         // If Supabase gave an explicit auth error (e.g. invalid credentials)
         if (supaErr) {
+          const isPhoneDisabled = supaErr.message?.toLowerCase().includes("phone logins are disabled");
+          const isInvalidCreds = supaErr.message?.toLowerCase().includes("invalid login credentials");
+          const displayErr = isPhoneDisabled || isInvalidCreds
+            ? "Invalid WhatsApp mobile number or password. Please try again."
+            : supaErr.message || "Invalid credentials. Please try again.";
           return NextResponse.json(
-            { error: supaErr.message || "Invalid email or password. Please try again." },
+            { error: displayErr },
             { status: 401 }
           );
         }
