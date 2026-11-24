@@ -3,6 +3,7 @@ import { saveListingToMemory } from "@/lib/store";
 import { saveListingToDisk } from "@/lib/server-store";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Listing } from "@/types/database";
+import { checkRateLimit, createRateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
 function isValidUUID(str?: string | null): boolean {
   if (!str) return false;
@@ -63,6 +64,16 @@ async function uploadBase64ToStorage(
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 listing creations per 60 seconds per IP
+    const rateCheck = checkRateLimit(`create_listing:${ip}`, 5, 60);
+    if (!rateCheck.success) {
+      return createRateLimitResponse(
+        `Listing creation rate limit reached. Please wait ${rateCheck.retryAfterSec} seconds before creating another listing.`,
+        rateCheck.retryAfterSec
+      );
+    }
+
     const listing: Listing = await req.json();
 
     if (!listing || !listing.slug || !listing.title) {

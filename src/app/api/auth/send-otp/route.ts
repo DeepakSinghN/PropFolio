@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveOtp, createSignedOtpToken } from "@/lib/auth-store";
 import { sendWhatsAppMessage, sendWhatsAppOtpTemplate } from "@/lib/whatsapp";
+import { checkRateLimit, createRateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    // 1. IP Rate limit: max 5 OTP requests per minute per IP to prevent network flooding
+    const ipCheck = checkRateLimit(`otp_ip:${ip}`, 5, 60);
+    if (!ipCheck.success) {
+      return createRateLimitResponse(
+        `Too many OTP requests from your network. Please wait ${ipCheck.retryAfterSec}s.`,
+        ipCheck.retryAfterSec
+      );
+    }
+
     const body = await req.json();
     const rawTarget = (body.identifier || body.phone || body.email || "").toString().trim();
 
@@ -17,6 +28,15 @@ export async function POST(req: NextRequest) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(cleanEmail)) {
         return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+      }
+
+      // Target rate limit: 1 OTP per 60 seconds per email
+      const targetCheck = checkRateLimit(`otp_target:${cleanEmail}`, 1, 60);
+      if (!targetCheck.success) {
+        return createRateLimitResponse(
+          `Please wait ${targetCheck.retryAfterSec} seconds before requesting a new code.`,
+          targetCheck.retryAfterSec
+        );
       }
 
       // Generate or set OTP
@@ -67,6 +87,15 @@ export async function POST(req: NextRequest) {
         testAccount: true,
         waSent: true,
       });
+    }
+
+    // Target rate limit: 1 OTP per 60 seconds per phone number
+    const targetCheck = checkRateLimit(`otp_target:${cleanPhone}`, 1, 60);
+    if (!targetCheck.success) {
+      return createRateLimitResponse(
+        `Please wait ${targetCheck.retryAfterSec} seconds before requesting another WhatsApp code.`,
+        targetCheck.retryAfterSec
+      );
     }
 
     // Generate random 6-digit OTP

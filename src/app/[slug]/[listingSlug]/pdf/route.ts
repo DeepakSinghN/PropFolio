@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getListingFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
 import ListingBrochurePdf from "@/components/pdf/ListingBrochurePdf";
+import { checkRateLimit, createRateLimitResponse, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,16 @@ export async function GET(
   { params }: { params: Promise<{ slug: string; listingSlug: string }> }
 ) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 PDF brochure downloads per 60s per IP
+    const rateCheck = checkRateLimit(`pdf:${ip}`, 5, 60);
+    if (!rateCheck.success) {
+      return createRateLimitResponse(
+        `PDF brochure download limit reached. Please wait ${rateCheck.retryAfterSec} seconds.`,
+        rateCheck.retryAfterSec
+      );
+    }
+
     const { slug, listingSlug } = await params;
     let listing: any = null;
     let brokerProfile: any = null;

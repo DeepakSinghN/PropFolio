@@ -17,6 +17,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
+  Clock,
   ChevronRight,
   Bed,
   Maximize2,
@@ -320,10 +321,33 @@ export function ListingEditorContent() {
   /* ── AI Content ── */
   const [rawNotes, setRawNotes] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiCooldownTimer, setAiCooldownTimer] = useState(0);
+  const aiCooldownRef = useRef<NodeJS.Timeout | null>(null);
   const [aiDescription, setAiDescription] = useState("");
   const [aiHighlights, setAiHighlights] = useState<string[]>([]);
   const [aiNeighborhood, setAiNeighborhood] = useState<string[]>([]);
   const [aiError, setAiError] = useState<string | null>(null);
+
+  // Clear AI cooldown on unmount
+  useEffect(() => {
+    return () => {
+      if (aiCooldownRef.current) clearInterval(aiCooldownRef.current);
+    };
+  }, []);
+
+  const startAiCooldown = (seconds: number) => {
+    if (aiCooldownRef.current) clearInterval(aiCooldownRef.current);
+    setAiCooldownTimer(seconds);
+    aiCooldownRef.current = setInterval(() => {
+      setAiCooldownTimer((prev) => {
+        if (prev <= 1) {
+          if (aiCooldownRef.current) clearInterval(aiCooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   /* ── AI Magic Auto-Fill (WhatsApp / Raw Notes) ── */
   const [aiMagicInput, setAiMagicInput] = useState("");
@@ -560,7 +584,12 @@ export function ListingEditorContent() {
         body: JSON.stringify({ notes: textToParse }),
       });
       const res = await response.json();
-      if (!response.ok || !res.success) throw new Error(res.error || "AI generation failed");
+      if (!response.ok || !res.success) {
+        if (response.status === 429 && res.retryAfterSec) {
+          startAiCooldown(res.retryAfterSec);
+        }
+        throw new Error(res.error || "AI generation failed");
+      }
 
       const data = res.data as ParsedPropertyData;
       setAiParsedPreview(data);
@@ -688,7 +717,12 @@ export function ListingEditorContent() {
         body: JSON.stringify({ notes: formContext }),
       });
       const res = await response.json();
-      if (!response.ok || !res.success) throw new Error(res.error || "AI generation failed");
+      if (!response.ok || !res.success) {
+        if (response.status === 429 && res.retryAfterSec) {
+          startAiCooldown(res.retryAfterSec);
+        }
+        throw new Error(res.error || "AI generation failed");
+      }
 
       const data = res.data as ParsedPropertyData;
       setAiDescription(data.description || "");
@@ -1102,13 +1136,18 @@ export function ListingEditorContent() {
           <button
             type="button"
             onClick={() => handleMagicAIFill()}
-            disabled={isGeneratingAI || !aiMagicInput.trim()}
+            disabled={isGeneratingAI || aiCooldownTimer > 0 || !aiMagicInput.trim()}
             className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-700/20 hover:from-emerald-500 hover:to-teal-600 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isGeneratingAI ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-white" />
                 <span>AI extracting & filling details...</span>
+              </>
+            ) : aiCooldownTimer > 0 ? (
+              <>
+                <Clock className="h-4 w-4 animate-pulse text-amber-200" />
+                <span>AI Cooldown: Available in {aiCooldownTimer}s</span>
               </>
             ) : (
               <>
@@ -1122,6 +1161,14 @@ export function ListingEditorContent() {
             Extracts BHK, price, area, floor, parking & 15+ amenities
           </span>
         </div>
+
+        {/* Cooldown Active Banner */}
+        {aiCooldownTimer > 0 && (
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-amber-300/60 bg-amber-50/80 px-3.5 py-2 text-xs font-semibold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+            <Clock className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 animate-spin" />
+            <span>AI request limit reached. Rate limit resets in <span className="font-mono font-bold text-amber-700 dark:text-amber-300 underline">{aiCooldownTimer}s</span>.</span>
+          </div>
+        )}
 
         {/* Error message */}
         {aiError && (
@@ -1959,13 +2006,18 @@ export function ListingEditorContent() {
         <button
           type="button"
           onClick={handleGenerateAI}
-          disabled={isGeneratingAI}
+          disabled={isGeneratingAI || aiCooldownTimer > 0}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a3c34] py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#0f2a24] active:scale-95 disabled:opacity-50"
         >
           {isGeneratingAI ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>AI is writing content...</span>
+            </>
+          ) : aiCooldownTimer > 0 ? (
+            <>
+              <Clock className="h-4 w-4 animate-pulse text-amber-300" />
+              <span>Cooldown Active: Wait {aiCooldownTimer}s</span>
             </>
           ) : (
             <>
@@ -1974,6 +2026,13 @@ export function ListingEditorContent() {
             </>
           )}
         </button>
+
+        {aiCooldownTimer > 0 && (
+          <div className="mt-2.5 flex items-center gap-2 rounded-xl border border-amber-300/60 bg-amber-50/80 px-3.5 py-2 text-xs font-semibold text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+            <Clock className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>AI rate limit active. Available again in <span className="font-mono font-bold text-amber-700 dark:text-amber-300">{aiCooldownTimer}s</span>.</span>
+          </div>
+        )}
 
         {aiError && (
           <p className="mt-2 text-xs font-semibold text-rose-600">{aiError}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,6 +17,7 @@ import {
   EyeOff,
   KeyRound,
   Check,
+  Clock,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -38,18 +39,27 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
+  const resendTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Phone validation (10 digits)
   const cleanPhoneDigits = phoneNumber.replace(/\D/g, "");
   const isValidPhone = cleanPhoneDigits.length >= 10;
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (resendTimerRef.current) clearInterval(resendTimerRef.current);
+    };
+  }, []);
+
   // Start Resend Timer for OTP
-  const startCountdown = () => {
-    setResendTimer(30);
-    const interval = setInterval(() => {
+  const startCountdown = (seconds = 60) => {
+    if (resendTimerRef.current) clearInterval(resendTimerRef.current);
+    setResendTimer(seconds);
+    resendTimerRef.current = setInterval(() => {
       setResendTimer((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
+          if (resendTimerRef.current) clearInterval(resendTimerRef.current);
           return 0;
         }
         return prev - 1;
@@ -99,13 +109,18 @@ export default function LoginClient() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to send WhatsApp code");
+      if (!res.ok) {
+        if (res.status === 429 && data.retryAfterSec) {
+          startCountdown(data.retryAfterSec);
+        }
+        throw new Error(data.error || "Failed to send WhatsApp code");
+      }
 
       setOtpSent(true);
       if (data.otp_token) {
         setOtpToken(data.otp_token);
       }
-      startCountdown();
+      startCountdown(60);
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to send WhatsApp code");
     } finally {
@@ -320,11 +335,16 @@ export default function LoginClient() {
 
                   <button
                     type="submit"
-                    disabled={loading || !isValidPhone}
+                    disabled={loading || !isValidPhone || resendTimer > 0}
                     className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#00974e] py-3 text-sm font-bold text-white shadow-md shadow-[#00974e]/20 transition-all hover:bg-[#008042] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : resendTimer > 0 ? (
+                      <>
+                        <Clock className="h-4 w-4 animate-pulse" />
+                        <span>Please wait {resendTimer}s</span>
+                      </>
                     ) : (
                       <>
                         <MessageCircle className="h-4 w-4" />
