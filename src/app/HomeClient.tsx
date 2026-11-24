@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,11 +16,28 @@ import {
   Zap,
   Sliders,
   Eye,
-  ArrowDown
+  ArrowDown,
+  LayoutDashboard,
+  LogIn
 } from "lucide-react";
 import HeroInteractiveDemo from "@/components/HeroInteractiveDemo";
 
 export default function HomeClient() {
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setCurrentUser(data.user);
+        } else {
+          setCurrentUser(null);
+        }
+      })
+      .catch(() => setCurrentUser(null));
+  }, []);
+
   const waBotNumber = "+1 (555) 175-6346";
   const waBotLink = "https://wa.me/15551756346?text=Create%20listing";
 
@@ -63,13 +81,23 @@ export default function HomeClient() {
               <span>Create Free Listing on WhatsApp</span>
             </a>
 
-            <Link
-              href="/signup"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
-            >
-              <Eye className="h-4 w-4 text-[#862e9f]" />
-              <span>Get Started Free</span>
-            </Link>
+            {currentUser ? (
+              <Link
+                href="/dashboard"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
+              >
+                <LayoutDashboard className="h-4 w-4 text-[#862e9f]" />
+                <span>Go to Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
+              >
+                <LogIn className="h-4 w-4 text-[#862e9f]" />
+                <span>Broker Sign In</span>
+              </Link>
+            )}
           </div>
 
           <div className="mt-5 flex items-center justify-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -385,13 +413,23 @@ export default function HomeClient() {
                 Live property pages created with Property Snaps
               </h2>
             </div>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-slate-200 dark:hover:text-[#c974e3]"
-            >
-              <span>Open Broker Dashboard</span>
-              <ArrowRight className="h-3.5 w-3.5 text-[#862e9f]" />
-            </Link>
+            {currentUser ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-slate-200 dark:hover:text-[#c974e3]"
+              >
+                <span>Open Broker Dashboard</span>
+                <ArrowRight className="h-3.5 w-3.5 text-[#862e9f]" />
+              </Link>
+            ) : (
+              <Link
+                href="/login?redirect=/dashboard"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-slate-200 dark:hover:text-[#c974e3]"
+              >
+                <span>Broker Login</span>
+                <ArrowRight className="h-3.5 w-3.5 text-[#862e9f]" />
+              </Link>
+            )}
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -528,13 +566,23 @@ export default function HomeClient() {
               <span>Send Property on WhatsApp</span>
             </a>
 
-            <Link
-              href="/dashboard"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white hover:border-[#862e9f] active:scale-95 sm:w-auto"
-            >
-              <span>Open Broker Dashboard</span>
-              <ArrowRight className="h-4 w-4 text-[#862e9f]" />
-            </Link>
+            {currentUser ? (
+              <Link
+                href="/dashboard"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white hover:border-[#862e9f] active:scale-95 sm:w-auto"
+              >
+                <span>Open Broker Dashboard</span>
+                <ArrowRight className="h-4 w-4 text-[#862e9f]" />
+              </Link>
+            ) : (
+              <Link
+                href="/login?redirect=/dashboard"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white hover:border-[#862e9f] active:scale-95 sm:w-auto"
+              >
+                <span>Broker Login</span>
+                <ArrowRight className="h-4 w-4 text-[#862e9f]" />
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -577,16 +625,33 @@ export default function HomeClient() {
                     Pricing & Plans
                   </Link>
                 </li>
-                <li>
-                  <Link href="/dashboard" className="hover:text-[#0a1128] dark:hover:text-white transition">
-                    Broker Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/dashboard/listings/new" className="hover:text-[#0a1128] dark:hover:text-white transition">
-                    Create Listing
-                  </Link>
-                </li>
+                {currentUser ? (
+                  <>
+                    <li>
+                      <Link href="/dashboard" className="hover:text-[#0a1128] dark:hover:text-white transition">
+                        Broker Dashboard
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/dashboard/listings/new" className="hover:text-[#0a1128] dark:hover:text-white transition">
+                        Create Listing
+                      </Link>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link href="/login" className="hover:text-[#0a1128] dark:hover:text-white transition">
+                        Broker Login
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/signup" className="hover:text-[#0a1128] dark:hover:text-white transition">
+                        Create Free Account
+                      </Link>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
 

@@ -19,6 +19,23 @@ export async function middleware(request: NextRequest) {
     return sessionResponse;
   }
 
+  // Security: Protect /dashboard routes for unauthenticated users
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+    const phoneCookie = request.cookies.get("propfolio-phone-session");
+    let hasSupabaseAuth = false;
+    for (const c of request.cookies.getAll()) {
+      if (c.name.includes("-auth-token") || c.name.startsWith("sb-")) {
+        hasSupabaseAuth = true;
+        break;
+      }
+    }
+
+    if (!phoneCookie?.value && !hasSupabaseAuth) {
+      const loginUrl = new URL(`/login?redirect=${encodeURIComponent(pathname)}`, request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   const rootDomain = "propertysnaps.in";
   const cleanHost = hostname.split(":")[0].toLowerCase();
 

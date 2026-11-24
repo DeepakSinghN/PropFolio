@@ -190,7 +190,7 @@ export default function Navbar() {
 
           {/* Primary CTA (Always visible, adapts on mobile) */}
           <Link
-            href="/dashboard/listings/new"
+            href={currentUser ? "/dashboard/listings/new" : "/login?redirect=/dashboard/listings/new"}
             className="flex items-center gap-1.5 rounded-xl bg-[#00974e] px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-white shadow-md shadow-[#00974e]/20 border border-emerald-400/30 transition hover:bg-[#008042] active:scale-95"
           >
             <Plus className="h-4 w-4 text-white" />
@@ -282,20 +282,37 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link
-                href="/dashboard/listings/new"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/dashboard/listings/new"
-                  ? "bg-[#00974e] text-white"
-                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Plus className="h-4 w-4 text-[#862e9f]" />
-                  <span>Create New Listing</span>
-                </div>
-                <ChevronRight className="h-4 w-4 opacity-50" />
-              </Link>
+              {currentUser ? (
+                <Link
+                  href="/dashboard/listings/new"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/dashboard/listings/new"
+                    ? "bg-[#00974e] text-white"
+                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Plus className="h-4 w-4 text-[#862e9f]" />
+                    <span>Create New Listing</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 opacity-50" />
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/login"
+                    ? "bg-[#00974e] text-white"
+                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-900"
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <LogIn className="h-4 w-4 text-[#862e9f]" />
+                    <span>Broker Sign In</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 opacity-50" />
+                </Link>
+              )}
 
               <Link
                 href="/pricing"

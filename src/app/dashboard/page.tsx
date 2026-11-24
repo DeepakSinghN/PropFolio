@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { getPhoneSession } from "@/lib/auth-store";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAllCollectionsFromDisk, getAllListingsFromDisk } from "@/lib/server-store";
@@ -16,13 +17,15 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const phoneCookie = cookieStore.get("propfolio-phone-session");
 
-  let broker = DEMO_BROKER;
+  let broker: any = null;
   let brokerId: string | null = null;
+  let isAuthenticated = false;
 
   if (phoneCookie?.value) {
     const session = getPhoneSession(phoneCookie.value);
     if (session?.profile) {
       broker = { ...DEMO_BROKER, ...session.profile };
+      isAuthenticated = true;
       if (isValidUUID(session.profile.id)) {
         brokerId = session.profile.id;
       }
@@ -30,6 +33,36 @@ export default async function DashboardPage() {
   }
 
   const supabase = createAdminClient();
+
+  // If not authenticated via phone cookie, check Supabase Auth session
+  if (!isAuthenticated) {
+    try {
+      const { createClient } = await import("@/lib/supabase/server");
+      const clientSupabase = await createClient();
+      const {
+        data: { user },
+      } = await clientSupabase.auth.getUser();
+
+      if (user) {
+        isAuthenticated = true;
+        broker = {
+          ...DEMO_BROKER,
+          id: user.id,
+          user_id: user.id,
+          email: user.email,
+          phone_number: user.phone || "",
+          full_name: user.user_metadata?.full_name || "Real Estate Broker",
+          ...user.user_metadata,
+        };
+        brokerId = user.id;
+      }
+    } catch {}
+  }
+
+  // Security: Unauthenticated users are redirected to login
+  if (!isAuthenticated || !broker) {
+    redirect("/login?redirect=/dashboard");
+  }
 
   // If brokerId is not a UUID, resolve it from Supabase profiles
   if (supabase && !brokerId && (broker.slug || broker.email || broker.phone_number)) {
