@@ -299,7 +299,7 @@ export default function Navbar() {
                 </Link>
               ) : (
                 <Link
-                  href="/login"
+                  href="/login?redirect=/dashboard/listings/new"
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition ${pathname === "/login"
                     ? "bg-[#00974e] text-white"
@@ -307,8 +307,8 @@ export default function Navbar() {
                     }`}
                 >
                   <div className="flex items-center gap-3">
-                    <LogIn className="h-4 w-4 text-[#862e9f]" />
-                    <span>Broker Sign In</span>
+                    <Sparkles className="h-4 w-4 text-[#862e9f]" />
+                    <span>Start Your Free Listing</span>
                   </div>
                   <ChevronRight className="h-4 w-4 opacity-50" />
                 </Link>

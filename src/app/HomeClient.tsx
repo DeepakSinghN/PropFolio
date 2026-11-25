@@ -91,11 +91,11 @@ export default function HomeClient() {
               </Link>
             ) : (
               <Link
-                href="/login"
+                href="/login?redirect=/dashboard/listings/new"
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0a1128] shadow-sm transition hover:border-[#862e9f] hover:text-[#862e9f] hover:bg-slate-50 active:scale-95 sm:w-auto dark:border-slate-800 dark:bg-[#0f182e] dark:text-slate-200 dark:hover:border-[#862e9f]"
               >
-                <LogIn className="h-4 w-4 text-[#862e9f]" />
-                <span>Broker Sign In</span>
+                <Sparkles className="h-4 w-4 text-[#862e9f]" />
+                <span>Start Your Free Listing</span>
               </Link>
             )}
           </div>
@@ -423,10 +423,10 @@ export default function HomeClient() {
               </Link>
             ) : (
               <Link
-                href="/login?redirect=/dashboard"
+                href="/login?redirect=/dashboard/listings/new"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0a1128] hover:text-[#862e9f] dark:text-slate-200 dark:hover:text-[#c974e3]"
               >
-                <span>Broker Login</span>
+                <span>Start Your Free Listing</span>
                 <ArrowRight className="h-3.5 w-3.5 text-[#862e9f]" />
               </Link>
             )}
@@ -576,10 +576,11 @@ export default function HomeClient() {
               </Link>
             ) : (
               <Link
-                href="/login?redirect=/dashboard"
+                href="/login?redirect=/dashboard/listings/new"
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/80 px-8 py-4 text-sm font-semibold text-slate-200 shadow-sm transition hover:bg-slate-800 hover:text-white hover:border-[#862e9f] active:scale-95 sm:w-auto"
               >
-                <span>Broker Login</span>
+                <Sparkles className="h-4 w-4 text-[#c974e3]" />
+                <span>Start Your Free Listing</span>
                 <ArrowRight className="h-4 w-4 text-[#862e9f]" />
               </Link>
             )}
