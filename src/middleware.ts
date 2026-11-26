@@ -7,7 +7,11 @@ export async function middleware(request: NextRequest) {
     return sessionResponse;
   }
 
-  const hostname = request.headers.get("host") || "";
+  const hostname =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.hostname ||
+    "";
   const { pathname } = request.nextUrl;
 
   // Ignore static assets, internal Next.js routes, and API routes
@@ -73,41 +77,47 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(targetUrl);
     }
 
+    // Helper to rewrite while preserving Supabase session cookies & custom headers,
+    // explicitly omitting Next.js internal 'x-middleware-*' headers which abort rewrites!
+    const rewriteWithSession = (targetPath: string) => {
+      const url = request.nextUrl.clone();
+      url.pathname = targetPath;
+      const response = NextResponse.rewrite(url);
+
+      if (sessionResponse) {
+        sessionResponse.cookies.getAll().forEach((cookie) => {
+          response.cookies.set(cookie);
+        });
+
+        sessionResponse.headers.forEach((value, key) => {
+          if (!key.toLowerCase().startsWith("x-middleware-")) {
+            response.headers.set(key, value);
+          }
+        });
+      }
+
+      return response;
+    };
+
     // 1. Root of subdomain -> rewrite to /[slug]
     if (pathname === "/" || pathname === "") {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${subdomain}`;
-      return NextResponse.rewrite(url, {
-        headers: sessionResponse.headers,
-      });
+      return rewriteWithSession(`/${subdomain}`);
     }
 
     // 2. /l/[listingSlug] -> rewrite to /[slug]/[listingSlug]
     if (pathname.startsWith("/l/")) {
       const listingPath = pathname.replace(/^\/l/, "");
-      const url = request.nextUrl.clone();
-      url.pathname = `/${subdomain}${listingPath}`;
-      return NextResponse.rewrite(url, {
-        headers: sessionResponse.headers,
-      });
+      return rewriteWithSession(`/${subdomain}${listingPath}`);
     }
 
     // 3. /c/[collectionSlug] -> rewrite to /[slug]/c/[collectionSlug]
     if (pathname.startsWith("/c/")) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${subdomain}${pathname}`;
-      return NextResponse.rewrite(url, {
-        headers: sessionResponse.headers,
-      });
+      return rewriteWithSession(`/${subdomain}${pathname}`);
     }
 
     // 4. Any direct listing slug (e.g. deepak.propertysnaps.in/4-bhk-bodakdev-401664)
     if (!pathname.startsWith(`/${subdomain}`)) {
-      const url = request.nextUrl.clone();
-      url.pathname = `/${subdomain}${pathname}`;
-      return NextResponse.rewrite(url, {
-        headers: sessionResponse.headers,
-      });
+      return rewriteWithSession(`/${subdomain}${pathname}`);
     }
   }
 
