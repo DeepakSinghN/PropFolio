@@ -435,7 +435,8 @@ export default function HomeClient() {
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Property 1 */}
             <Link
-              href="/signup"
+              href="/broker/4-bhk-luxury-villa-sky-terrace"
+              target="_blank"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
@@ -464,12 +465,17 @@ export default function HomeClient() {
                 <p className="mt-1 text-xs text-slate-500">
                   Malviya Nagar, Jaipur
                 </p>
+                <div className="mt-3 flex items-center gap-1.5 text-xs font-bold text-[#862e9f] dark:text-[#c974e3]">
+                  <span>Open Live Page</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </Link>
 
             {/* Property 2 */}
             <Link
-              href="/signup"
+              href="/broker/luxurious-3-bhk-furnished-flat"
+              target="_blank"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
@@ -498,12 +504,17 @@ export default function HomeClient() {
                 <p className="mt-1 text-xs text-slate-500">
                   Satellite, Near ISRO, Ahmedabad
                 </p>
+                <div className="mt-3 flex items-center gap-1.5 text-xs font-bold text-[#862e9f] dark:text-[#c974e3]">
+                  <span>Open Live Page</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </Link>
 
             {/* Property 3 */}
             <Link
-              href="/signup"
+              href="/broker/prime-corner-residential-plot"
+              target="_blank"
               className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-lg hover:border-[#862e9f]/40 dark:border-slate-800 dark:bg-[#0c1222]"
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#090e1c]">
@@ -516,7 +527,7 @@ export default function HomeClient() {
                   PLOT · FOR SALE
                 </div>
                 <div className="absolute bottom-3 right-3 rounded-full bg-[#0a1128]/80 px-2.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
-                  2 Photos
+                  3 Photos
                 </div>
               </div>
               <div className="p-5 text-left">
@@ -532,6 +543,10 @@ export default function HomeClient() {
                 <p className="mt-1 text-xs text-slate-500">
                   Sector 150, Noida Expressway
                 </p>
+                <div className="mt-3 flex items-center gap-1.5 text-xs font-bold text-[#862e9f] dark:text-[#c974e3]">
+                  <span>Open Live Page</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </Link>
           </div>

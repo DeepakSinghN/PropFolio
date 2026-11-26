@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { Listing, PropertyCollection } from "@/types/database";
+import { INITIAL_LISTINGS } from "@/lib/store";
 
 // Global cache across serverless warm invocations
 const g = globalThis as unknown as {
@@ -79,12 +80,19 @@ export function saveListingToDisk(listing: Listing) {
 
 export function getListingFromDisk(slug: string): Listing | undefined {
   const map = ensureFileStore();
-  return map.get(slug);
+  return map.get(slug) || INITIAL_LISTINGS.find((l) => l.slug === slug);
 }
 
 export function getAllListingsFromDisk(): Listing[] {
   const map = ensureFileStore();
-  return Array.from(map.values());
+  const list = Array.from(map.values());
+  const slugs = new Set(list.map((l) => l.slug));
+  for (const init of INITIAL_LISTINGS) {
+    if (!slugs.has(init.slug)) {
+      list.push(init);
+    }
+  }
+  return list;
 }
 
 export function deleteListingFromDisk(slug: string): boolean {
