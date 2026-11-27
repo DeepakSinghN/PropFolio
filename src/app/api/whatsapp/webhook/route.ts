@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
           to: from,
           text:
             failLang === "hinglish"
-              ? `⚠️ *Photo download nahi ho payi* (${mediaResult.reason || "error"}).\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`
-              : `⚠️ *Could not download photo* (${mediaResult.reason || "error"}).\n\nYou have 2 options:\n1️⃣ Please **resend the photo**\n2️⃣ Or reply *Proceed without photos* (or *2*) to continue without it.`,
+              ? `⚠️ Photo save nahi hui (${mediaResult.reason || "error"}).\n1️⃣ Dobara bhejein ya 2️⃣ *2* likh kar bina photo ke aage badhein.`
+              : `⚠️ Photo couldn't be saved (${mediaResult.reason || "error"}).\n1️⃣ Resend photo or 2️⃣ reply *2* to skip photos.`,
         });
         return NextResponse.json({ status: "media_download_failed", reason: mediaResult.reason });
       }
@@ -128,8 +128,8 @@ export async function POST(req: NextRequest) {
           to: from,
           text:
             activeLang === "hinglish"
-              ? `⚠️ Aapne abhi tak koi property details ya photos nahi bheji hain.\n\nKripya pehle details bhejein, aur sab complete hone ke baad *Done* likhein!`
-              : `⚠️ You haven't sent any property details or photos yet.\n\nPlease send the property details first, then reply *Done* when ready!`,
+              ? `⚠️ Pehle property details/photos bhejein, fir *Done* likhein.`
+              : `⚠️ Please send property details or photos first, then reply *Done*.`,
         });
         return NextResponse.json({ status: "awaiting_notes" });
       }
@@ -140,8 +140,8 @@ export async function POST(req: NextRequest) {
           to: from,
           text:
             activeLang === "hinglish"
-              ? `⏸️ *Aapki pichli photo download nahi ho payi thi.*\n\nKripya pehle choose karein:\n1️⃣ Photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`
-              : `⏸️ *Your previous photo could not be downloaded.*\n\nPlease choose an option:\n1️⃣ **Resend the photo**\n2️⃣ Or reply *Proceed without photos* (or *2*) to continue without it.`,
+              ? `⏸️ Pichli photo save nahi hui thi.\n1️⃣ Photo dobara bhejein ya 2️⃣ *2* likh kar bina photo ke aage badhein.`
+              : `⏸️ Previous photo couldn't be saved.\n1️⃣ Resend photo or 2️⃣ reply *2* to skip photos.`,
         });
         return NextResponse.json({ status: "awaiting_media_choice" });
       }
@@ -171,8 +171,8 @@ export async function POST(req: NextRequest) {
         to: from,
         text:
           activeLang === "hinglish"
-            ? `👍 *Property details receive hona start ho gayi hain!*\n\nAap apni property ki baaki saari details aur photos bhejte rahiye. Jab sab info poori ho jaye, toh bas *Done* likh dena!`
-            : `👍 *Got it! Receiving your property details.*\n\nKeep sending the remaining details and photos. When you're finished, simply reply *Done*!`,
+            ? `👍 Details mil gayi! Baaki photos/notes bhejein, aur complete hone par *Done* likhein.`
+            : `👍 Got it! Keep sending details & photos, and reply *Done* when finished.`,
       });
 
       return NextResponse.json({ status: "first_acknowledged" });
@@ -205,8 +205,8 @@ async function executeCreateListing(
     to: from,
     text:
       lang === "hinglish"
-        ? `⏳ *Samajh gaya!* AI aapki property details analyze karke website aur brochure generate kar raha hai...`
-        : `⏳ *Got it!* Creating your property listing page and brochure...`,
+        ? `⏳ Property page ban raha hai...`
+        : `⏳ Creating your property page...`,
   });
 
   // Call Groq AI
