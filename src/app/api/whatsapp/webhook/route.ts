@@ -11,6 +11,7 @@ import {
   getUserSession,
   clearUserSession,
   markSessionAcknowledged,
+  setSessionMediaFailed,
 } from "@/lib/server-store";
 
 function isValidUUID(str?: string | null): boolean {
@@ -72,23 +73,25 @@ export async function POST(req: NextRequest) {
       const mediaId = message.image?.id;
       const currentPhotoIndex = session?.photos?.length || 0;
       console.log(`Processing incoming photo from ${from} (mediaId: ${mediaId}, index: ${currentPhotoIndex})`);
-      const downloadedUrl = await downloadMetaMedia(mediaId, currentPhotoIndex);
+      const mediaResult = await downloadMetaMedia(mediaId, currentPhotoIndex);
 
-      if (!downloadedUrl) {
+      if (!mediaResult.url) {
         if (incomingText.trim()) {
           appendUserSession(from, incomingText.trim(), undefined, contactName || undefined);
         }
+        setSessionMediaFailed(from, true);
         await sendWhatsAppMessage({
           to: from,
-          text: `⚠️ *Photo download nahi ho payi.*\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *Done*) likhein.`,
+          text: `⚠️ *Photo download nahi ho payi* (${mediaResult.reason || "error"}).\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`,
         });
-        return NextResponse.json({ status: "media_download_failed" });
+        return NextResponse.json({ status: "media_download_failed", reason: mediaResult.reason });
       }
-      incomingPhotoUrl = downloadedUrl;
+      setSessionMediaFailed(from, false);
+      incomingPhotoUrl = mediaResult.url;
     }
 
     const trimmed = incomingText.trim().toLowerCase();
-    const isProceedWithoutPhotos = /^(proceed without photos|without photos|bina photo|bina photos|skip photos)$/i.test(trimmed);
+    const isProceedWithoutPhotos = /^(2|proceed without photos|without photos|bina photo|bina photos|skip photos)$/i.test(trimmed);
     const isDone = isProceedWithoutPhotos || /^(done|ho gaya|khatam|banao|ready|create|ok done)$/i.test(trimmed);
 
     // CASE 1: User says "Done" or "Proceed without photos" -> Generate listing preview!
@@ -100,6 +103,15 @@ export async function POST(req: NextRequest) {
           text: `⚠️ Aapne abhi tak koi property details ya photos nahi bheji hain.\n\nKripya pehle details bhejein, aur sab complete hone ke baad *Done* likhein!`,
         });
         return NextResponse.json({ status: "awaiting_notes" });
+      }
+
+      // If a photo just failed and user sent "Done" before selecting an option, wait for their choice!
+      if ((session as any)?.mediaFailed && !isProceedWithoutPhotos) {
+        await sendWhatsAppMessage({
+          to: from,
+          text: `⏸️ *Aapki pichli photo download nahi ho payi thi.*\n\nKripya pehle choose karein:\n1️⃣ Photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`,
+        });
+        return NextResponse.json({ status: "awaiting_media_choice" });
       }
 
       // Generate preview strictly using user's provided photos (unless user chose proceed without photos)

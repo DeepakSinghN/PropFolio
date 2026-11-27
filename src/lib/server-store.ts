@@ -223,6 +223,21 @@ export function setSessionAskedForPhotos(phone: string, asked: boolean) {
   }
 }
 
+export function setSessionMediaFailed(phone: string, failed: boolean) {
+  const map = loadSessions();
+  const session = map.get(phone) || {
+    phone,
+    notes: [],
+    photos: [],
+    askedForPhotos: false,
+    updatedAt: Date.now(),
+  };
+  (session as any).mediaFailed = failed;
+  session.updatedAt = Date.now();
+  map.set(phone, session);
+  saveSessions(map);
+}
+
 export function getUserSession(phone: string): UserSession | undefined {
   const map = loadSessions();
   return map.get(phone);

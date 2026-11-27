@@ -206,12 +206,15 @@ export async function sendWhatsAppOtpTemplate({
  * Downloads media from Meta WhatsApp Cloud API and uploads to Supabase Storage CDN.
  * Returns the public CDN URL, or null if download/upload fails (never injects fake fallback images).
  */
-export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number = 0): Promise<string | null> {
+export async function downloadMetaMedia(
+  mediaId: string,
+  _fallbackIndex: number = 0
+): Promise<{ url: string | null; reason?: string }> {
   const accessToken = (process.env.WHATSAPP_ACCESS_TOKEN || "").trim();
 
   if (!accessToken || !mediaId) {
     console.warn("WhatsApp access token or mediaId missing");
-    return null;
+    return { url: null, reason: "Missing WHATSAPP_ACCESS_TOKEN or mediaId" };
   }
 
   try {
@@ -226,7 +229,7 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
     if (!metaRes.ok) {
       const errText = await metaRes.text();
       console.error(`Meta media retrieval failed (${metaRes.status}):`, errText);
-      return null;
+      return { url: null, reason: `Meta API ${metaRes.status}` };
     }
 
     const mediaData = await metaRes.json();
@@ -235,7 +238,7 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
     const downloadUrl = mediaData.url;
     if (!downloadUrl) {
       console.warn("No download URL returned by Meta for media", mediaId);
-      return null;
+      return { url: null, reason: "Meta returned empty media URL" };
     }
 
     // 2. Download the binary media from Meta CDN (requires User-Agent & Auth)
@@ -248,7 +251,7 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
 
     if (!fileRes.ok) {
       console.error(`Failed to download binary media (${fileRes.status})`);
-      return null;
+      return { url: null, reason: `Meta CDN ${fileRes.status}` };
     }
 
     const arrayBuffer = await fileRes.arrayBuffer();
@@ -271,6 +274,7 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
       ""
     ).trim();
 
+    let lastUploadErr = "";
     if (supaUrl && supaKey && !supaKey.includes("...")) {
       try {
         const { createClient } = await import("@supabase/supabase-js");
@@ -294,14 +298,18 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
             .getPublicUrl(fileName);
           if (pubData?.publicUrl) {
             console.log(`[Media Download] Uploaded to Supabase CDN: ${pubData.publicUrl}`);
-            return pubData.publicUrl;
+            return { url: pubData.publicUrl };
           }
         } else {
+          lastUploadErr = uploadError.message;
           console.warn("[Media Download] Supabase upload warning:", uploadError.message);
         }
       } catch (supaErr: any) {
+        lastUploadErr = supaErr?.message || "Supabase storage error";
         console.warn("[Media Download] Supabase storage fallback:", supaErr?.message);
       }
+    } else {
+      lastUploadErr = "Supabase env vars missing";
     }
 
     // 4. Local filesystem fallback (dev only; Vercel public/ is read-only)
@@ -314,13 +322,13 @@ export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number 
       fs.writeFileSync(filePath, buffer);
 
       console.log(`[Media Download] Saved locally ${filePath} (${buffer.length} bytes)`);
-      return `/uploads/${fileName}`;
+      return { url: `/uploads/${fileName}` };
     }
 
-    return null;
+    return { url: null, reason: lastUploadErr || "Storage upload failed" };
   } catch (err: any) {
     console.error("Error downloading Meta media:", err.message);
-    return null;
+    return { url: null, reason: err?.message || "Unknown download error" };
   }
 }
 
