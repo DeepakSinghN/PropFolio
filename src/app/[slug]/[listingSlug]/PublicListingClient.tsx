@@ -197,12 +197,12 @@ export default function PublicListingClient({
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Fallback to gallery photos if listing has 0 photos
+  // Keep strictly user-provided photos (do not inject fake stock photos)
   const initialPhotos = useMemo(() => {
     if (listing.photos && listing.photos.length > 0) {
       return listing.photos;
     }
-    return DEFAULT_GALLERY_PHOTOS;
+    return [];
   }, [listing.photos]);
 
   const [photos, setPhotos] = useState<ListingPhoto[]>(initialPhotos);
@@ -544,17 +544,21 @@ export default function PublicListingClient({
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
-                <img
-                  src={currentPhoto.photo_url}
-                  alt={listing.title}
-                  loading="eager"
-                  decoding="async"
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_GALLERY_PHOTOS[0].photo_url;
-                  }}
-                  onClick={() => setIsLightboxOpen(true)}
-                  className="h-full w-full cursor-zoom-in object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
-                />
+                {currentPhoto?.photo_url ? (
+                  <img
+                    src={currentPhoto.photo_url}
+                    alt={listing.title}
+                    loading="eager"
+                    decoding="async"
+                    onClick={() => setIsLightboxOpen(true)}
+                    className="h-full w-full cursor-zoom-in object-cover transition duration-500 ease-out group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-900 dark:text-slate-500">
+                    <Building2 className="h-10 w-10 mb-2 opacity-60" />
+                    <span className="text-xs font-medium">No property photos uploaded</span>
+                  </div>
+                )}
 
                 {/* Top Badges */}
                 <div className="absolute left-3.5 top-3.5 sm:left-4 sm:top-4 z-20 flex flex-wrap items-center gap-1.5 sm:gap-2 pointer-events-none">

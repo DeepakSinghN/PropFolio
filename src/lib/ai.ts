@@ -59,38 +59,41 @@ async function parseWithOpenAICompatible(
   });
 
   const systemPrompt = `
-You are an expert real estate AI copywriter and listing data extraction system.
-Analyze the unstructured property notes sent by a real estate broker.
-The notes might be in English, Hindi, Hinglish, or casual shorthand broker jargon (like "4bhk flat sale bodakdev 1650 carpet 2450 sba 12th flr west facing 4 baths 2 car park ready to move asking 3.25 cr nego").
+You are a strict real estate listing data extraction system.
+Analyze ONLY the property notes sent by a real estate broker (English, Hindi, Hinglish, or shorthand).
 
-Extract all details into a clean, highly structured, professional listing.
+STRICT RULES (NO HALLUCINATION):
+1. Extract ONLY facts explicitly stated in the Broker Notes.
+2. NEVER invent, guess, assume, or add any amenities, floor, facing, possession, parking, property_age, nearby landmarks, or extra claims not present in the notes.
+3. If a field is NOT mentioned in the notes, return null (for strings/numbers) or [] (for arrays).
+4. For "description", rewrite ONLY the broker's stated facts into clean, clear sentences—do not add unmentioned features.
 
-Respond ONLY with valid JSON matching this exact structure:
+Respond ONLY with valid JSON matching this structure:
 {
-  "title": "Crisp premium title (e.g. Luxurious 4 BHK Flat for Sale in Bodakdev, Ahmedabad)",
-  "slug": "url-friendly-slug (e.g. 4-bhk-flat-bodakdev-ahmedabad)",
-  "description": "Polished 2-paragraph sales description highlighting key layout & features",
+  "title": "Crisp title based strictly on stated details (e.g. 4 BHK Flat for Sale in Bodakdev, Ahmedabad)",
+  "slug": "url-friendly-slug",
+  "description": "Clean factual summary using ONLY details from the notes",
   "property_type": "Apartment", // Must be one of: Apartment, Villa, Penthouse, Builder Floor, Plot, Commercial
   "listing_type": "Sale", // Must be: Sale or Rent
-  "bhk": 4,
-  "bedrooms": 4,
-  "bathrooms": 4,
-  "carpet_area_sqft": 1650,
-  "super_built_up_sqft": 2450,
-  "floor": "12th Floor",
-  "furnishing": "Semi-Furnished", // Furnished, Semi-Furnished, or Unfurnished
-  "facing": "West Facing",
-  "possession": "Ready to Move",
-  "parking": "2 Covered Car Parking",
-  "property_age": "5-Year-Old",
-  "price_amount": 32500000,
-  "display_price": "₹3.25 Cr",
+  "bhk": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "carpet_area_sqft": null,
+  "super_built_up_sqft": null,
+  "floor": null,
+  "furnishing": null,
+  "facing": null,
+  "possession": null,
+  "parking": null,
+  "property_age": null,
+  "price_amount": 0,
+  "display_price": "Price on Request",
   "currency": "INR",
-  "location_city": "Ahmedabad",
-  "location_locality": "Bodakdev",
-  "amenities": ["Lift", "Covered Parking", "24/7 Security", "Gym", "Swimming Pool"],
-  "ai_highlights": ["5 compelling selling bullet points"],
-  "ai_neighborhood_highlights": ["3 nearby perks (e.g. 5 mins to metro)"]
+  "location_city": "",
+  "location_locality": "",
+  "amenities": [],
+  "ai_highlights": [],
+  "ai_neighborhood_highlights": []
 }
 `;
 
@@ -145,11 +148,14 @@ async function parseWithGemini(rawNotes: string, apiKey: string): Promise<Parsed
   const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
-You are an expert real estate AI copywriter and listing data extraction system.
-Analyze the following unstructured property notes sent by a real estate broker.
-The notes might be in English, Hindi, Hinglish, or casual shorthand broker jargon.
+You are a strict real estate listing data extraction system.
+Analyze ONLY the property notes sent by a real estate broker (English, Hindi, Hinglish, or shorthand).
 
-Extract all details into a clean, highly structured, professional listing.
+STRICT RULES (NO HALLUCINATION):
+- Extract ONLY facts explicitly stated in the Broker Notes.
+- NEVER invent, guess, or add any amenities, floor, facing, possession, parking, property_age, or nearby highlights not mentioned in the notes.
+- If a detail is not mentioned, omit it or return null / [].
+- Keep description strictly factual based only on what the broker wrote.
 
 Broker Notes:
 """

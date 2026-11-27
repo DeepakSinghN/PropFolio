@@ -72,13 +72,26 @@ export async function POST(req: NextRequest) {
       const mediaId = message.image?.id;
       const currentPhotoIndex = session?.photos?.length || 0;
       console.log(`Processing incoming photo from ${from} (mediaId: ${mediaId}, index: ${currentPhotoIndex})`);
-      incomingPhotoUrl = await downloadMetaMedia(mediaId, currentPhotoIndex);
+      const downloadedUrl = await downloadMetaMedia(mediaId, currentPhotoIndex);
+
+      if (!downloadedUrl) {
+        if (incomingText.trim()) {
+          appendUserSession(from, incomingText.trim(), undefined, contactName || undefined);
+        }
+        await sendWhatsAppMessage({
+          to: from,
+          text: `⚠️ *Photo download nahi ho payi.*\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *Done*) likhein.`,
+        });
+        return NextResponse.json({ status: "media_download_failed" });
+      }
+      incomingPhotoUrl = downloadedUrl;
     }
 
     const trimmed = incomingText.trim().toLowerCase();
-    const isDone = /^(done|ho gaya|khatam|banao|ready|create|ok done)$/i.test(trimmed);
+    const isProceedWithoutPhotos = /^(proceed without photos|without photos|bina photo|bina photos|skip photos)$/i.test(trimmed);
+    const isDone = isProceedWithoutPhotos || /^(done|ho gaya|khatam|banao|ready|create|ok done)$/i.test(trimmed);
 
-    // CASE 1: User says "Done" -> Generate listing preview immediately!
+    // CASE 1: User says "Done" or "Proceed without photos" -> Generate listing preview!
     if (isDone) {
       const hasContent = session && (session.notes.length > 0 || session.photos.length > 0);
       if (!hasContent) {
@@ -89,8 +102,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ status: "awaiting_notes" });
       }
 
-      // Generate preview directly with all collected info & photos
-      const hasPhotos = Boolean(session.photos && session.photos.length > 0);
+      // Generate preview strictly using user's provided photos (unless user chose proceed without photos)
+      const hasPhotos = !isProceedWithoutPhotos && Boolean(session.photos && session.photos.length > 0);
       return await executeCreateListing(req, from, session, hasPhotos, contactName);
     }
 

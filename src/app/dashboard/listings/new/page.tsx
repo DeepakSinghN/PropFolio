@@ -793,9 +793,7 @@ export function ListingEditorContent() {
       views_count: 142,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      photos: (photos.length > 0 ? photos : [
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80"
-      ]).map((url, i) => ({
+      photos: photos.map((url, i) => ({
         id: `p-${i}`,
         listing_id: id,
         photo_url: url,

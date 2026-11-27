@@ -203,23 +203,15 @@ export async function sendWhatsAppOtpTemplate({
 }
 
 /**
- * Downloads media from Meta WhatsApp Cloud API and stores it in public/uploads/
- * Returns the local URL path (/uploads/${filename})
+ * Downloads media from Meta WhatsApp Cloud API and uploads to Supabase Storage CDN.
+ * Returns the public CDN URL, or null if download/upload fails (never injects fake fallback images).
  */
-export async function downloadMetaMedia(mediaId: string, fallbackIndex: number = 0): Promise<string> {
+export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number = 0): Promise<string | null> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-  
-  // Compute safe distinct fallback index from mediaId if needed
-  let photoPickIdx = fallbackIndex;
-  if (mediaId) {
-    let hash = 0;
-    for (let i = 0; i < mediaId.length; i++) hash = (hash * 31 + mediaId.charCodeAt(i)) >>> 0;
-    photoPickIdx = (hash + fallbackIndex) % REAL_ESTATE_FALLBACKS.length;
-  }
 
   if (!accessToken || !mediaId) {
-    console.warn("WhatsApp access token or mediaId missing, using fallback photo");
-    return REAL_ESTATE_FALLBACKS[photoPickIdx];
+    console.warn("WhatsApp access token or mediaId missing");
+    return null;
   }
 
   try {
@@ -234,7 +226,7 @@ export async function downloadMetaMedia(mediaId: string, fallbackIndex: number =
     if (!metaRes.ok) {
       const errText = await metaRes.text();
       console.error(`Meta media retrieval failed (${metaRes.status}):`, errText);
-      return REAL_ESTATE_FALLBACKS[photoPickIdx];
+      return null;
     }
 
     const mediaData = await metaRes.json();
@@ -243,7 +235,7 @@ export async function downloadMetaMedia(mediaId: string, fallbackIndex: number =
     const downloadUrl = mediaData.url;
     if (!downloadUrl) {
       console.warn("No download URL returned by Meta for media", mediaId);
-      return REAL_ESTATE_FALLBACKS[photoPickIdx];
+      return null;
     }
 
     // 2. Download the binary media from Meta CDN (requires User-Agent & Auth)
@@ -256,7 +248,7 @@ export async function downloadMetaMedia(mediaId: string, fallbackIndex: number =
 
     if (!fileRes.ok) {
       console.error(`Failed to download binary media (${fileRes.status})`);
-      return REAL_ESTATE_FALLBACKS[photoPickIdx];
+      return null;
     }
 
     const arrayBuffer = await fileRes.arrayBuffer();
@@ -313,18 +305,22 @@ export async function downloadMetaMedia(mediaId: string, fallbackIndex: number =
     }
 
     // 4. Local filesystem fallback (dev only; Vercel public/ is read-only)
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, buffer);
+    if (!process.env.VERCEL) {
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const filePath = path.join(uploadDir, fileName);
+      fs.writeFileSync(filePath, buffer);
 
-    console.log(`[Media Download] Saved locally ${filePath} (${buffer.length} bytes)`);
-    return `/uploads/${fileName}`;
+      console.log(`[Media Download] Saved locally ${filePath} (${buffer.length} bytes)`);
+      return `/uploads/${fileName}`;
+    }
+
+    return null;
   } catch (err: any) {
     console.error("Error downloading Meta media:", err.message);
-    return REAL_ESTATE_FALLBACKS[photoPickIdx];
+    return null;
   }
 }
 
