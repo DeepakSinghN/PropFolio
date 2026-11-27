@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
           to: from,
           text:
             failLang === "hinglish"
-              ? `⚠️ Photo save nahi hui (${mediaResult.reason || "error"}).\n1️⃣ Dobara bhejein ya 2️⃣ *2* likh kar bina photo ke aage badhein.`
-              : `⚠️ Photo couldn't be saved (${mediaResult.reason || "error"}).\n1️⃣ Resend photo or 2️⃣ reply *2* to skip photos.`,
+              ? `⚠️ Yeh photo save nahi ho payi. Kripya photo dobara bhejein, ya bina photo ke aage badhne ke liye *2* likhein.`
+              : `⚠️ We couldn't save that photo. Please resend it, or reply *2* to continue without photos.`,
         });
         return NextResponse.json({ status: "media_download_failed", reason: mediaResult.reason });
       }
@@ -140,8 +140,8 @@ export async function POST(req: NextRequest) {
           to: from,
           text:
             activeLang === "hinglish"
-              ? `⏸️ Pichli photo save nahi hui thi.\n1️⃣ Photo dobara bhejein ya 2️⃣ *2* likh kar bina photo ke aage badhein.`
-              : `⏸️ Previous photo couldn't be saved.\n1️⃣ Resend photo or 2️⃣ reply *2* to skip photos.`,
+              ? `⏸️ Pichli photo save nahi ho payi thi. Kripya dobara bhejein, ya bina photo ke aage badhne ke liye *2* likhein.`
+              : `⏸️ Your last photo couldn't be saved. Please resend it, or reply *2* to continue without photos.`,
         });
         return NextResponse.json({ status: "awaiting_media_choice" });
       }
@@ -308,6 +308,20 @@ async function executeCreateListing(
         dbErrorMsg = `Broker profile ID is not a valid UUID (${senderBroker.id}).`;
         console.error("[webhook]", dbErrorMsg);
       } else {
+        // Ensure slug is unique for this broker so similar/re-tested properties never collide
+        const { data: existingSlugRow } = await supabase
+          .from("listings")
+          .select("id")
+          .eq("broker_id", senderBroker.id)
+          .eq("slug", fullListing.slug)
+          .maybeSingle();
+
+        if (existingSlugRow) {
+          const uniqueSuffix = Date.now().toString().slice(-4);
+          fullListing.slug = `${fullListing.slug}-${uniqueSuffix}`;
+          parsedData.slug = fullListing.slug;
+        }
+
         const { error: upsertErr } = await supabase.from("listings").upsert({
           id: fullListing.id,
           broker_id: senderBroker.id,
@@ -363,12 +377,18 @@ async function executeCreateListing(
   clearUserSession(from);
 
   if (supabase && !dbSaved) {
+    const isDuplicate = /duplicate key|unique constraint/i.test(dbErrorMsg);
+    const friendlyErrorText = isDuplicate
+      ? lang === "hinglish"
+        ? `⚠️ Aisi hi details wali ek property aapke account me pehle se maujood hai. Kripya title ya details thoda update karke dubara bhejein.`
+        : `⚠️ A listing with similar details already exists in your account. Please adjust the title or details slightly and try again.`
+      : lang === "hinglish"
+        ? `⚠️ Abhi aapki listing save nahi ho payi. Kripya thodi der baad dubara try karein ya apne dashboard se banayein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`
+        : `⚠️ We couldn't save your listing right now. Please try again shortly or create it from your dashboard:\n👉 https://www.propertysnaps.in/dashboard/listings/new`;
+
     await sendWhatsAppMessage({
       to: from,
-      text:
-        lang === "hinglish"
-          ? `⚠️ *Listing database me save nahi ho payi.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nKripya thodi der baad dobara try karein ya dashboard se create karein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`
-          : `⚠️ *Could not save listing to database.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nPlease try again shortly or create from your dashboard:\n👉 https://www.propertysnaps.in/dashboard/listings/new`,
+      text: friendlyErrorText,
     });
     return NextResponse.json({ status: "db_error", error: dbErrorMsg }, { status: 200 });
   }
