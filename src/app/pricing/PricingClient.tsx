@@ -142,7 +142,7 @@ export default function PricingClient() {
       features: [
         "20 Active Property Listings",
         "20 Photos per listing + Videos",
-        "Custom subdomain (you.propertysnaps.in)",
+        "Custom subdomain (yourname.propertysnaps.in)",
         "Clean Branded PDF (No watermark)",
         "Up to 10 Client Collections",
         "Full Buyer View Stats & Analytics",
@@ -171,7 +171,7 @@ export default function PricingClient() {
       features: [
         "60 Active Property Listings",
         "Unlimited Photos per listing + Videos",
-        "Custom subdomain (you.propertysnaps.in)",
+        "Custom subdomain (yourname.propertysnaps.in)",
         "Clean Branded PDF (No watermark)",
         "Unlimited Client Collections",
         "Full Portfolio View Stats",
@@ -199,7 +199,7 @@ export default function PricingClient() {
         "Unlimited Property Listings",
         "Unlimited Photos per listing + Videos",
         "5+ / Custom Agent WhatsApp numbers",
-        "Custom Domain (properties.yourfirm.com)",
+        "Custom Domain (properties.youragency.com)",
         "100% White-label Web & PDF",
         "Centralized Team Lead Stats",
         "Dedicated Account Manager",

@@ -162,7 +162,7 @@ export function decodeUserSession(token: string): { profile: Profile; createdAt:
       const raw = Buffer.from(token.slice(3), "base64url").toString("utf8");
       const parsed = JSON.parse(raw);
       if (parsed && parsed.profile) return parsed;
-    } catch {}
+    } catch { }
   }
   return null;
 }
@@ -213,7 +213,7 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
     store[sessionId] = session;
     saveStore(sessionsFile, store);
-  } catch {}
+  } catch { }
 
   return session;
 }
@@ -247,7 +247,7 @@ export function deletePhoneSession(sessionId: string): void {
     const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
     delete store[sessionId];
     saveStore(sessionsFile, store);
-  } catch {}
+  } catch { }
 }
 
 // ------------------------------------------------------------------
@@ -503,7 +503,7 @@ export async function ensureProfileNotExpired<
         }
       }
       if (changed) saveStore(sessionsFile, store);
-    } catch {}
+    } catch { }
   }
 
   return downgraded;
@@ -659,7 +659,7 @@ export async function resolveOrCreateBrokerProfile(
         }
       }
     }
-  } catch {}
+  } catch { }
 
   // 3. Fallback: generate local profile
   const resolvedName = contactName && contactName.trim() ? contactName.trim() : "Real Estate Broker";
@@ -761,7 +761,7 @@ export async function updateBrokerProfile(
       }
     }
     saveStore(sessionsFile, store);
-  } catch {}
+  } catch { }
 
   return { success: true, profile: updatedProfile || undefined };
 }
