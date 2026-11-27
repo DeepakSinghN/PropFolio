@@ -166,16 +166,15 @@ export default async function BrokerProfilePage({ params }: PageProps) {
           .eq("broker_id", profile.id)
           .order("created_at", { ascending: false });
 
-        if (supaListings && supaListings.length > 0) {
-          allListings = supaListings.map((l: any) => ({
-            ...l,
-            photos: (l.listing_photos || []).sort(
-              (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
-            ),
-          }));
-        }
+        const brokerListings = Array.isArray(supaListings)
+          ? supaListings.map((l: any) => ({
+              ...l,
+              photos: (l.listing_photos || []).sort(
+                (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+              ),
+            }))
+          : [];
 
-        const brokerListings = allListings.length > 0 ? allListings : INITIAL_LISTINGS;
         return (
           <BrokerProfileClient
             slug={slug}
@@ -240,7 +239,12 @@ export default async function BrokerProfilePage({ params }: PageProps) {
     );
   }
 
-  const brokerListings = allListings.length > 0 ? allListings : INITIAL_LISTINGS;
+  const isDemoSlug = slug === DEMO_BROKER.slug || slug === "demo" || slug === "broker";
+  const brokerListings = isDemoSlug
+    ? allListings.length > 0
+      ? allListings
+      : INITIAL_LISTINGS
+    : allListings.filter((l) => l.broker?.slug === slug);
 
   return (
     <BrokerProfileClient
