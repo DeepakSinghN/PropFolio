@@ -14,18 +14,21 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://www.propertysnaps.in"
   ),
-  title: "Property Snaps — AI Real Estate Listing Engine",
-  description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
+  title: "Property Snaps: Your Own Website in Minutes",
+  description:
+    "Upload photos and notes on WhatsApp or our site. Get a listing page with your own link, gallery, PDF brochure and contact button in minutes.",
   openGraph: {
-    title: "Property Snaps — Private Office AI",
-    description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
+    title: "Property Snaps: Your Own Website in Minutes",
+    description:
+      "Upload photos and notes on WhatsApp or our site. Get a listing page with your own link, gallery, PDF brochure and contact button in minutes.",
     type: "website",
     siteName: "Property Snaps",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Property Snaps — Private Office AI",
-    description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
+    title: "Property Snaps: Your Own Website in Minutes",
+    description:
+      "Upload photos and notes on WhatsApp or our site. Get a listing page with your own link, gallery, PDF brochure and contact button in minutes.",
   },
 };
 
