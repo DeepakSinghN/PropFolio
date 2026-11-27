@@ -70,6 +70,8 @@ export async function GET(req: NextRequest) {
             .maybeSingle();
           if (prof?.id) {
             filterBrokerId = prof.id;
+          } else {
+            return NextResponse.json({ listings: [] });
           }
         }
 

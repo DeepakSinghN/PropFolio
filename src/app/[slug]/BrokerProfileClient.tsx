@@ -53,30 +53,33 @@ export default function BrokerProfileClient({
         : `https://${slug}.propertysnaps.in`;
       setCurrentUrl(subUrl);
 
-      // Try reading local storage listings if present
+      // Try reading local storage listings belonging strictly to this broker
       try {
         const stored = localStorage.getItem("propfolio_listings");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setListings((prev) => {
-              const combined = [...parsed, ...prev];
-              const unique = Array.from(new Map(combined.map((item) => [item.slug, item])).values());
-              return unique;
-            });
+            const mine = parsed.filter(
+              (item: any) =>
+                item?.broker?.slug === slug ||
+                (initialBroker?.id && item?.broker_id === initialBroker.id)
+            );
+            if (mine.length > 0) {
+              setListings((prev) => {
+                const combined = [...mine, ...prev];
+                return Array.from(new Map(combined.map((item) => [item.slug, item])).values());
+              });
+            }
           }
         }
       } catch {}
 
-      // Fetch fresh listings from API
-      fetch("/api/listings")
+      // Fetch fresh listings scoped strictly to this broker slug
+      fetch(`/api/listings?broker_slug=${encodeURIComponent(slug)}`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.listings && data.listings.length > 0) {
-            setListings((prev) => {
-              const combined = [...data.listings, ...prev];
-              return Array.from(new Map(combined.map((item) => [item.slug, item])).values());
-            });
+          if (Array.isArray(data.listings)) {
+            setListings(data.listings);
           }
         })
         .catch(() => {});

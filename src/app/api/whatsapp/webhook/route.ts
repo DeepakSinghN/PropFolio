@@ -141,10 +141,11 @@ async function executeCreateListing(
   // Call Groq AI
   const parsedData = await parsePropertyNotes(combinedNotes);
 
+  const listingUuid = crypto.randomUUID();
   const photosList = includePhotos && session.photos && session.photos.length > 0
     ? session.photos.map((url: string, i: number) => ({
-      id: `p-${i}`,
-      listing_id: "listing-wa-" + Date.now(),
+      id: crypto.randomUUID(),
+      listing_id: listingUuid,
       photo_url: url,
       display_order: i + 1,
       is_cover: i === 0,
@@ -192,7 +193,7 @@ async function executeCreateListing(
       : photosList;
 
   const fullListing = {
-    id: "listing-wa-" + Date.now(),
+    id: listingUuid,
     broker_id: senderBroker.id,
     title: parsedData.title,
     slug: parsedData.slug,
@@ -234,7 +235,7 @@ async function executeCreateListing(
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(supaUrl, supaKey);
 
-      await supabase.from("listings").upsert({
+      const { error: upsertErr } = await supabase.from("listings").upsert({
         id: fullListing.id,
         broker_id: senderBroker.id,
         title: fullListing.title,
@@ -260,8 +261,12 @@ async function executeCreateListing(
         updated_at: fullListing.updated_at,
       });
 
-      if (cappedPhotos.length > 0) {
-        await supabase.from("listing_photos").insert(
+      if (upsertErr) {
+        console.error("[webhook] Supabase listing upsert error:", upsertErr);
+      }
+
+      if (!upsertErr && cappedPhotos.length > 0) {
+        const { error: photoErr } = await supabase.from("listing_photos").insert(
           cappedPhotos.map((p: any) => ({
             listing_id: fullListing.id,
             photo_url: p.photo_url,
@@ -269,6 +274,9 @@ async function executeCreateListing(
             is_cover: p.is_cover,
           }))
         );
+        if (photoErr) {
+          console.error("[webhook] Supabase listing_photos insert error:", photoErr);
+        }
       }
     } catch (dbErr) {
       console.warn("[webhook] Supabase listing sync notice:", dbErr);
@@ -286,8 +294,8 @@ async function executeCreateListing(
     req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const isLocal = host.includes("localhost");
   const liveUrl = isLocal
-    ? `http://${senderBroker.slug}.localhost:3000/${parsedData.slug}`
-    : `https://${senderBroker.slug}.propertysnaps.in/${parsedData.slug}`;
+    ? `http://${senderBroker.slug}.localhost:3000/l/${parsedData.slug}`
+    : `https://${senderBroker.slug}.propertysnaps.in/l/${parsedData.slug}`;
   const brochureUrl = `${liveUrl}/brochure`;
 
   const photoNotice = includePhotos

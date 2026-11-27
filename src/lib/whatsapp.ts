@@ -267,17 +267,60 @@ export async function downloadMetaMedia(mediaId: string, fallbackIndex: number =
     else if (mediaData.mime_type?.includes("webp")) ext = "webp";
     else if (mediaData.mime_type?.includes("jpeg") || mediaData.mime_type?.includes("jpg")) ext = "jpg";
 
-    const fileName = `${mediaId}.${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    const fileName = `wa-${mediaId}-${Date.now()}.${ext}`;
+    const mimeType = mediaData.mime_type || `image/${ext === "jpg" ? "jpeg" : ext}`;
 
+    // 3. Upload directly to Supabase Storage CDN (works on Vercel read-only filesystem)
+    const supaUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
+    const supaKey = (
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      ""
+    ).trim();
+
+    if (supaUrl && supaKey && !supaKey.includes("...")) {
+      try {
+        const { createClient } = await import("@supabase/supabase-js");
+        const supabase = createClient(supaUrl, supaKey);
+
+        // Ensure bucket exists (ignore error if already exists)
+        await supabase.storage
+          .createBucket("listing-photos", { public: true })
+          .catch(() => {});
+
+        const { error: uploadError } = await supabase.storage
+          .from("listing-photos")
+          .upload(fileName, buffer, {
+            contentType: mimeType,
+            upsert: true,
+          });
+
+        if (!uploadError) {
+          const { data: pubData } = supabase.storage
+            .from("listing-photos")
+            .getPublicUrl(fileName);
+          if (pubData?.publicUrl) {
+            console.log(`[Media Download] Uploaded to Supabase CDN: ${pubData.publicUrl}`);
+            return pubData.publicUrl;
+          }
+        } else {
+          console.warn("[Media Download] Supabase upload warning:", uploadError.message);
+        }
+      } catch (supaErr: any) {
+        console.warn("[Media Download] Supabase storage fallback:", supaErr?.message);
+      }
+    }
+
+    // 4. Local filesystem fallback (dev only; Vercel public/ is read-only)
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-
     const filePath = path.join(uploadDir, fileName);
     fs.writeFileSync(filePath, buffer);
 
-    console.log(`[Media Download] Successfully saved ${filePath} (${buffer.length} bytes)`);
+    console.log(`[Media Download] Saved locally ${filePath} (${buffer.length} bytes)`);
     return `/uploads/${fileName}`;
   } catch (err: any) {
     console.error("Error downloading Meta media:", err.message);
