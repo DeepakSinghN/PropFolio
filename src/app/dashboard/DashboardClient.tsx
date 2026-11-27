@@ -773,7 +773,7 @@ export default function DashboardClient({
               }`}
             >
               <Layers className="h-4 w-4 text-[#862e9f]" />
-              <span>Curated Collections ({collections.length})</span>
+              <span>Collections ({collections.length})</span>
               <span className="rounded-full bg-[#862e9f]/10 border border-[#862e9f]/20 px-2 py-0.5 text-[9px] font-bold text-[#862e9f] dark:bg-[#862e9f]/20 dark:border-[#862e9f]/30 dark:text-[#a845c4]">
                 PITCH DECKS
               </span>
@@ -895,7 +895,7 @@ export default function DashboardClient({
                         <div className="flex items-center gap-1.5">
                           <a
                             href={`https://wa.me/?text=${encodeURIComponent(
-                              `*${col.title}*\nI have put together a custom property shortlist for you.\n\nView Curated Collection:\n${targetUrl}`
+                              `*${col.title}*\nI have put together a custom property shortlist for you.\n\nView Collection:\n${targetUrl}`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
@@ -1260,7 +1260,7 @@ export default function DashboardClient({
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-[#0a1128] dark:text-white">
-                      Create Curated Collection
+                      Create Collection
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Bundle matching properties into a single shareable pitch deck for WhatsApp.

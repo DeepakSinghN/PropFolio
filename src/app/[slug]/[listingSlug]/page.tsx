@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const appBaseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://prop-folio-eosin.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.propertysnaps.in";
 
   let coverPhoto =
     "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&auto=format&fit=crop&q=80";

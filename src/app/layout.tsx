@@ -12,7 +12,7 @@ const fontSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://propertysnaps.in"
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.propertysnaps.in"
   ),
   title: "Property Snaps — AI Real Estate Listing Engine",
   description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
@@ -21,20 +21,11 @@ export const metadata: Metadata = {
     description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
     type: "website",
     siteName: "Property Snaps",
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
-        width: 1200,
-        height: 630,
-        alt: "Property Snaps Luxury Real Estate",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Property Snaps — Private Office AI",
     description: "Turn raw WhatsApp messages and photos into branded luxury property micro-sites in 60 seconds.",
-    images: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80"],
   },
 };
 

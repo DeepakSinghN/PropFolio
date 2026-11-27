@@ -38,6 +38,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             type: "profile",
             siteName: "Property Snaps",
           },
+          twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+          },
         };
       }
 
@@ -84,9 +89,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const diskListing = getListingFromDisk(slug) || INITIAL_LISTINGS.find((l) => l.slug === slug);
   if (diskListing) {
     const title = `${diskListing.title} | ${diskListing.display_price}`;
+    const description =
+      diskListing.description?.slice(0, 160) || "Property listing on Property Snaps.";
+    const rawCover = diskListing.photos?.[0]?.photo_url;
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.propertysnaps.in";
+    const coverPhoto =
+      rawCover && rawCover.startsWith("data:image/")
+        ? `${appBaseUrl}/api/listings/${diskListing.slug}/cover`
+        : rawCover && (rawCover.startsWith("http://") || rawCover.startsWith("https://"))
+          ? rawCover
+          : undefined;
+
     return {
       title,
-      description: diskListing.description?.slice(0, 160) || "Property listing on Property Snaps.",
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        ...(coverPhoto ? { images: [{ url: coverPhoto, width: 1200, height: 630, alt: diskListing.title }] } : {}),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        ...(coverPhoto ? { images: [coverPhoto] } : {}),
+      },
     };
   }
 
@@ -101,6 +129,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       type: "profile",
       siteName: "Property Snaps",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
