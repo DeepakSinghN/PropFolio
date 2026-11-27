@@ -561,26 +561,24 @@ export async function resolveOrCreateBrokerProfile(
   const formattedPhone = `+91${phone10}`;
 
   // 1. Check Supabase profiles table
-  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supaKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { createAdminClient } = await import("@/lib/supabase/server");
+  const supabase = createAdminClient();
 
-  if (supaUrl && supaKey && !supaKey.includes("...")) {
+  if (supabase) {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(supaUrl, supaKey);
-
+      const phonePart1 = phone10.slice(0, 5);
+      const phonePart2 = phone10.slice(5);
       const { data: profiles } = await supabase
         .from("profiles")
         .select("*")
         .or(
-          `phone_number.ilike.%${phone10}%,phone_number.eq.+91${phone10},phone_number.eq.91${phone10},phone_number.eq.${phone10},phone_number.eq.+${cleanPhone}`
+          `phone_number.ilike.%${phone10}%,phone_number.ilike.%${phonePart1}%${phonePart2}%`
         )
-        .limit(1);
+        .limit(10);
 
-      const existing = profiles?.[0];
+      const existing = (profiles || []).find((p: any) =>
+        (p.phone_number || "").replace(/\D/g, "").endsWith(phone10)
+      );
 
       if (existing) {
         // If profile has generic name/slug but we now have contactName from WhatsApp, upgrade it!
@@ -609,9 +607,20 @@ export async function resolveOrCreateBrokerProfile(
 
       // If no profile exists in Supabase, create one with the real name!
       const initialName = contactName && contactName.trim() ? contactName.trim() : "Real Estate Broker";
-      const initialSlug = isGenericBrokerName(initialName)
+      const baseSlug = isGenericBrokerName(initialName)
         ? `broker-${phone10.slice(-4)}`
         : slugifyName(initialName);
+
+      // Ensure slug is unique if someone else already took baseSlug
+      let initialSlug = baseSlug;
+      const { data: slugTaken } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("slug", baseSlug)
+        .maybeSingle();
+      if (slugTaken) {
+        initialSlug = `${baseSlug}-${phone10.slice(-4)}`;
+      }
 
       const newProfile: Partial<Profile> = {
         full_name: initialName,
@@ -640,11 +649,11 @@ export async function resolveOrCreateBrokerProfile(
       // Retry without newer optional columns if DB migration hasn't been run yet
       if (createErr) {
         console.warn("[resolveOrCreateBrokerProfile] Initial insert failed, retrying base columns:", createErr.message);
-        const { data: createdBase } = await supabase
+        const { data: createdBase, error: baseErr } = await supabase
           .from("profiles")
           .insert({
             full_name: initialName,
-            slug: initialSlug,
+            slug: `${baseSlug}-${phone10.slice(-4)}-${Date.now().toString().slice(-3)}`,
             phone_number: formattedPhone,
             company_name: "",
             city: "India",
@@ -658,6 +667,9 @@ export async function resolveOrCreateBrokerProfile(
 
         if (createdBase) {
           return createdBase as Profile;
+        }
+        if (baseErr) {
+          console.error("[resolveOrCreateBrokerProfile] Base insert also failed:", baseErr.message);
         }
       }
     } catch (dbErr) {

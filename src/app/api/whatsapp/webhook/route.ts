@@ -299,7 +299,7 @@ async function executeCreateListing(
       to: from,
       text: `⚠️ *Listing database me save nahi ho payi.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nKripya thodi der baad dobara try karein ya dashboard se create karein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`,
     });
-    return NextResponse.json({ status: "db_error", error: dbErrorMsg }, { status: 500 });
+    return NextResponse.json({ status: "db_error", error: dbErrorMsg }, { status: 200 });
   }
 
   const host =
