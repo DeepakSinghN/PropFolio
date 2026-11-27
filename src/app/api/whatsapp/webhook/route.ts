@@ -4,6 +4,7 @@ import { sendWhatsAppMessage, downloadMetaMedia } from "@/lib/whatsapp";
 import { saveListingToMemory } from "@/lib/store";
 import { resolveOrCreateBrokerProfile, ensureProfileNotExpired } from "@/lib/auth-store";
 import { getEffectivePlan } from "@/lib/plans";
+import { createAdminClient } from "@/lib/supabase/server";
 import {
   saveListingToDisk,
   appendUserSession,
@@ -11,6 +12,11 @@ import {
   clearUserSession,
   markSessionAcknowledged,
 } from "@/lib/server-store";
+
+function isValidUUID(str?: string | null): boolean {
+  if (!str) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
 
 /**
  * Meta WhatsApp Cloud API Webhook
@@ -224,66 +230,77 @@ async function executeCreateListing(
   saveListingToDisk(fullListing);
 
   // Sync listing to Supabase if configured
-  const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supaKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createAdminClient();
+  let dbSaved = false;
+  let dbErrorMsg = "";
 
-  if (supaUrl && supaKey && !supaKey.includes("...")) {
+  if (supabase) {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(supaUrl, supaKey);
+      if (!isValidUUID(senderBroker.id)) {
+        dbErrorMsg = `Broker profile ID is not a valid UUID (${senderBroker.id}).`;
+        console.error("[webhook]", dbErrorMsg);
+      } else {
+        const { error: upsertErr } = await supabase.from("listings").upsert({
+          id: fullListing.id,
+          broker_id: senderBroker.id,
+          title: fullListing.title,
+          slug: fullListing.slug,
+          description: fullListing.description,
+          property_type: fullListing.property_type,
+          listing_type: fullListing.listing_type,
+          bhk: fullListing.bhk,
+          bedrooms: fullListing.bedrooms,
+          bathrooms: fullListing.bathrooms,
+          carpet_area_sqft: fullListing.carpet_area_sqft,
+          price_amount: fullListing.price_amount,
+          display_price: fullListing.display_price,
+          currency: fullListing.currency,
+          location_city: fullListing.location_city,
+          location_locality: fullListing.location_locality,
+          amenities: fullListing.amenities,
+          ai_highlights: fullListing.ai_highlights,
+          ai_neighborhood_highlights: fullListing.ai_neighborhood_highlights,
+          status: "active",
+          views_count: 1,
+          created_at: fullListing.created_at,
+          updated_at: fullListing.updated_at,
+        });
 
-      const { error: upsertErr } = await supabase.from("listings").upsert({
-        id: fullListing.id,
-        broker_id: senderBroker.id,
-        title: fullListing.title,
-        slug: fullListing.slug,
-        description: fullListing.description,
-        property_type: fullListing.property_type,
-        listing_type: fullListing.listing_type,
-        bhk: fullListing.bhk,
-        bedrooms: fullListing.bedrooms,
-        bathrooms: fullListing.bathrooms,
-        carpet_area_sqft: fullListing.carpet_area_sqft,
-        price_amount: fullListing.price_amount,
-        display_price: fullListing.display_price,
-        currency: fullListing.currency,
-        location_city: fullListing.location_city,
-        location_locality: fullListing.location_locality,
-        amenities: fullListing.amenities,
-        ai_highlights: fullListing.ai_highlights,
-        ai_neighborhood_highlights: fullListing.ai_neighborhood_highlights,
-        status: "active",
-        views_count: 1,
-        created_at: fullListing.created_at,
-        updated_at: fullListing.updated_at,
-      });
-
-      if (upsertErr) {
-        console.error("[webhook] Supabase listing upsert error:", upsertErr);
-      }
-
-      if (!upsertErr && cappedPhotos.length > 0) {
-        const { error: photoErr } = await supabase.from("listing_photos").insert(
-          cappedPhotos.map((p: any) => ({
-            listing_id: fullListing.id,
-            photo_url: p.photo_url,
-            display_order: p.display_order,
-            is_cover: p.is_cover,
-          }))
-        );
-        if (photoErr) {
-          console.error("[webhook] Supabase listing_photos insert error:", photoErr);
+        if (upsertErr) {
+          dbErrorMsg = upsertErr.message;
+          console.error("[webhook] Supabase listing upsert error:", upsertErr);
+        } else {
+          dbSaved = true;
+          if (cappedPhotos.length > 0) {
+            const { error: photoErr } = await supabase.from("listing_photos").insert(
+              cappedPhotos.map((p: any) => ({
+                listing_id: fullListing.id,
+                photo_url: p.photo_url,
+                display_order: p.display_order,
+                is_cover: p.is_cover,
+              }))
+            );
+            if (photoErr) {
+              console.error("[webhook] Supabase listing_photos insert error:", photoErr);
+            }
+          }
         }
       }
-    } catch (dbErr) {
+    } catch (dbErr: any) {
+      dbErrorMsg = dbErr?.message || "Unknown DB error";
       console.warn("[webhook] Supabase listing sync notice:", dbErr);
     }
   }
 
   clearUserSession(from);
+
+  if (supabase && !dbSaved) {
+    await sendWhatsAppMessage({
+      to: from,
+      text: `⚠️ *Listing database me save nahi ho payi.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nKripya thodi der baad dobara try karein ya dashboard se create karein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`,
+    });
+    return NextResponse.json({ status: "db_error", error: dbErrorMsg }, { status: 500 });
+  }
 
   const host =
     req.headers.get("x-forwarded-host") ||

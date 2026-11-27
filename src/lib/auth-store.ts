@@ -627,7 +627,7 @@ export async function resolveOrCreateBrokerProfile(
         is_active: true,
       };
 
-      const { data: created } = await supabase
+      const { data: created, error: createErr } = await supabase
         .from("profiles")
         .insert(newProfile)
         .select()
@@ -635,6 +635,30 @@ export async function resolveOrCreateBrokerProfile(
 
       if (created) {
         return created as Profile;
+      }
+
+      // Retry without newer optional columns if DB migration hasn't been run yet
+      if (createErr) {
+        console.warn("[resolveOrCreateBrokerProfile] Initial insert failed, retrying base columns:", createErr.message);
+        const { data: createdBase } = await supabase
+          .from("profiles")
+          .insert({
+            full_name: initialName,
+            slug: initialSlug,
+            phone_number: formattedPhone,
+            company_name: "",
+            city: "India",
+            avatar_url: "/brand-logo.png",
+            plan_tier: "free",
+            listing_credits: 1,
+            is_active: true,
+          })
+          .select()
+          .single();
+
+        if (createdBase) {
+          return createdBase as Profile;
+        }
       }
     } catch (dbErr) {
       console.warn("[resolveOrCreateBrokerProfile] Supabase query notice:", dbErr);

@@ -87,8 +87,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!listing) {
     return {
-      title: "Property Listing | Property Snaps",
-      description: "Verified luxury property listing on Property Snaps.",
+      title: "Property Not Found | Property Snaps",
+      description: "This property listing does not exist or may have been removed.",
+      openGraph: {
+        title: "Property Not Found | Property Snaps",
+        description: "This property listing does not exist or may have been removed.",
+        images: [],
+      },
     };
   }
 
