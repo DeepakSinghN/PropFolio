@@ -143,6 +143,8 @@ export interface UserSession {
   photos: string[];
   askedForPhotos: boolean;
   hasAcknowledged?: boolean;
+  mediaFailed?: boolean;
+  lang?: "en" | "hinglish";
   updatedAt: number;
 }
 
@@ -232,10 +234,20 @@ export function setSessionMediaFailed(phone: string, failed: boolean) {
     askedForPhotos: false,
     updatedAt: Date.now(),
   };
-  (session as any).mediaFailed = failed;
+  session.mediaFailed = failed;
   session.updatedAt = Date.now();
   map.set(phone, session);
   saveSessions(map);
+}
+
+export function setSessionLang(phone: string, lang: "en" | "hinglish") {
+  const map = loadSessions();
+  const session = map.get(phone);
+  if (session) {
+    session.lang = lang;
+    map.set(phone, session);
+    saveSessions(map);
+  }
 }
 
 export function getUserSession(phone: string): UserSession | undefined {

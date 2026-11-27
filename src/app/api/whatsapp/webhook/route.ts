@@ -12,7 +12,20 @@ import {
   clearUserSession,
   markSessionAcknowledged,
   setSessionMediaFailed,
+  setSessionLang,
 } from "@/lib/server-store";
+
+type BotLang = "en" | "hinglish";
+
+function detectMessageLang(text?: string): BotLang {
+  if (!text || !text.trim()) return "en";
+  // Devanagari script
+  if (/[\u0900-\u097F]/.test(text)) return "hinglish";
+  // Unambiguous Hinglish words
+  const hinglishPattern =
+    /\b(hai|hain|karo|banao|chahiye|milega|bechna|kiraye|keemat|bhejo|bhejiye|nahi|haan|ho gaya|khatam|bina|wala|wali|wale|mein|yahan|wahan|acchi|badhiya|suvidha|samajh|dukan|makan|ghar|kamra|manzil|floor pe)\b/i;
+  return hinglishPattern.test(text) ? "hinglish" : "en";
+}
 
 function isValidUUID(str?: string | null): boolean {
   if (!str) return false;
@@ -79,16 +92,29 @@ export async function POST(req: NextRequest) {
         if (incomingText.trim()) {
           appendUserSession(from, incomingText.trim(), undefined, contactName || undefined);
         }
+        const failLang: BotLang =
+          session?.lang === "hinglish" || detectMessageLang(incomingText) === "hinglish"
+            ? "hinglish"
+            : "en";
         setSessionMediaFailed(from, true);
+        setSessionLang(from, failLang);
         await sendWhatsAppMessage({
           to: from,
-          text: `⚠️ *Photo download nahi ho payi* (${mediaResult.reason || "error"}).\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`,
+          text:
+            failLang === "hinglish"
+              ? `⚠️ *Photo download nahi ho payi* (${mediaResult.reason || "error"}).\n\nAapke paas 2 options hain:\n1️⃣ Kripya photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`
+              : `⚠️ *Could not download photo* (${mediaResult.reason || "error"}).\n\nYou have 2 options:\n1️⃣ Please **resend the photo**\n2️⃣ Or reply *Proceed without photos* (or *2*) to continue without it.`,
         });
         return NextResponse.json({ status: "media_download_failed", reason: mediaResult.reason });
       }
       setSessionMediaFailed(from, false);
       incomingPhotoUrl = mediaResult.url;
     }
+
+    const activeLang: BotLang =
+      session?.lang === "hinglish" || detectMessageLang(incomingText) === "hinglish"
+        ? "hinglish"
+        : "en";
 
     const trimmed = incomingText.trim().toLowerCase();
     const isProceedWithoutPhotos = /^(2|proceed without photos|without photos|bina photo|bina photos|skip photos)$/i.test(trimmed);
@@ -100,35 +126,42 @@ export async function POST(req: NextRequest) {
       if (!hasContent) {
         await sendWhatsAppMessage({
           to: from,
-          text: `⚠️ Aapne abhi tak koi property details ya photos nahi bheji hain.\n\nKripya pehle details bhejein, aur sab complete hone ke baad *Done* likhein!`,
+          text:
+            activeLang === "hinglish"
+              ? `⚠️ Aapne abhi tak koi property details ya photos nahi bheji hain.\n\nKripya pehle details bhejein, aur sab complete hone ke baad *Done* likhein!`
+              : `⚠️ You haven't sent any property details or photos yet.\n\nPlease send the property details first, then reply *Done* when ready!`,
         });
         return NextResponse.json({ status: "awaiting_notes" });
       }
 
       // If a photo just failed and user sent "Done" before selecting an option, wait for their choice!
-      if ((session as any)?.mediaFailed && !isProceedWithoutPhotos) {
+      if (session?.mediaFailed && !isProceedWithoutPhotos) {
         await sendWhatsAppMessage({
           to: from,
-          text: `⏸️ *Aapki pichli photo download nahi ho payi thi.*\n\nKripya pehle choose karein:\n1️⃣ Photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`,
+          text:
+            activeLang === "hinglish"
+              ? `⏸️ *Aapki pichli photo download nahi ho payi thi.*\n\nKripya pehle choose karein:\n1️⃣ Photo **dobara bhejein**\n2️⃣ Ya bina photo ke aage badhne ke liye *Proceed without photos* (ya *2*) likhein.`
+              : `⏸️ *Your previous photo could not be downloaded.*\n\nPlease choose an option:\n1️⃣ **Resend the photo**\n2️⃣ Or reply *Proceed without photos* (or *2*) to continue without it.`,
         });
         return NextResponse.json({ status: "awaiting_media_choice" });
       }
 
       // Generate preview strictly using user's provided photos (unless user chose proceed without photos)
       const hasPhotos = !isProceedWithoutPhotos && Boolean(session.photos && session.photos.length > 0);
-      return await executeCreateListing(req, from, session, hasPhotos, contactName);
+      return await executeCreateListing(req, from, session, hasPhotos, contactName, activeLang);
     }
 
     // CASE 2: User is sending info/photos
     const wasAcknowledged = Boolean(session?.hasAcknowledged);
 
-    // Append incoming data quietly to session (preserving contact name)
+    // Append incoming data quietly to session (preserving contact name & language)
     appendUserSession(
       from,
       incomingText.trim() ? incomingText.trim() : undefined,
       incomingPhotoUrl || undefined,
       contactName || undefined
     );
+    setSessionLang(from, activeLang);
 
     // If this is the user's FIRST data in the session -> Send ONLY 1 friendly guide message!
     if (!wasAcknowledged) {
@@ -136,7 +169,10 @@ export async function POST(req: NextRequest) {
 
       await sendWhatsAppMessage({
         to: from,
-        text: `👍 *Property details receive hona start ho gayi hain!*\n\nAap apni property ki baaki saari details aur photos bhejte rahiye. Jab sab info poori ho jaye, toh bas *Done* likh dena!`,
+        text:
+          activeLang === "hinglish"
+            ? `👍 *Property details receive hona start ho gayi hain!*\n\nAap apni property ki baaki saari details aur photos bhejte rahiye. Jab sab info poori ho jaye, toh bas *Done* likh dena!`
+            : `👍 *Got it! Receiving your property details.*\n\nKeep sending the remaining details and photos. When you're finished, simply reply *Done*!`,
       });
 
       return NextResponse.json({ status: "first_acknowledged" });
@@ -159,14 +195,18 @@ async function executeCreateListing(
   from: string,
   session: any,
   includePhotos: boolean,
-  contactName?: string
+  contactName?: string,
+  lang: BotLang = "en"
 ) {
   const combinedNotes = session.notes.join("\n\n");
-  console.log(`Executing listing for ${from} (includePhotos: ${includePhotos}):`, combinedNotes);
+  console.log(`Executing listing for ${from} (includePhotos: ${includePhotos}, lang: ${lang}):`, combinedNotes);
 
   await sendWhatsAppMessage({
     to: from,
-    text: `⏳ *Samajh gaya!* AI aapki property details analyze karke website aur brochure generate kar raha hai...`,
+    text:
+      lang === "hinglish"
+        ? `⏳ *Samajh gaya!* AI aapki property details analyze karke website aur brochure generate kar raha hai...`
+        : `⏳ *Got it!* Creating your property listing page and brochure...`,
   });
 
   // Call Groq AI
@@ -210,7 +250,10 @@ async function executeCreateListing(
         clearUserSession(from);
         await sendWhatsAppMessage({
           to: from,
-          text: `⚠️ *Listing Limit Reached (${waPlan.name})*\n\nAapke plan ki ${waCredits} active listing${waCredits === 1 ? "" : "s"} ki limit poori ho chuki hai.\n\nNayi property publish karne ke liye apna plan upgrade karein:\n👉 https://www.propertysnaps.in/pricing`,
+          text:
+            lang === "hinglish"
+              ? `⚠️ *Listing Limit Reached (${waPlan.name})*\n\nAapke plan ki ${waCredits} active listing${waCredits === 1 ? "" : "s"} ki limit poori ho chuki hai.\n\nNayi property publish karne ke liye apna plan upgrade karein:\n👉 https://www.propertysnaps.in/pricing`
+              : `⚠️ *Listing Limit Reached (${waPlan.name})*\n\nYou have reached your plan limit of ${waCredits} active listing${waCredits === 1 ? "" : "s"}.\n\nUpgrade your plan to publish more properties:\n👉 https://www.propertysnaps.in/pricing`,
         });
         return NextResponse.json({ status: "plan_limit_reached" });
       }
@@ -322,7 +365,10 @@ async function executeCreateListing(
   if (supabase && !dbSaved) {
     await sendWhatsAppMessage({
       to: from,
-      text: `⚠️ *Listing database me save nahi ho payi.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nKripya thodi der baad dobara try karein ya dashboard se create karein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`,
+      text:
+        lang === "hinglish"
+          ? `⚠️ *Listing database me save nahi ho payi.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nKripya thodi der baad dobara try karein ya dashboard se create karein:\n👉 https://www.propertysnaps.in/dashboard/listings/new`
+          : `⚠️ *Could not save listing to database.*\n\nReason: ${dbErrorMsg || "Database sync failed"}\n\nPlease try again shortly or create from your dashboard:\n👉 https://www.propertysnaps.in/dashboard/listings/new`,
     });
     return NextResponse.json({ status: "db_error", error: dbErrorMsg }, { status: 200 });
   }
@@ -341,14 +387,19 @@ async function executeCreateListing(
   const brochureUrl = `${liveUrl}/brochure`;
 
   const photoNotice = includePhotos
-    ? `📸 ${photosList.length} photos included`
-    : `ℹ️ Listing created without photos`;
+    ? `📸 ${cappedPhotos.length} ${cappedPhotos.length === 1 ? "photo" : "photos"} included`
+    : lang === "hinglish"
+      ? `ℹ️ Listing bina photos ke banayi gayi hai`
+      : `ℹ️ Listing created without photos`;
 
   const dashboardUrl = isLocal
     ? `http://localhost:3000/dashboard`
     : `https://www.propertysnaps.in/dashboard`;
 
-  const replyText = `🎉 *Aapki Property Website Taiyar Hai!*\n\n📍 *${parsedData.title}*\n💰 *Keemat:* ${parsedData.display_price}\n${photoNotice}\n\n👉 *Live Listing Link:* ${liveUrl}\n📄 *PDF Brochure Link:* ${brochureUrl}\n\n📊 *Apna Broker Dashboard:* ${dashboardUrl}\n\nIs link ko apne buyers aur WhatsApp groups me share karein!`;
+  const replyText =
+    lang === "hinglish"
+      ? `🎉 *Aapki Property Website Taiyar Hai!*\n\n📍 *${parsedData.title}*\n💰 *Keemat:* ${parsedData.display_price}\n${photoNotice}\n\n👉 *Live Listing Link:* ${liveUrl}\n📄 *PDF Brochure Link:* ${brochureUrl}\n\n📊 *Apna Broker Dashboard:* ${dashboardUrl}\n\nIs link ko apne buyers aur WhatsApp groups me share karein!`
+      : `🎉 *Your Property Page is Ready!*\n\n📍 *${parsedData.title}*\n💰 *Price:* ${parsedData.display_price}\n${photoNotice}\n\n👉 *Live Listing Link:* ${liveUrl}\n📄 *PDF Brochure Link:* ${brochureUrl}\n\n📊 *Your Broker Dashboard:* ${dashboardUrl}\n\nShare this link with your buyers and WhatsApp groups!`;
 
   await sendWhatsAppMessage({
     to: from,
