@@ -266,20 +266,12 @@ export async function downloadMetaMedia(
     const mimeType = mediaData.mime_type || `image/${ext === "jpg" ? "jpeg" : ext}`;
 
     // 3. Upload directly to Supabase Storage CDN (works on Vercel read-only filesystem)
-    const supaUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-    const supaKey = (
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_ANON_KEY ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-      ""
-    ).trim();
+    const { createAdminClient } = await import("@/lib/supabase/server");
+    const supabase = createAdminClient();
 
     let lastUploadErr = "";
-    if (supaUrl && supaKey && !supaKey.includes("...")) {
+    if (supabase) {
       try {
-        const { createClient } = await import("@supabase/supabase-js");
-        const supabase = createClient(supaUrl, supaKey);
-
         // Ensure bucket exists (ignore error if already exists)
         await supabase.storage
           .createBucket("listing-photos", { public: true })
