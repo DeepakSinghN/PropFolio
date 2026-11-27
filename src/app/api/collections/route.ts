@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllCollectionsFromDisk, saveCollectionToDisk, getAllListingsFromDisk } from "@/lib/server-store";
 import { PropertyCollection } from "@/types/database";
+import { getPhoneSession, ensureProfileNotExpired } from "@/lib/auth-store";
+import { getEffectivePlan } from "@/lib/plans";
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,6 +41,29 @@ export async function POST(req: NextRequest) {
         { success: false, error: "Title and at least one property are required" },
         { status: 400 }
       );
+    }
+
+    // Enforce plan collection limit if session cookie is present
+    const phoneCookie = req.cookies.get("propfolio-phone-session");
+    if (phoneCookie?.value) {
+      const sess = getPhoneSession(phoneCookie.value);
+      if (sess?.profile) {
+        const activeProf = await ensureProfileNotExpired(sess.profile);
+        const { plan } = getEffectivePlan(activeProf);
+        const existingCols = getAllCollectionsFromDisk().filter(
+          (c) => !activeProf.id || c.broker_id === activeProf.id || c.broker_id === "broker-default"
+        );
+        if (!plan.isUnlimitedCollections && existingCols.length >= plan.maxCollections) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Your ${plan.name} plan allows up to ${plan.maxCollections} collection${plan.maxCollections === 1 ? "" : "s"}. Upgrade to create more.`,
+              code: "COLLECTION_LIMIT_REACHED",
+            },
+            { status: 403 }
+          );
+        }
+      }
     }
 
     const slug = title

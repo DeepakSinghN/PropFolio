@@ -4,6 +4,8 @@ import { saveListingToDisk } from "@/lib/server-store";
 import { createAdminClient } from "@/lib/supabase/server";
 import { Listing } from "@/types/database";
 import { checkRateLimit, createRateLimitResponse, getClientIp } from "@/lib/rate-limit";
+import { ensureProfileNotExpired } from "@/lib/auth-store";
+import { getEffectivePlan } from "@/lib/plans";
 
 function isValidUUID(str?: string | null): boolean {
   if (!str) return false;
@@ -159,6 +161,72 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // 1b. Fetch broker profile & enforce subscription expiry + plan limits
+      let brokerProfile: any = sessionProfile || { plan_tier: "free", listing_credits: 1 };
+      const { data: dbProfile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", brokerId)
+        .maybeSingle();
+      if (dbProfile) brokerProfile = dbProfile;
+
+      brokerProfile = await ensureProfileNotExpired(brokerProfile);
+      const { plan, effectiveCredits } = getEffectivePlan(brokerProfile);
+
+      // Check photo limit per listing
+      const incomingPhotosCount = Array.isArray(listing.photos) ? listing.photos.length : 0;
+      if (!plan.isUnlimitedPhotos && incomingPhotosCount > plan.maxPhotosPerListing) {
+        return NextResponse.json(
+          {
+            error: `Your ${plan.name} plan allows up to ${plan.maxPhotosPerListing} photos per listing. Please remove extra photos or upgrade your plan.`,
+            code: "PHOTO_LIMIT_EXCEEDED",
+          },
+          { status: 403 }
+        );
+      }
+
+      // Check video allowance
+      let resolvedVideoUrl: string | null = listing.video_url || null;
+      if (resolvedVideoUrl && !plan.allowVideos) {
+        return NextResponse.json(
+          {
+            error: `Property videos are available on Solo Broker and Builder Pro plans. Upgrade to add videos.`,
+            code: "VIDEO_NOT_ALLOWED",
+          },
+          { status: 403 }
+        );
+      }
+      if (resolvedVideoUrl && resolvedVideoUrl.startsWith("blob:")) {
+        resolvedVideoUrl = null;
+      }
+
+      // Check if a listing with this (broker_id, slug) already exists (edit vs new)
+      const { data: existing } = await supabase
+        .from("listings")
+        .select("id")
+        .eq("broker_id", brokerId)
+        .eq("slug", listing.slug)
+        .maybeSingle();
+
+      // Enforce active listings limit only when creating a NEW listing
+      if (!existing?.id && !plan.isUnlimitedListings) {
+        const { count: activeCount } = await supabase
+          .from("listings")
+          .select("id", { count: "exact", head: true })
+          .eq("broker_id", brokerId)
+          .neq("status", "sold");
+
+        if ((activeCount ?? 0) >= effectiveCredits) {
+          return NextResponse.json(
+            {
+              error: `You have reached your ${plan.name} limit of ${effectiveCredits} active listing${effectiveCredits === 1 ? "" : "s"}. Upgrade your plan or mark a listing as sold.`,
+              code: "PLAN_LIMIT_REACHED",
+            },
+            { status: 403 }
+          );
+        }
+      }
+
       const listingPayload = {
         broker_id: brokerId,
         title: listing.title,
@@ -179,17 +247,10 @@ export async function POST(req: NextRequest) {
         amenities: Array.isArray(listing.amenities) ? listing.amenities : [],
         ai_highlights: Array.isArray(listing.ai_highlights) ? listing.ai_highlights : [],
         ai_neighborhood_highlights: Array.isArray(listing.ai_neighborhood_highlights) ? listing.ai_neighborhood_highlights : [],
+        video_url: resolvedVideoUrl,
         status: listing.status || "active",
         updated_at: new Date().toISOString(),
       };
-
-      // 2. Check if a listing with this (broker_id, slug) or slug exists
-      const { data: existing } = await supabase
-        .from("listings")
-        .select("id")
-        .eq("broker_id", brokerId)
-        .eq("slug", listing.slug)
-        .maybeSingle();
 
       let savedListingId: string;
 

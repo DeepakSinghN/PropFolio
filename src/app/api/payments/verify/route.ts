@@ -58,15 +58,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── 4. Normalize plan key to subscription tier ────────────────────────────
-    // e.g. "pro_monthly" / "pro_yearly" → "pro"
-    let planTier: "free" | "pay_per_listing" | "pro" | "agency";
+    // ── 4. Normalize plan key to subscription tier & billing cycle ────────────
+    let planTier: "free" | "pay_per_listing" | "solo_pro" | "builder_pro" | "agency_starter";
+    let billingCycle: "monthly" | "yearly" | "one_time" = "monthly";
+
     if (planKey.startsWith("pro")) {
-      planTier = "pro";
+      planTier = "solo_pro";
+      billingCycle = planKey.endsWith("yearly") ? "yearly" : "monthly";
+    } else if (planKey.startsWith("builder")) {
+      planTier = "builder_pro";
+      billingCycle = planKey.endsWith("yearly") ? "yearly" : "monthly";
     } else if (planKey.startsWith("agency")) {
-      planTier = "agency";
+      planTier = "agency_starter";
+      billingCycle = planKey.endsWith("yearly") ? "yearly" : "monthly";
     } else if (planKey === "pay_per_listing") {
       planTier = "pay_per_listing";
+      billingCycle = "one_time";
     } else {
       planTier = "free";
     }
@@ -76,6 +83,7 @@ export async function POST(req: NextRequest) {
       razorpay_order_id,
       razorpay_payment_id,
       planKey,
+      billingCycle,
     });
 
     console.log(

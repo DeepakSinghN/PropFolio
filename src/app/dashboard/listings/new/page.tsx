@@ -788,6 +788,7 @@ export function ListingEditorContent() {
       property_features: featuresList,
       enquiry_form_url: enquiryFormUrl.trim(),
       enquiry_form_gate: enquiryFormGate,
+      video_url: videoUrl.trim() || undefined,
       status: "active" as const,
       views_count: 142,
       created_at: new Date().toISOString(),
@@ -972,31 +973,30 @@ export function ListingEditorContent() {
         )}
       </div>
 
-      {/* Property Videos (Optional) */}
+      {/* Property Videos (Solo Broker & Builder Pro) */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 dark:border-slate-800 dark:bg-[#0c1222]">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h3 className="text-sm font-bold uppercase tracking-wider text-[#0a1128] dark:text-white">
-            Property Videos
+            Property Video Walkthrough
           </h3>
-          <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
-            Optional
+          <span className="rounded-full bg-[#862e9f]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#862e9f]">
+            Solo Broker+
           </span>
         </div>
 
-        {!videoUrl ? (
-          <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 py-8 transition hover:border-[#1a3c34] dark:border-slate-700 dark:bg-slate-900">
-            <Plus className="h-5 w-5 text-slate-400" />
-            <input
-              type="file"
-              accept="video/*"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) setVideoUrl(URL.createObjectURL(file));
-              }}
-            />
-          </label>
-        ) : (
+        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+          Paste a YouTube, Google Drive, or MP4 video URL (available on Solo Broker &amp; Builder Pro).
+        </p>
+
+        <input
+          type="url"
+          value={videoUrl}
+          onChange={(e) => setVideoUrl(e.target.value)}
+          placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-[#0a1128] outline-none focus:border-[#862e9f] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+        />
+
+        {videoUrl && !videoUrl.includes("youtube") && !videoUrl.includes("youtu.be") && !videoUrl.includes("drive.google") && (
           <div className="mt-3 relative rounded-xl overflow-hidden bg-black">
             <video src={videoUrl} controls className="w-full max-h-48 object-contain" />
             <button

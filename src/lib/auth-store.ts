@@ -188,8 +188,12 @@ export function createPhoneSession(target: string, customProfile?: Partial<Profi
     company_name: customProfile?.company_name || "",
     city: customProfile?.city || "India",
     avatar_url: customProfile?.avatar_url || "/brand-logo.png",
-    plan_tier: "solo_pro",
-    listing_credits: 30,
+    plan_tier: customProfile?.plan_tier || "free",
+    listing_credits: customProfile?.listing_credits ?? 1,
+    plan_expires_at:
+      customProfile?.plan_expires_at ||
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    billing_cycle: customProfile?.billing_cycle || "monthly",
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -272,8 +276,12 @@ export function saveUserAccount(
     company_name: customProfile?.company_name || "",
     city: customProfile?.city || "India",
     avatar_url: customProfile?.avatar_url || "/brand-logo.png",
-    plan_tier: "solo_pro",
-    listing_credits: 30,
+    plan_tier: customProfile?.plan_tier || "free",
+    listing_credits: customProfile?.listing_credits ?? 1,
+    plan_expires_at:
+      customProfile?.plan_expires_at ||
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    billing_cycle: customProfile?.billing_cycle || "monthly",
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -316,45 +324,81 @@ export function getUserAccount(identifier: string): UserAccount | null {
   return store[cleanKey] || null;
 }
 
+import {
+  PLAN_DEFINITIONS,
+  BillingCycle,
+  computePlanExpiryIso,
+  isPlanExpired,
+  normalizePlanTier,
+} from "@/lib/plans";
+
 // ------------------------------------------------------------------
 // Plan Upgrade (called ONLY after Razorpay signature verified)
 // ------------------------------------------------------------------
 export async function updateUserPlan(
   userId: string,
-  planTier: "free" | "pay_per_listing" | "pro" | "agency",
+  planTier: "free" | "pay_per_listing" | "solo_pro" | "builder_pro" | "agency_starter",
   paymentMeta: {
     razorpay_order_id: string;
     razorpay_payment_id: string;
     planKey: string;
+    billingCycle?: BillingCycle;
   }
 ): Promise<void> {
+  const canonicalTier = normalizePlanTier(planTier);
+  const billingCycle: BillingCycle =
+    paymentMeta.billingCycle ||
+    (canonicalTier === "pay_per_listing"
+      ? "one_time"
+      : paymentMeta.planKey.endsWith("yearly")
+        ? "yearly"
+        : "monthly");
+
+  const planDef = PLAN_DEFINITIONS[canonicalTier];
+  const expiresAt = computePlanExpiryIso(canonicalTier, billingCycle);
+
   // 1. Try Supabase if configured
   const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supaKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (supaUrl && supaKey && !supaKey.includes("...")) {
     try {
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(supaUrl, supaKey);
 
-      // Map plan tier to listing credits
-      const creditMap: Record<string, number> = {
-        free: 1,
-        pay_per_listing: 1,
-        pro: 25,
-        agency: 999,
-      };
+      let nextCredits = planDef.isUnlimitedListings ? 999 : planDef.maxListings;
 
-      await supabase
+      // For pay_per_listing, ADD +1 credit to existing credits instead of overwriting
+      if (canonicalTier === "pay_per_listing") {
+        const { data: existingProf } = await supabase
+          .from("profiles")
+          .select("listing_credits")
+          .or(`id.eq.${userId},user_id.eq.${userId}`)
+          .maybeSingle();
+        nextCredits = (existingProf?.listing_credits ?? 0) + 1;
+      }
+
+      const { error: upErr } = await supabase
         .from("profiles")
         .update({
-          plan_tier: planTier === "pro" ? "solo_pro" : planTier,
-          listing_credits: creditMap[planTier] ?? 1,
+          plan_tier: canonicalTier,
+          listing_credits: nextCredits,
+          plan_expires_at: expiresAt,
+          billing_cycle: billingCycle,
           updated_at: new Date().toISOString(),
         })
-        .eq("user_id", userId);
+        .or(`id.eq.${userId},user_id.eq.${userId}`);
 
-      console.log(`[updateUserPlan] Supabase updated — userId: ${userId}, plan: ${planTier}`);
+      if (upErr) {
+        console.error("[updateUserPlan] Supabase update error:", upErr);
+      } else {
+        console.log(
+          `[updateUserPlan] Supabase updated — userId: ${userId}, plan: ${canonicalTier}, credits: ${nextCredits}, expiresAt: ${expiresAt}`
+        );
+      }
     } catch (dbErr) {
       console.error("[updateUserPlan] Supabase error:", dbErr);
     }
@@ -366,8 +410,16 @@ export async function updateUserPlan(
     for (const key of Object.keys(store)) {
       const session = store[key];
       if (session?.profile?.user_id === userId || session?.profile?.id === userId) {
-        session.profile.plan_tier = planTier === "pro" ? "solo_pro" : planTier === "agency" ? "agency_starter" : "free";
-        session.profile.listing_credits = planTier === "pro" ? 25 : planTier === "agency" ? 999 : 1;
+        const nextCredits =
+          canonicalTier === "pay_per_listing"
+            ? (session.profile.listing_credits ?? 0) + 1
+            : planDef.isUnlimitedListings
+              ? 999
+              : planDef.maxListings;
+        session.profile.plan_tier = canonicalTier;
+        session.profile.listing_credits = nextCredits;
+        session.profile.plan_expires_at = expiresAt;
+        session.profile.billing_cycle = billingCycle;
         session.profile.updated_at = new Date().toISOString();
       }
     }
@@ -377,8 +429,84 @@ export async function updateUserPlan(
   }
 
   console.log(
-    `[updateUserPlan] ✅ done — userId: ${userId}, plan: ${planTier}, orderId: ${paymentMeta.razorpay_order_id}`
+    `[updateUserPlan] ✅ done — userId: ${userId}, plan: ${canonicalTier}, orderId: ${paymentMeta.razorpay_order_id}`
   );
+}
+
+/**
+ * Checks if a profile's plan_expires_at has passed.
+ * If expired (and not already free), downgrades the user to "free" (1 credit)
+ * in Supabase and local session store, returning the updated profile.
+ */
+export async function ensureProfileNotExpired<
+  T extends {
+    id?: string;
+    user_id?: string;
+    plan_tier?: string | null;
+    plan_expires_at?: string | null;
+    listing_credits?: number | null;
+    billing_cycle?: string | null;
+  }
+>(profile: T): Promise<T> {
+  if (!profile) return profile;
+  const currentTier = normalizePlanTier(profile.plan_tier);
+  if (!isPlanExpired(profile.plan_expires_at) || currentTier === "free") {
+    return profile;
+  }
+
+  const downgraded = {
+    ...profile,
+    plan_tier: "free",
+    listing_credits: 1,
+    plan_expires_at: null,
+    billing_cycle: "monthly",
+  };
+
+  const targetId = profile.id || profile.user_id;
+  if (targetId) {
+    const supaUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supaKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (supaUrl && supaKey && !supaKey.includes("...")) {
+      try {
+        const { createClient } = await import("@supabase/supabase-js");
+        const supabase = createClient(supaUrl, supaKey);
+        await supabase
+          .from("profiles")
+          .update({
+            plan_tier: "free",
+            listing_credits: 1,
+            plan_expires_at: null,
+            billing_cycle: "monthly",
+            updated_at: new Date().toISOString(),
+          })
+          .or(`id.eq.${targetId},user_id.eq.${targetId}`);
+      } catch (e) {
+        console.warn("[ensureProfileNotExpired] Supabase downgrade skipped:", e);
+      }
+    }
+
+    try {
+      const store = ensureStore<Record<string, PhoneSession>>(sessionsFile, {});
+      let changed = false;
+      for (const key of Object.keys(store)) {
+        const sess = store[key];
+        if (sess?.profile?.id === targetId || sess?.profile?.user_id === targetId) {
+          sess.profile.plan_tier = "free";
+          sess.profile.listing_credits = 1;
+          sess.profile.plan_expires_at = null;
+          sess.profile.billing_cycle = "monthly";
+          changed = true;
+        }
+      }
+      if (changed) saveStore(sessionsFile, store);
+    } catch {}
+  }
+
+  return downgraded;
 }
 
 // ------------------------------------------------------------------
@@ -492,8 +620,10 @@ export async function resolveOrCreateBrokerProfile(
         company_name: "",
         city: "India",
         avatar_url: "/brand-logo.png",
-        plan_tier: "solo_pro",
-        listing_credits: 30,
+        plan_tier: "free",
+        listing_credits: 1,
+        plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        billing_cycle: "monthly",
         is_active: true,
       };
 
@@ -546,8 +676,10 @@ export async function resolveOrCreateBrokerProfile(
     company_name: "",
     city: "India",
     avatar_url: "/brand-logo.png",
-    plan_tier: "solo_pro",
-    listing_credits: 30,
+    plan_tier: "free",
+    listing_credits: 1,
+    plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    billing_cycle: "monthly",
     is_active: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

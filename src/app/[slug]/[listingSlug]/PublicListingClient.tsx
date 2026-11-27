@@ -1031,6 +1031,47 @@ export default function PublicListingClient({
               </section>
             )}
 
+            {/* 6b. PROPERTY VIDEO WALKTHROUGH */}
+            {listing.video_url && !listing.video_url.startsWith("blob:") && (() => {
+              const vUrl = listing.video_url.trim();
+              const ytMatch = vUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+              const ytEmbedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : null;
+              return (
+                <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+                  <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                      Video Walkthrough
+                    </h3>
+                  </div>
+                  <div className="mt-3 overflow-hidden rounded-2xl bg-black">
+                    {ytEmbedUrl ? (
+                      <iframe
+                        src={ytEmbedUrl}
+                        title={`${listing.title} Video Walkthrough`}
+                        className="aspect-video w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : /\.(mp4|webm|mov)(\?|$)/i.test(vUrl) ? (
+                      <video src={vUrl} controls className="aspect-video w-full bg-black" />
+                    ) : (
+                      <div className="flex items-center justify-between bg-slate-900 p-4 text-white">
+                        <span className="text-sm font-medium">Property Video Tour Available</span>
+                        <a
+                          href={vUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-xl bg-[#00974e] px-4 py-2 text-xs font-bold text-white hover:bg-[#007a3f]"
+                        >
+                          Watch Video →
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              );
+            })()}
+
             {/* 7. ABOUT THIS PROPERTY */}
             <section className="mt-4 sm:mt-0 rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-none sm:shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
               <div className="pb-3 border-b border-slate-100 dark:border-slate-800">

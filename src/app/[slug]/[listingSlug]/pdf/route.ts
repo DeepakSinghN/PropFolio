@@ -6,6 +6,8 @@ import { getListingFromDisk } from "@/lib/server-store";
 import { INITIAL_LISTINGS, DEMO_BROKER } from "@/lib/store";
 import ListingBrochurePdf from "@/components/pdf/ListingBrochurePdf";
 import { checkRateLimit, createRateLimitResponse, getClientIp } from "@/lib/rate-limit";
+import { ensureProfileNotExpired } from "@/lib/auth-store";
+import { getEffectivePlan } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +86,21 @@ export async function GET(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    const broker = brokerProfile || listing.broker || DEMO_BROKER;
+    const rawBroker = brokerProfile || listing.broker || DEMO_BROKER;
+    const broker = await ensureProfileNotExpired(rawBroker);
+    const { plan } = getEffectivePlan(broker);
+
+    if (!plan.allowPdfBrochure) {
+      return NextResponse.json(
+        {
+          error:
+            "PDF Brochure download is available on Pay Per Listing (₹99) and paid plans. Please upgrade at propertysnaps.in/pricing",
+          code: "PLAN_UPGRADE_REQUIRED",
+        },
+        { status: 403 }
+      );
+    }
+
     const photos =
       listing.photos && listing.photos.length > 0
         ? listing.photos
@@ -100,7 +116,7 @@ export async function GET(
     const host = req.headers.get("host") || "propertysnaps.in";
     const proto = host.includes("localhost") ? "http" : "https";
     const liveUrl = `${proto}://${broker.slug || "broker"}.${host.includes("localhost") ? "localhost:3000" : "propertysnaps.in"}/${listing.slug}`;
-    const isPaid = broker.plan_tier && broker.plan_tier !== "free";
+    const isPaid = plan.removeWatermark;
 
     // Generate PDF Buffer
     const pdfElement = React.createElement(ListingBrochurePdf, {

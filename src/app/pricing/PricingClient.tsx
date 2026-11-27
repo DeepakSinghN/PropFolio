@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -15,7 +15,14 @@ import {
   CreditCard,
   CheckCircle2,
   Loader2,
+  Globe,
 } from "lucide-react";
+import {
+  PLAN_DEFINITIONS,
+  CURRENCY_RATES,
+  CurrencyCode,
+  formatPlanPrice,
+} from "@/lib/plans";
 
 // ─── Razorpay window type ──────────────────────────────────────────────────
 declare global {
@@ -41,90 +48,105 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 export default function PricingClient() {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
-  const [activeTab, setActiveTab] = useState<string>("pro");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [currency, setCurrency] = useState<CurrencyCode>("INR");
+  const [activeTab, setActiveTab] = useState<string>("solo_pro");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
+
+  // Auto-detect India vs International for default currency
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      const lang = (navigator.language || "").toLowerCase();
+      const isIndia =
+        tz.includes("Kolkata") || tz.includes("Calcutta") || lang.endsWith("-in");
+      setCurrency(isIndia ? "INR" : "USD");
+    } catch {
+      setCurrency("INR");
+    }
+  }, []);
 
   const plans = [
     {
       id: "free",
-      name: "Starter Free",
-      badge: "Best for trying out",
-      description: "Experience the magic of turning a WhatsApp message into a listing web page.",
-      monthlyPrice: 0,
-      yearlyPrice: 0,
-      period: "forever",
-      ctaText: "Start Free on WhatsApp",
-      ctaHref: "https://wa.me/919876543210?text=Hi%20Property%20Snaps%20Team%2C%20I%20want%20to%20try%20the%20free%20listing%20creator.",
+      name: PLAN_DEFINITIONS.free.name,
+      badge: PLAN_DEFINITIONS.free.badge,
+      description: PLAN_DEFINITIONS.free.description,
+      monthlyInr: 0,
+      yearlyInr: 0,
+      monthlyUsd: 0,
+      yearlyUsd: 0,
+      period: "/ 30 days",
+      ctaText: "Start Free",
+      ctaHref: "/signup",
       highlight: false,
       payable: false,
       features: [
         "1 Active Property Listing",
+        "30-day starter validity",
+        "4 Photos per listing",
         "Instant WhatsApp Bot generator",
         "Mobile-first responsive web page",
-        "HD Photo gallery (up to 10 photos)",
-        "Direct WhatsApp inquiry button for buyers",
-        "Google Maps location integration",
-        "Standard propertysnaps.in link",
+        "Direct WhatsApp inquiry button",
       ],
       notIncluded: [
-        "Branded PDF brochure generator",
-        "Custom broker profile subdomain",
-        "Remove Property Snaps watermark",
-        "Multi-agent team accounts",
+        "Downloadable PDF brochure",
+        "Custom broker subdomain",
+        "Property video walkthroughs",
       ],
     },
     {
       id: "pay_per_listing",
-      name: "Pay Per Listing",
-      badge: "No Subscription",
-      description: "Only have 2–3 properties to market? Pay only when you publish. Zero recurring commitments.",
-      monthlyPrice: 79,
-      yearlyPrice: 79,
+      name: PLAN_DEFINITIONS.pay_per_listing.name,
+      badge: PLAN_DEFINITIONS.pay_per_listing.badge,
+      description: PLAN_DEFINITIONS.pay_per_listing.description,
+      monthlyInr: PLAN_DEFINITIONS.pay_per_listing.monthlyPriceInr,
+      yearlyInr: PLAN_DEFINITIONS.pay_per_listing.yearlyPriceInr,
+      monthlyUsd: PLAN_DEFINITIONS.pay_per_listing.monthlyPriceUsd,
+      yearlyUsd: PLAN_DEFINITIONS.pay_per_listing.yearlyPriceUsd,
       period: "/ listing",
-      ctaText: "Pay ₹79 & Publish",
+      ctaText: `Pay ${formatPlanPrice(99, 1.07, currency)} & Publish`,
       ctaHref: null,
       highlight: false,
       payable: true,
       planKey: "pay_per_listing",
       features: [
-        "₹79 per single live listing",
-        "Active online for full 60 days",
-        "Instant WhatsApp Bot generator",
-        "HD Photo gallery (up to 15 photos)",
-        "Direct buyer WhatsApp inquiry button",
-        "1-Click Branded PDF Brochure",
-        "No monthly renewal / cancel anytime",
+        "+1 Active Listing credit",
+        "30-day listing validity",
+        "10 Photos per listing",
+        "1-Click PDF Brochure",
+        "1 Client Collection",
+        "No recurring subscription",
       ],
       notIncluded: [
-        "Custom broker profile subdomain",
-        "Multi-agent team accounts",
+        "Custom broker subdomain",
+        "Property video walkthroughs",
       ],
     },
     {
-      id: "pro",
-      name: "Solo Broker Pro",
-      badge: "Most Popular for Brokers",
-      description: "Designed for active property consultants who want to close deals faster and look 10x more professional.",
-      monthlyPrice: 499,
-      yearlyPrice: 3999,
+      id: "solo_pro",
+      name: PLAN_DEFINITIONS.solo_pro.name,
+      badge: PLAN_DEFINITIONS.solo_pro.badge,
+      description: PLAN_DEFINITIONS.solo_pro.description,
+      monthlyInr: PLAN_DEFINITIONS.solo_pro.monthlyPriceInr,
+      yearlyInr: PLAN_DEFINITIONS.solo_pro.yearlyPriceInr,
+      monthlyUsd: PLAN_DEFINITIONS.solo_pro.monthlyPriceUsd,
+      yearlyUsd: PLAN_DEFINITIONS.solo_pro.yearlyPriceUsd,
       period: billingCycle === "yearly" ? "/year" : "/month",
-      ctaText: billingCycle === "yearly" ? "Get Solo Pro (₹3,999/yr)" : "Get Solo Pro (₹499/mo)",
+      ctaText: `Get Solo Broker`,
       ctaHref: null,
       highlight: true,
       payable: true,
       planKey: billingCycle === "yearly" ? "pro_yearly" : "pro_monthly",
       features: [
-        "25 Active Property Listings",
-        "Custom broker subdomain (yourname.propertysnaps.in)",
-        "1-Click Branded PDF Brochure Generator",
-        "Remove Property Snaps watermark",
-        "Instant WhatsApp lead notification alerts",
-        "Full Web Dashboard for easy edits",
-        "Buyer view counter & engagement stats",
-        "Priority AI WhatsApp Bot processing",
-        "Full Dark / Light mode presentation",
+        "20 Active Property Listings",
+        "20 Photos per listing + Videos",
+        "Custom subdomain (you.propertysnaps.in)",
+        "Clean Branded PDF (No watermark)",
+        "Up to 10 Client Collections",
+        "Full Buyer View Stats & Analytics",
+        "Priority WhatsApp AI Bot",
       ],
       notIncluded: [
         "Multi-agent team accounts",
@@ -132,44 +154,125 @@ export default function PricingClient() {
       ],
     },
     {
-      id: "agency",
-      name: "Agency & Builder",
-      badge: "For Real Estate Firms",
-      description: "For agencies and developer sales teams managing high listing volumes with multiple agents.",
-      monthlyPrice: 1499,
-      yearlyPrice: 11999,
+      id: "builder_pro",
+      name: PLAN_DEFINITIONS.builder_pro.name,
+      badge: PLAN_DEFINITIONS.builder_pro.badge,
+      description: PLAN_DEFINITIONS.builder_pro.description,
+      monthlyInr: PLAN_DEFINITIONS.builder_pro.monthlyPriceInr,
+      yearlyInr: PLAN_DEFINITIONS.builder_pro.yearlyPriceInr,
+      monthlyUsd: PLAN_DEFINITIONS.builder_pro.monthlyPriceUsd,
+      yearlyUsd: PLAN_DEFINITIONS.builder_pro.yearlyPriceUsd,
       period: billingCycle === "yearly" ? "/year" : "/month",
-      ctaText: "Contact for Agency Plan",
+      ctaText: `Get Builder Pro`,
+      ctaHref: null,
+      highlight: false,
+      payable: true,
+      planKey: billingCycle === "yearly" ? "builder_yearly" : "builder_monthly",
+      features: [
+        "60 Active Property Listings",
+        "Unlimited Photos per listing + Videos",
+        "Custom subdomain (you.propertysnaps.in)",
+        "Clean Branded PDF (No watermark)",
+        "Unlimited Client Collections",
+        "Full Portfolio View Stats",
+        "Priority WhatsApp Support",
+      ],
+      notIncluded: [
+        "Multi-agent team accounts",
+      ],
+    },
+    {
+      id: "agency_starter",
+      name: PLAN_DEFINITIONS.agency_starter.name,
+      badge: PLAN_DEFINITIONS.agency_starter.badge,
+      description: PLAN_DEFINITIONS.agency_starter.description,
+      monthlyInr: 0,
+      yearlyInr: 0,
+      monthlyUsd: 0,
+      yearlyUsd: 0,
+      period: "Custom",
+      ctaText: "Contact Us",
       ctaHref: "/contact",
       highlight: false,
       payable: false,
       features: [
         "Unlimited Property Listings",
-        "Up to 5 Broker WhatsApp phone numbers",
-        "Custom Domain Support (properties.yourfirm.com)",
-        "Video walkthrough embed (YouTube / Drive)",
-        "Confidential broker notes & co-broking rules",
-        "High-Speed Cloud Hosting & SSL",
-        "Dedicated Account Manager on WhatsApp",
-        "White-label client sharing options",
-        "Bulk listing import assistance",
+        "Unlimited Photos per listing + Videos",
+        "5+ / Custom Agent WhatsApp numbers",
+        "Custom Domain (properties.yourfirm.com)",
+        "100% White-label Web & PDF",
+        "Centralized Team Lead Stats",
+        "Dedicated Account Manager",
       ],
       notIncluded: [],
     },
   ];
 
   const comparisonRows = [
-    { name: "Active Property Listings", free: "1 Listing", payg: "Pay as you go", pro: "25 Listings", agency: "Unlimited" },
-    { name: "Cost / Pricing", free: "₹0 Free", payg: "₹79 / listing", pro: "₹499 / mo", agency: "₹1,499 / mo" },
-    { name: "Listing Validity", free: "Unlimited", payg: "60 Days / listing", pro: "Unlimited (Active)", agency: "Unlimited (Active)" },
-    { name: "WhatsApp AI Bot Generation", free: "Standard", payg: "Standard (~45s)", pro: "Priority (~30s)", agency: "Instant Priority" },
-    { name: "Downloadable PDF Brochures", free: "—", payg: "✓ 1-Click Printable", pro: "✓ 1-Click Printable", agency: "✓ Custom Agency PDF" },
-    { name: "Custom Broker Subdomain", free: "—", payg: "—", pro: "✓ you.propertysnaps.in", agency: "✓ Custom Domain" },
-    { name: "Remove Property Snaps Watermark", free: "—", payg: "—", pro: "✓ Included", agency: "✓ Fully White-labeled" },
-    { name: "Team WhatsApp Numbers", free: "1 Number", payg: "1 Number", pro: "1 Number", agency: "Up to 5 Agents" },
-    { name: "Lead Inquiry Alerts", free: "Direct WhatsApp", payg: "Direct WhatsApp", pro: "Direct WhatsApp + Counter", agency: "Centralized Lead CRM" },
-    { name: "HD Photos Per Listing", free: "Up to 10 Photos", payg: "Up to 15 Photos", pro: "Up to 25 Photos", agency: "Unlimited Photos" },
-    { name: "Support Channel", free: "Community WhatsApp", payg: "WhatsApp Support", pro: "Priority WhatsApp Support", agency: "Dedicated Account Manager" },
+    {
+      name: "Active Property Listings",
+      free: "1 Listing",
+      payg: "+1 / purchase",
+      pro: "20 Listings",
+      builder: "60 Listings",
+      agency: "Unlimited",
+    },
+    {
+      name: "Plan / Listing Validity",
+      free: "30 Days",
+      payg: "30 Days",
+      pro: billingCycle === "yearly" ? "365 Days" : "30 Days",
+      builder: billingCycle === "yearly" ? "365 Days" : "30 Days",
+      agency: "Custom",
+    },
+    {
+      name: "Photos per listing",
+      free: "4 Photos",
+      payg: "10 Photos",
+      pro: "20 Photos + Videos",
+      builder: "Unlimited + Videos",
+      agency: "Unlimited + Videos",
+    },
+    {
+      name: "Downloadable PDF Brochure",
+      free: "—",
+      payg: "✓ Included",
+      pro: "✓ No Watermark",
+      builder: "✓ No Watermark",
+      agency: "✓ White-label PDF",
+    },
+    {
+      name: "Custom Broker Subdomain",
+      free: "—",
+      payg: "—",
+      pro: "✓ you.propertysnaps.in",
+      builder: "✓ you.propertysnaps.in",
+      agency: "✓ Custom Domain",
+    },
+    {
+      name: "Client Collections",
+      free: "—",
+      payg: "1 Collection",
+      pro: "Up to 10",
+      builder: "Unlimited",
+      agency: "Unlimited",
+    },
+    {
+      name: "Buyer View Stats",
+      free: "Basic",
+      payg: "Total Views",
+      pro: "✓ Full View Counter",
+      builder: "✓ Full Portfolio Stats",
+      agency: "✓ Team Analytics",
+    },
+    {
+      name: "Team / Agent Accounts",
+      free: "1 Number",
+      payg: "1 Number",
+      pro: "1 Number",
+      builder: "1 Number",
+      agency: "✓ 5+ / Custom Agents",
+    },
   ];
 
   // ─── Payment handler ──────────────────────────────────────────────────────
@@ -315,31 +418,49 @@ export default function PricingClient() {
             Start completely free. Upgrade when your agency is closing more transactions and needs custom branding, PDF brochures, and multi-agent access.
           </p>
 
-          {/* Billing Cycle Switcher */}
-          <div className="mt-8 inline-flex items-center rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
-            <button
-              type="button"
-              onClick={() => setBillingCycle("monthly")}
-              className={`rounded-xl px-5 py-2 text-xs font-bold transition-all ${billingCycle === "monthly"
-                ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
-                : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
-                }`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              type="button"
-              onClick={() => setBillingCycle("yearly")}
-              className={`flex items-center gap-1.5 rounded-xl px-5 py-2 text-xs font-bold transition-all ${billingCycle === "yearly"
-                ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
-                : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
-                }`}
-            >
-              <span>Annual Billing</span>
-              <span className="rounded-full bg-[#00974e]/10 px-2 py-0.5 text-[10px] font-extrabold text-[#00974e] dark:bg-[#00974e]/20 dark:text-[#00b85f]">
-                Save 33%
-              </span>
-            </button>
+          {/* Billing Cycle Switcher + Currency Selector */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="inline-flex items-center rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <button
+                type="button"
+                onClick={() => setBillingCycle("monthly")}
+                className={`rounded-xl px-5 py-2 text-xs font-bold transition-all ${billingCycle === "monthly"
+                  ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
+                  : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
+                  }`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle("yearly")}
+                className={`flex items-center gap-1.5 rounded-xl px-5 py-2 text-xs font-bold transition-all ${billingCycle === "yearly"
+                  ? "bg-[#0a1128] text-white shadow dark:bg-[#862e9f] dark:text-white"
+                  : "text-slate-600 hover:text-[#0a1128] dark:text-slate-400 dark:hover:text-white"
+                  }`}
+              >
+                <span>Annual Billing</span>
+                <span className="rounded-full bg-[#00974e]/10 px-2 py-0.5 text-[10px] font-extrabold text-[#00974e] dark:bg-[#00974e]/20 dark:text-[#00b85f]">
+                  2 Months Free
+                </span>
+              </button>
+            </div>
+
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-slate-800 dark:bg-[#0c1222]">
+              <Globe className="h-3.5 w-3.5 text-slate-400" />
+              <select
+                aria-label="Select Currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
+                className="bg-transparent text-xs font-bold text-[#0a1128] outline-none dark:text-white cursor-pointer"
+              >
+                {(Object.keys(CURRENCY_RATES) as CurrencyCode[]).map((code) => (
+                  <option key={code} value={code} className="dark:bg-[#0c1222]">
+                    {CURRENCY_RATES[code].label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </section>
@@ -354,9 +475,19 @@ export default function PricingClient() {
               Select plan to view details:
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             {plans.map((p) => {
               const isActive = activeTab === p.id;
+              const shortPrice =
+                p.id === "free"
+                  ? `${formatPlanPrice(0, 0, currency)}`
+                  : p.id === "agency_starter"
+                    ? "Custom"
+                    : p.id === "pay_per_listing"
+                      ? `${formatPlanPrice(p.monthlyInr, p.monthlyUsd, currency)} / listing`
+                      : billingCycle === "yearly"
+                        ? `${formatPlanPrice(p.yearlyInr, p.yearlyUsd, currency)} / yr`
+                        : `${formatPlanPrice(p.monthlyInr, p.monthlyUsd, currency)} / mo`;
               return (
                 <button
                   key={p.id}
@@ -376,13 +507,7 @@ export default function PricingClient() {
                     {p.name}
                   </span>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
-                    {p.id === "free"
-                      ? "₹0 Free"
-                      : p.id === "pay_per_listing"
-                        ? "₹79 / listing"
-                        : p.id === "pro"
-                          ? (billingCycle === "yearly" ? "₹333 / mo" : "₹499 / mo")
-                          : (billingCycle === "yearly" ? "₹999 / mo" : "₹1,499 / mo")}
+                    {shortPrice}
                   </span>
                 </button>
               );
@@ -390,26 +515,31 @@ export default function PricingClient() {
           </div>
         </div>
 
-        {/* Cards Grid: 1 column on mobile (filtered by activeTab), 4 columns on desktop */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-4 xl:gap-5">
+        {/* Cards Grid: 1 column on mobile (filtered by activeTab), 5 columns on desktop */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:gap-4">
           {plans.map((plan) => {
             const isPayPerListing = plan.id === "pay_per_listing";
             const isFree = plan.id === "free";
-            const displayPrice = isFree
-              ? "₹0"
-              : isPayPerListing
-                ? "₹79"
-                : billingCycle === "yearly"
-                  ? `₹${plan.yearlyPrice.toLocaleString("en-IN")}`
-                  : `₹${plan.monthlyPrice.toLocaleString("en-IN")}`;
+            const isAgency = plan.id === "agency_starter";
+            const displayPrice = isAgency
+              ? "Custom"
+              : isFree
+                ? formatPlanPrice(0, 0, currency)
+                : isPayPerListing
+                  ? formatPlanPrice(plan.monthlyInr, plan.monthlyUsd, currency)
+                  : billingCycle === "yearly"
+                    ? formatPlanPrice(plan.yearlyInr, plan.yearlyUsd, currency)
+                    : formatPlanPrice(plan.monthlyInr, plan.monthlyUsd, currency);
 
             const subtext = isFree
-              ? "Forever free to try"
+              ? "30-day starter validity"
               : isPayPerListing
-                ? "Pay once per listing (60-day validity)"
-                : billingCycle === "yearly"
-                  ? `Billed annually (equals ₹${Math.round(plan.yearlyPrice / 12)}/month)`
-                  : "Billed monthly, cancel anytime";
+                ? "Pay once per listing (30-day validity)"
+                : isAgency
+                  ? "Tailored for multi-agent teams"
+                  : billingCycle === "yearly"
+                    ? `Billed annually (${formatPlanPrice(Math.round(plan.yearlyInr / 12), +(plan.yearlyUsd / 12).toFixed(2), currency)}/mo)`
+                    : "Billed monthly, cancel anytime";
 
             const isSelectedMobile = activeTab === plan.id;
             const isLoading = loadingPlan === (plan as any).planKey;
@@ -568,29 +698,33 @@ export default function PricingClient() {
               <table className="w-full text-left text-xs min-w-[640px]">
                 <thead>
                   <tr className="border-b border-slate-200/80 bg-slate-50/60 text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
-                    <th className="py-4 px-5 font-bold uppercase tracking-wider text-[11px]">Feature</th>
-                    <th className="py-4 px-5 font-bold uppercase tracking-wider text-[11px]">Starter (₹0)</th>
-                    <th className="py-4 px-5 font-bold uppercase tracking-wider text-[11px] text-[#00974e]">Pay-Per-Listing (₹79)</th>
-                    <th className="py-4 px-5 font-bold uppercase tracking-wider text-[11px] text-[#862e9f]">Solo Pro (₹499)</th>
-                    <th className="py-4 px-5 font-bold uppercase tracking-wider text-[11px]">Agency (₹1,499)</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px]">Feature</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px]">Free ({formatPlanPrice(0, 0, currency)})</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px] text-[#00974e]">Pay-Per-Listing ({formatPlanPrice(99, 1.07, currency)})</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px] text-[#862e9f]">Solo Broker ({formatPlanPrice(699, 7.53, currency)})</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px] text-indigo-600 dark:text-indigo-400">Builder Pro ({formatPlanPrice(1999, 21.54, currency)})</th>
+                    <th className="py-4 px-4 font-bold uppercase tracking-wider text-[11px]">Agency Pro</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {comparisonRows.map((row, idx) => (
                     <tr key={idx} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="py-4 px-5 font-semibold text-[#0a1128] dark:text-white">
+                      <td className="py-4 px-4 font-semibold text-[#0a1128] dark:text-white">
                         {row.name}
                       </td>
-                      <td className="py-4 px-5 text-slate-600 dark:text-slate-400">
+                      <td className="py-4 px-4 text-slate-600 dark:text-slate-400">
                         {row.free}
                       </td>
-                      <td className="py-4 px-5 font-semibold text-[#00974e] dark:text-[#00b85f]">
+                      <td className="py-4 px-4 font-semibold text-[#00974e] dark:text-[#00b85f]">
                         {row.payg}
                       </td>
-                      <td className="py-4 px-5 font-bold text-[#862e9f] dark:text-[#a845c4]">
+                      <td className="py-4 px-4 font-bold text-[#862e9f] dark:text-[#a845c4]">
                         {row.pro}
                       </td>
-                      <td className="py-4 px-5 text-slate-700 dark:text-slate-300">
+                      <td className="py-4 px-4 font-semibold text-indigo-600 dark:text-indigo-400">
+                        {row.builder}
+                      </td>
+                      <td className="py-4 px-4 text-slate-700 dark:text-slate-300">
                         {row.agency}
                       </td>
                     </tr>

@@ -188,8 +188,10 @@ export async function POST(req: NextRequest) {
               phone_number: safePhone,
               company_name: company_name ? company_name.trim() : "",
               city: city || "India",
-              plan_tier: "solo_pro",
-              listing_credits: 30,
+              plan_tier: "free",
+              listing_credits: 1,
+              plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              billing_cycle: "monthly",
               is_active: true,
               updated_at: new Date().toISOString(),
             };

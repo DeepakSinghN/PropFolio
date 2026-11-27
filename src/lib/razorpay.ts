@@ -5,27 +5,27 @@ import crypto from "crypto";
 export const PLAN_CONFIG = {
   pay_per_listing: {
     name: "Pay Per Listing",
-    amountInPaise: 7900,      // ₹79 × 100
+    amountInPaise: 9900,      // ₹99 × 100
     currency: "INR",
   },
   pro_monthly: {
-    name: "Solo Broker Pro (Monthly)",
-    amountInPaise: 49900,     // ₹499 × 100
+    name: "Solo Broker (Monthly)",
+    amountInPaise: 69900,     // ₹699 × 100
     currency: "INR",
   },
   pro_yearly: {
-    name: "Solo Broker Pro (Yearly)",
-    amountInPaise: 399900,    // ₹3999 × 100
+    name: "Solo Broker (Yearly)",
+    amountInPaise: 699000,    // ₹6,990 × 100 (2 months free)
     currency: "INR",
   },
-  agency_monthly: {
-    name: "Agency & Builder (Monthly)",
-    amountInPaise: 149900,    // ₹1499 × 100
+  builder_monthly: {
+    name: "Builder Pro (Monthly)",
+    amountInPaise: 199900,    // ₹1,999 × 100
     currency: "INR",
   },
-  agency_yearly: {
-    name: "Agency & Builder (Yearly)",
-    amountInPaise: 1199900,   // ₹11999 × 100
+  builder_yearly: {
+    name: "Builder Pro (Yearly)",
+    amountInPaise: 1999000,   // ₹19,990 × 100 (2 months free)
     currency: "INR",
   },
 } as const;

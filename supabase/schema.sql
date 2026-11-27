@@ -16,8 +16,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     company_name TEXT,
     city TEXT,
     avatar_url TEXT,
-    plan_tier TEXT DEFAULT 'free' CHECK (plan_tier IN ('free', 'solo_pro', 'agency_starter')),
+    plan_tier TEXT DEFAULT 'free' CHECK (plan_tier IN ('free', 'pay_per_listing', 'solo_pro', 'builder_pro', 'agency_starter')),
     listing_credits INT DEFAULT 1,
+    plan_expires_at TIMESTAMPTZ DEFAULT (now() + interval '30 days'),
+    billing_cycle TEXT DEFAULT 'monthly',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
@@ -51,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.listings (
     ai_neighborhood_highlights TEXT[] DEFAULT '{}',
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'sold', 'draft')),
     views_count INT DEFAULT 0,
+    video_url TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     UNIQUE(broker_id, slug)
@@ -131,4 +134,21 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- ========================================================
+-- Idempotent Migration for Existing Databases
+-- ========================================================
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS plan_expires_at TIMESTAMPTZ DEFAULT (now() + interval '30 days'),
+  ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'monthly';
+
+ALTER TABLE public.profiles
+  DROP CONSTRAINT IF EXISTS profiles_plan_tier_check;
+
+ALTER TABLE public.profiles
+  ADD CONSTRAINT profiles_plan_tier_check
+  CHECK (plan_tier IN ('free', 'pay_per_listing', 'solo_pro', 'builder_pro', 'agency_starter'));
+
+ALTER TABLE public.listings
+  ADD COLUMN IF NOT EXISTS video_url TEXT;
 

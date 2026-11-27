@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getPhoneSession } from "@/lib/auth-store";
+import { getPhoneSession, ensureProfileNotExpired } from "@/lib/auth-store";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getAllCollectionsFromDisk, getAllListingsFromDisk } from "@/lib/server-store";
 import { DEMO_BROKER } from "@/lib/store";
@@ -93,6 +93,9 @@ export default async function DashboardPage() {
       }
     } catch {}
   }
+
+  // Auto-downgrade expired subscription/trial to Free before loading dashboard
+  broker = await ensureProfileNotExpired(broker);
 
   // PARALLEL SERVER FETCH: Zero client-side waterfall
   let initialListings: any[] = [];

@@ -8,13 +8,18 @@ export type PropertyType =
 
 export type ListingType = "Sale" | "Rent";
 
-export type PlanTier = "free" | "solo_pro" | "agency_starter";
+export type PlanTier =
+  | "free"
+  | "pay_per_listing"
+  | "solo_pro"
+  | "builder_pro"
+  | "agency_starter";
 
 export interface Profile {
   id: string;
   user_id: string;
   full_name: string;
-  slug: string; // for [slug].propfolio.co
+  slug: string; // for [slug].propertysnaps.in
   phone_number: string;
   email?: string;
   company_name?: string;
@@ -22,6 +27,8 @@ export interface Profile {
   avatar_url?: string;
   plan_tier: PlanTier;
   listing_credits: number;
+  plan_expires_at?: string | null;
+  billing_cycle?: "monthly" | "yearly" | "one_time" | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -53,6 +60,7 @@ export interface Listing {
   enquiry_form_gate?: boolean;
   status: "active" | "sold" | "draft";
   views_count: number;
+  video_url?: string | null;
   created_at: string;
   updated_at: string;
   // Extended brochure fields (driven by spec)

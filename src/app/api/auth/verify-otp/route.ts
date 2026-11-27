@@ -104,8 +104,10 @@ export async function POST(req: NextRequest) {
             email: profileData.email,
             company_name: profileData.company_name,
             city: profileData.city,
-            plan_tier: "solo_pro",
-            listing_credits: 25,
+            plan_tier: "free",
+            listing_credits: 1,
+            plan_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            billing_cycle: "monthly",
             is_active: true,
           });
         }

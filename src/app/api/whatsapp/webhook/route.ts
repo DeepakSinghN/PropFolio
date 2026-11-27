@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { parsePropertyNotes } from "@/lib/ai";
 import { sendWhatsAppMessage, downloadMetaMedia } from "@/lib/whatsapp";
 import { saveListingToMemory } from "@/lib/store";
-import { resolveOrCreateBrokerProfile } from "@/lib/auth-store";
+import { resolveOrCreateBrokerProfile, ensureProfileNotExpired } from "@/lib/auth-store";
+import { getEffectivePlan } from "@/lib/plans";
 import {
   saveListingToDisk,
   appendUserSession,
@@ -151,8 +152,44 @@ async function executeCreateListing(
     }))
     : [];
 
-  // Resolve broker profile using real contact name & clean slug
-  const senderBroker = await resolveOrCreateBrokerProfile(from, session?.contactName || contactName);
+  // Resolve broker profile using real contact name & clean slug, and check plan expiry
+  const rawSenderBroker = await resolveOrCreateBrokerProfile(from, session?.contactName || contactName);
+  const senderBroker = await ensureProfileNotExpired(rawSenderBroker);
+  const { plan: waPlan, effectiveCredits: waCredits } = getEffectivePlan(senderBroker);
+
+  // Enforce active listing limit for WhatsApp bot
+  const supaCheckUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaCheckKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!waPlan.isUnlimitedListings && supaCheckUrl && supaCheckKey && !supaCheckKey.includes("...")) {
+    try {
+      const { createClient } = await import("@supabase/supabase-js");
+      const supaCheck = createClient(supaCheckUrl, supaCheckKey);
+      const { count: activeCount } = await supaCheck
+        .from("listings")
+        .select("id", { count: "exact", head: true })
+        .eq("broker_id", senderBroker.id)
+        .neq("status", "sold");
+
+      if ((activeCount ?? 0) >= waCredits) {
+        clearUserSession(from);
+        await sendWhatsAppMessage({
+          to: from,
+          text: `⚠️ *Listing Limit Reached (${waPlan.name})*\n\nAapke plan ki ${waCredits} active listing${waCredits === 1 ? "" : "s"} ki limit poori ho chuki hai.\n\nNayi property publish karne ke liye apna plan upgrade karein:\n👉 https://www.propertysnaps.in/pricing`,
+        });
+        return NextResponse.json({ status: "plan_limit_reached" });
+      }
+    } catch {}
+  }
+
+  // Enforce photo limit per listing
+  const cappedPhotos =
+    !waPlan.isUnlimitedPhotos && photosList.length > waPlan.maxPhotosPerListing
+      ? photosList.slice(0, waPlan.maxPhotosPerListing)
+      : photosList;
 
   const fullListing = {
     id: "listing-wa-" + Date.now(),
@@ -178,7 +215,7 @@ async function executeCreateListing(
     views_count: 1,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    photos: photosList,
+    photos: cappedPhotos,
     broker: senderBroker,
   };
 
@@ -223,9 +260,9 @@ async function executeCreateListing(
         updated_at: fullListing.updated_at,
       });
 
-      if (photosList.length > 0) {
+      if (cappedPhotos.length > 0) {
         await supabase.from("listing_photos").insert(
-          photosList.map((p: any) => ({
+          cappedPhotos.map((p: any) => ({
             listing_id: fullListing.id,
             photo_url: p.photo_url,
             display_order: p.display_order,
