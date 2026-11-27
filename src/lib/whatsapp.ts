@@ -22,8 +22,8 @@ export const REAL_ESTATE_FALLBACKS = [
 ];
 
 export async function sendWhatsAppMessage({ to, text }: SendTextMessageOptions) {
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = (process.env.WHATSAPP_PHONE_NUMBER_ID || "").trim();
+  const accessToken = (process.env.WHATSAPP_ACCESS_TOKEN || "").trim();
 
   if (!phoneNumberId || !accessToken) {
     console.warn("WhatsApp credentials not configured in .env.local. Message not sent:", { to, text });
@@ -207,7 +207,7 @@ export async function sendWhatsAppOtpTemplate({
  * Returns the public CDN URL, or null if download/upload fails (never injects fake fallback images).
  */
 export async function downloadMetaMedia(mediaId: string, _fallbackIndex: number = 0): Promise<string | null> {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const accessToken = (process.env.WHATSAPP_ACCESS_TOKEN || "").trim();
 
   if (!accessToken || !mediaId) {
     console.warn("WhatsApp access token or mediaId missing");
